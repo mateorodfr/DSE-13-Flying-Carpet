@@ -1,3 +1,3 @@
 import numpy as np
 
-MTOW= 
+MTOW= 6000
