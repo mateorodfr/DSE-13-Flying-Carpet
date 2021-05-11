@@ -35,6 +35,10 @@ Bat_E_dense = 250           # Wh/kg A single high voltage battery assumed for no
                             # However it would be less heavy, thus not included for now (As the power requirements are not known yet)
 rho_battery = 400 * 10**3                       # Wh/m^3 Assumed for the time being as range is approximately 250 - 670
 
+# Cabin
+t_wall = 0.005
+W_person = 0.5
+
 """ Efficiencies of the propulsion and power subsystem """
 
 Prop_eff = 0.85             # Propeller efficiency assumed for now
@@ -86,7 +90,6 @@ H_person = 1.5
 H_cabin = H_person * SF_dimensions                   # Height of the cabin determined by seating configuration
 L_person = 0.75
 L_cabin = L_person * 3 * SF_dimensions              # Determined from seating configuration
-W_person = 0.5
 W_cabin = W_person * 2 * SF_dimensions               # Determined from seating configuration
 
 S_cabin_bottom = W_cabin * L_cabin
@@ -126,6 +129,22 @@ Increment_seat12 = cg_range[0] / 2 / L_cabin
 Increment_seat135 = cg_range[1] / 2 / W_cabin
 print("The approximate increase in c.g due to passengers laterally", Increment_seat12 * 100, "%")
 print("The approximate increase in c.g due to passengers longitudinally", Increment_seat135 * 100, "%")
+
+
+"""   One engine inoperative   """
+# The assumption is that the engines are paired having a rotation of 180deg between them. Thus, the net torque generated
+# in case of one pair of engines inoperative, is still equal to zero. Thus only roll of the craft is present due to
+# an upwards force. Thus spin of the motor would have to be altered continuously in a sinusoidal manner such that the
+# roll angles are limited.
+
+I_yy = 1/3 * (L_cabin**2 * W_cabin * t_wall)
+I_xx = 1/3 * (W_cabin**2 * L_cabin * t_wall)
+
+My = T * 2 * (L_cabin/2 + D_blade/2)
+Mx = T * 2 * (W_cabin/2 + D_blade/2)
+
+
+
 
 
 
