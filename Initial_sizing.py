@@ -6,7 +6,7 @@ import numpy as np
 N_motor = 8                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
                             # 180 deg and attached on top
 R_motor = 0.418 / 2         # The diameter of the motor is found on internet. Reference by Chloe
-Torque = 1500               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
+Torque = 1000               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
                             # the Torque can be adapted, such that the power usage is half of the maximum needed. P_max_motor = 204 kW
 M_eng = 49                  # kg. Motor mass, found on internet
 SF_Rotational = 0.8         # Rotational part of the engine
