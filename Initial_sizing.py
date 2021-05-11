@@ -1,4 +1,5 @@
 import numpy as np
+#waddup
 g=9.81
 Maxpayload= 600
 Missiont= 45/60
