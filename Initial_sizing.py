@@ -86,9 +86,9 @@ L_cabin = 0.5 * 2 * SF_dimensions               # Determined from seating config
 S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
 S_cabin_front = W_cabin * H_cabin
-V_cabin = H_cabin * W_cabin * L_cabin           # m^3
-V_battery = M_bat * Bat_E_dense / rho_battery
-V_tot = V_battery + V_cabin + N_motor * V_engine
+V_cabin = H_cabin * W_cabin * L_cabin               # m^3
+V_battery = M_bat * Bat_E_dense / rho_battery       # m^3
+V_tot = V_battery + V_cabin + N_motor * V_engine    # m^3
 
 print("Total Volume = ", V_tot)
 
