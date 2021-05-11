@@ -11,11 +11,11 @@ Torque = 1000               # The maximum continuous torque is 1500 Nm. When the
 M_eng = 49                  # kg. Motor mass, found on internet
 
 # Propellers
-CL = 0.9                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
+CL = 1.3                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
                             # CL determined from airfoiltools by taking the heighest Reynolds number
 N_blade = 6                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
                             # it is not clear whether the amount of blades reduces the efficiency of the lift generation properties
-D_blade = np.arange(2.5, 3, 0.1)    # Various diameters of the propellers are inspected to determine the best fit
+D_blade = 2.5    # Various diameters of the propellers are inspected to determine the best fit
 W_blade = 0.1 * D_blade     # The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
 t_blade = 0.01 * D_blade / 2        # Thickness of the blade assumed to be 1% of length on average
 rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
@@ -23,7 +23,7 @@ rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
 # Mission
 g = 9.81                    # kg/s^2
 Maxpayload = 600            # 6 people, each around 100kg
-t_mission = 45/60           # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
+t_mission = 30/60           # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
 rho = 1.225                 # kg/m^3 - air density at sea level
 visc = 1.46*10**-5              # Viscosity at sea level
 
@@ -46,14 +46,14 @@ Sb = W_blade * D_blade * N_blade                    # m^2 - lift area of all the
 M_blades = Sb * t_blade * rho_blade                 # Mass of all the blades in kg for a single engine
 I_prop = 1/3 * M_blades * (D_blade*D_blade) / 4     # Mass moment of inertia for all the blades (A rectangle rotates around its base) of single motor
 I_mot = 1/2 * M_eng * R_motor**2                    # Mass moment of inertia for an engine (A rotating disc around its centre)
-I_tot = I_mot + I_prop                              # kg*m^2
+I_tot = I_mot + I_prop                             # kg*m^2
 
 
 # Engine usage power and propeller velocities
 omega = Torque/I_tot                                # Angular velocity from angular momentum theory
-V_tip = D_blade / 2 * omega                         # Velocity of blades tips
+V_tip = D_blade /2 * omega                         # Velocity of blades tips
 P_eng = Torque * omega                              # Single engines power without efficiencies
-print("P_eng for hovering = ", P_eng)
+print("P_eng for hovering = ", I_prop)
 
 # Reynolds number
 V = V_tip / np.sqrt(2)              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
@@ -80,9 +80,13 @@ SF_engine_diemensions = 1.15
 S_eng = np.pi * D_blade*D_blade / 4             # Area of an engine (Assuming a quadcopter design)
 H_engine = 0.3                                  # Value found on internet. Chloe has the reference
 V_engine = S_eng * H_engine * SF_dimensions     # Volume of a single engine (propeller + motor)
+H_person = 1.5
 H_cabin = 1.5 * SF_dimensions                   # Height of the cabin determined by seating configuration
-W_cabin = 0.75 * 3 * SF_dimensions              # Determined from seating configuration
-L_cabin = 0.5 * 2 * SF_dimensions               # Determined from seating configuration
+L_person = 0.75
+L_cabin = 0.75 * 3 * SF_dimensions              # Determined from seating configuration
+
+W_cabin = 0.5 * 2 * SF_dimensions               # Determined from seating configuration
+
 S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
 S_cabin_front = W_cabin * H_cabin
@@ -92,4 +96,10 @@ V_tot = V_battery + V_cabin + N_motor * V_engine    # m^3
 
 print("Total Volume = ", V_tot)
 
+
+"""   c.g computation and estimation  """
+
+cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                   # C.g cabin
+#cg_seat_12 = np.array(L_cabin-)
+#cg_2long = np.array([L_cabin/2 + , W_cabin/2, H_cabin/2])               # C.g at longitudinal position
 
