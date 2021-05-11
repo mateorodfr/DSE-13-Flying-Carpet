@@ -6,7 +6,7 @@ import numpy as np
 N_motor = 8                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
                             # 180 deg and attached on top
 R_motor = 0.418 / 2         # The diameter of the motor is found on internet. Reference by Chloe
-Torque = 1000               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
+Torque = 1500               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
                             # the Torque can be adapted, such that the power usage is half of the maximum needed. P_max_motor = 204 kW
 M_eng = 49                  # kg. Motor mass, found on internet
 SF_Rotational = 0.8         # Rotational part of the engine
@@ -37,7 +37,10 @@ rho_battery = 400 * 10**3                       # Wh/m^3 Assumed for the time be
 
 # Cabin
 t_wall = 0.005
-W_person = 0.5
+L_person = 0.5
+W_person = 0.75
+H_engine = 0.3
+H_person = 1.5
 
 """ Efficiencies of the propulsion and power subsystem """
 
@@ -83,14 +86,14 @@ print("Safety margin = ", T/Mass_tot)
 SF_dimensions = 1.1                             # A assumed safety factor for the dimensions of the cabin to provide clearances
 SF_engine_diemensions = 1.15
 
-S_eng = np.pi * D_blade*D_blade / 4             # Area of an engine (Assuming a quadcopter design)
-H_engine = 0.3                                  # Value found on internet. Chloe has the reference
-V_engine = S_eng * H_engine * SF_dimensions     # Volume of a single engine (propeller + motor)
-H_person = 1.5
-H_cabin = H_person * SF_dimensions                   # Height of the cabin determined by seating configuration
-L_person = 0.75
-L_cabin = L_person * 3 * SF_dimensions              # Determined from seating configuration
-W_cabin = W_person * 2 * SF_dimensions               # Determined from seating configuration
+S_eng = np.pi * D_blade*D_blade / 4          # Area of an engine (Assuming a quadcopter design)
+                                                # Value found on internet. Chloe has the reference
+V_engine = S_eng * H_engine * SF_engine_diemensions   # Volume of a single engine (propeller + motor)
+
+H_cabin = H_person * SF_dimensions              # Height of the cabin determined by seating configuration
+
+L_cabin = L_person * 3 * SF_dimensions          # Determined from seating configuration
+W_cabin = W_person * 2 * SF_dimensions          # Determined from seating configuration
 
 S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
@@ -131,20 +134,41 @@ print("The approximate increase in c.g due to passengers laterally", Increment_s
 print("The approximate increase in c.g due to passengers longitudinally", Increment_seat135 * 100, "%")
 
 
-"""   One engine inoperative   """
+"""   One engine pair inoperative   """
 # The assumption is that the engines are paired having a rotation of 180deg between them. Thus, the net torque generated
 # in case of one pair of engines inoperative, is still equal to zero. Thus only roll of the craft is present due to
 # an upwards force. Thus spin of the motor would have to be altered continuously in a sinusoidal manner such that the
 # roll angles are limited.
 
-I_yy = 1/3 * (L_cabin**2 * W_cabin * t_wall)
-I_xx = 1/3 * (W_cabin**2 * L_cabin * t_wall)
 
-My = T * 2 * (L_cabin/2 + D_blade/2)
+# Take a look at TU Delft method of drone stabilisation
+# Discuss verbally the concept of one engine inoperative, as that could be counteracted by shutting down a diagonal engine
+# Thus, can be discussed qualitatively
+
+I_yy = 1/3 * (L_cabin**2 * W_cabin * t_wall)    # The wall thickness is assumed. The cross section is still TBD
+I_xx = 1/3 * (W_cabin**2 * L_cabin * t_wall)
+Operation_percentage = np.arange(0.2, 1, 0.1)   # Assume the engine is still providing thrust just after the failure,
+                                                # however, the percentage of thrust provision is f(t). If there is a
+                                                # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
+                                                #
+
+My = (1 - Operation_percentage) * T * 2 * (L_cabin/2 + D_blade/2)
 Mx = T * 2 * (W_cabin/2 + D_blade/2)
 
+t_response = 0.0005                             # Unfeasible due to gyroscope limitations. Arvis has source for that
+
+alpha_y_init = My/I_xx                          # Rotation can be assumed to be accelerated in no wind conditions.
+alpha_x_init = Mx/I_yy                          # As the airflow is assumed to be zero for the critical conditions, the
+                                                # change in angular acceleration can be assumed constant due the lack of
+                                                # external forces.
+
+theta_reached_x = alpha_x_init * t_response**2 * 57.3 / 2
+theta_reached_y = alpha_y_init * t_response**2 * 57.3 / 2
+
+print(alpha_x_init, theta_reached_y)
 
 
+"""    Gust load estimation    """
 
 
 
