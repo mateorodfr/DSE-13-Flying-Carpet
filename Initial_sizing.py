@@ -89,6 +89,7 @@ S_cabin_front = W_cabin * H_cabin
 V_cabin = H_cabin * W_cabin * L_cabin           # m^3
 V_battery = M_bat * Bat_E_dense / rho_battery
 V_tot = V_battery + V_cabin + N_motor * V_engine
+
 print("Total Volume = ", V_tot)
 
 
