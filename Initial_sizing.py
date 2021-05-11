@@ -86,15 +86,12 @@ print("Safety margin = ", T/Mass_tot)
 SF_dimensions = 1.1                             # A assumed safety factor for the dimensions of the cabin to provide clearances
 SF_engine_diemensions = 1.15
 
-S_eng = np.pi * D_blade*D_blade / 4          # Area of an engine (Assuming a quadcopter design)
+S_eng = np.pi * D_blade*D_blade / 4             # Area of an engine (Assuming a quadcopter design)
                                                 # Value found on internet. Chloe has the reference
 V_engine = S_eng * H_engine * SF_engine_diemensions   # Volume of a single engine (propeller + motor)
-
 H_cabin = H_person * SF_dimensions              # Height of the cabin determined by seating configuration
-
 L_cabin = L_person * 3 * SF_dimensions          # Determined from seating configuration
 W_cabin = W_person * 2 * SF_dimensions          # Determined from seating configuration
-
 S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
 S_cabin_front = W_cabin * H_cabin
