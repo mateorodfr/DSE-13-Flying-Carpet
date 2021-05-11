@@ -6,9 +6,10 @@ import numpy as np
 N_motor = 8                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
                             # 180 deg and attached on top
 R_motor = 0.418 / 2         # The diameter of the motor is found on internet. Reference by Chloe
-Torque = 1000               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
+Torque = 1500               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
                             # the Torque can be adapted, such that the power usage is half of the maximum needed. P_max_motor = 204 kW
 M_eng = 49                  # kg. Motor mass, found on internet
+SF_Rotational = 0.8         # Rotational part of the engine
 
 # Propellers
 CL = 1.3                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
@@ -23,6 +24,7 @@ rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
 # Mission
 g = 9.81                    # kg/s^2
 Maxpayload = 600            # 6 people, each around 100kg
+M_person = 100              # kg
 t_mission = 30/60           # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
 rho = 1.225                 # kg/m^3 - air density at sea level
 visc = 1.46*10**-5              # Viscosity at sea level
@@ -45,8 +47,8 @@ Bat_eff = 0.9               # Assumed battery efficiency
 Sb = W_blade * D_blade * N_blade                    # m^2 - lift area of all the blades (Only 2D area) for a single engine
 M_blades = Sb * t_blade * rho_blade                 # Mass of all the blades in kg for a single engine
 I_prop = 1/3 * M_blades * (D_blade*D_blade) / 4     # Mass moment of inertia for all the blades (A rectangle rotates around its base) of single motor
-I_mot = 1/2 * M_eng * R_motor**2                    # Mass moment of inertia for an engine (A rotating disc around its centre)
-I_tot = I_mot + I_prop                             # kg*m^2
+I_mot = 1/2 * M_eng * R_motor**2 * SF_Rotational    # Mass moment of inertia for an engine (A rotating disc around its centre)
+I_tot = I_mot + I_prop                              # kg*m^2
 
 
 # Engine usage power and propeller velocities
@@ -68,24 +70,24 @@ print("Mass to be carried by engines = ", T * N_motor / g)
 P_req = P_eng * N_motor / Motor_eff / Prop_eff                          # Power required from the batteries for operative engines
 M_bat = P_req * t_mission / Bat_E_dense / Bat_eff                       # Mass of the batteries
 Mass_tot = 1.2 * (M_bat + Maxpayload + N_motor * (M_eng + M_blades))    # The structures mass is assumed to be 1.2 of the total mass, thus the introduction of the term
-
+M_cabin = Mass_tot - Maxpayload
 print("Total mass = ", Mass_tot)
 print("Safety margin = ", T/Mass_tot)
 
 """   Initial area and volume sizing   """
 
-SF_dimensions = 1.1                     # A assumed safety factor for the dimensions of the cabin to provide clearances
+SF_dimensions = 1.1                             # A assumed safety factor for the dimensions of the cabin to provide clearances
 SF_engine_diemensions = 1.15
 
 S_eng = np.pi * D_blade*D_blade / 4             # Area of an engine (Assuming a quadcopter design)
 H_engine = 0.3                                  # Value found on internet. Chloe has the reference
 V_engine = S_eng * H_engine * SF_dimensions     # Volume of a single engine (propeller + motor)
 H_person = 1.5
-H_cabin = 1.5 * SF_dimensions                   # Height of the cabin determined by seating configuration
+H_cabin = H_person * SF_dimensions                   # Height of the cabin determined by seating configuration
 L_person = 0.75
-L_cabin = 0.75 * 3 * SF_dimensions              # Determined from seating configuration
-
-W_cabin = 0.5 * 2 * SF_dimensions               # Determined from seating configuration
+L_cabin = L_person * 3 * SF_dimensions              # Determined from seating configuration
+W_person = 0.5
+W_cabin = W_person * 2 * SF_dimensions               # Determined from seating configuration
 
 S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
@@ -99,7 +101,32 @@ print("Total Volume = ", V_tot)
 
 """   c.g computation and estimation  """
 
-cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                   # C.g cabin
-#cg_seat_12 = np.array(L_cabin-)
-#cg_2long = np.array([L_cabin/2 + , W_cabin/2, H_cabin/2])               # C.g at longitudinal position
+cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                                       # C.g cabin
+cg_seat_12 = np.array([(L_cabin - L_person/2 - (L_cabin-3*L_person)/4), W_cabin/2, H_cabin/2])    # C.g at longitudinal position
+cg_seat_135 = np.array([L_cabin/2, W_person/2, H_cabin/2])
+cg_tot_12 = (M_cabin * cg_init + 2 * M_person * cg_seat_12) / (M_cabin + 2 * M_person)
+print(np.round(cg_tot_12, 3))
+cg_tot_135 = (M_cabin * cg_init + 3 * M_person * cg_seat_135) / (M_cabin + 3 * M_person)
+print(np.round(cg_tot_135, 3))
+cg_range = (cg_tot_12 - cg_tot_135) * 2
+print(cg_range)
+
+Moment_seat12 = - N_motor * T / 2 * cg_range[0]
+Moment_seat135 = - N_motor * T / 2 * cg_range[1]
+
+print("Moment c.g longitudinal = ", Moment_seat12, "Nm")
+print("Moment c.g lateral = ", Moment_seat135, "Nm")
+
+T_diff_seat12 = Moment_seat12 / (cg_tot_12[0]+D_blade/2*SF_dimensions)
+T_diff_seat135 = Moment_seat135 / (cg_tot_135[1]++D_blade/2*SF_dimensions)
+print("T difference seat12 = ", T_diff_seat12)
+print("T difference seat135 = ", T_diff_seat135)
+
+Increment_seat12 = cg_range[0] / 2 / L_cabin
+Increment_seat135 = cg_range[1] / 2 / W_cabin
+print("The approximate increase in c.g due to passengers laterally", Increment_seat12 * 100, "%")
+print("The approximate increase in c.g due to passengers longitudinally", Increment_seat135 * 100, "%")
+
+
+
 
