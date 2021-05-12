@@ -226,9 +226,9 @@ print("The approximate increase in c.g due to passengers longitudinally", Increm
 # Discuss verbally the concept of one engine inoperative, as that could be counteracted by shutting down a diagonal engine
 # Thus, can be discussed qualitatively
 
-I_yy = 1/12 * ((W_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + 4 * N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
-I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + 4 * N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (W_person + (W_cabin - 3 * W_person)/4)**2
-Operation_percentage = 0   # Assume the engine is still providing thrust just after the failure,
+I_yy = 1/12 * ((W_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
+I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (L_person + (0.1 * L_cabin)/2)**2
+Operation_percentage = 0.5   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
 
@@ -246,7 +246,7 @@ alpha_x_init = Mx/I_yy                          # As the airflow is assumed to b
 theta_reached_x = alpha_x_init * t_response**2 * 57.3 / 2
 theta_reached_y = alpha_y_init * t_response**2 * 57.3 / 2
 
-print(alpha_x_init, theta_reached_y)
+print(theta_reached_x, theta_reached_y)
 
 
 """    Gust load estimation    """
