@@ -231,7 +231,7 @@ I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_bla
 Operation_percentage = 0   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
-                                                #
+
 
 My = (1 - Operation_percentage) * T2[4] * 2 * (L_cabin/2 + D_blade/2)
 Mx = (1 - Operation_percentage) * T2[4] * 2 * (W_cabin/2 + D_blade/2)
