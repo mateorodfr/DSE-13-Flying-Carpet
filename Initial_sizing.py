@@ -177,6 +177,7 @@ M_bat_switch_1 = N_motor * (t_switch * P_eng[3]) / Bat_E_dense / Bat_eff / Motor
 
 
 Mass_tot1 = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades))
+M_cabin = Mass_tot1 - Maxpayload
 
 print("Iterated total mass = ", Mass_tot1)
 
@@ -195,8 +196,8 @@ print(np.round(cg_tot_135, 3))
 cg_range = (cg_tot_12 - cg_tot_135) * 2
 print(cg_range)
 
-Moment_seat12 = - N_motor * T / 2 * cg_range[0]
-Moment_seat135 = - N_motor * T / 2 * cg_range[1]
+Moment_seat12 = - N_motor * T2 / 2 * cg_range[0]
+Moment_seat135 = - N_motor * T2 / 2 * cg_range[1]
 
 print("Moment c.g longitudinal = ", Moment_seat12, "Nm")
 print("Moment c.g lateral = ", Moment_seat135, "Nm")
@@ -227,13 +228,13 @@ print("The approximate increase in c.g due to passengers longitudinally", Increm
 
 I_yy = 1/3 * (L_cabin**2 * W_cabin * t_wall)    # The wall thickness is assumed. The cross section is still TBD
 I_xx = 1/3 * (W_cabin**2 * L_cabin * t_wall)
-Operation_percentage = np.arange(0.2, 1, 0.1)   # Assume the engine is still providing thrust just after the failure,
+Operation_percentage = 0   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
                                                 #
 
-My = (1 - Operation_percentage) * T * 2 * (L_cabin/2 + D_blade/2)
-Mx = T * 2 * (W_cabin/2 + D_blade/2)
+My = (1 - Operation_percentage) * T2[4] * 2 * (L_cabin/2 + D_blade/2)
+Mx = T2[4] * 2 * (W_cabin/2 + D_blade/2)
 
 t_response = 0.0005                             # Unfeasible due to gyroscope limitations. Arvis has source for that
 
@@ -249,6 +250,8 @@ print(alpha_x_init, theta_reached_y)
 
 
 """    Gust load estimation    """
+
+
 
 
 
