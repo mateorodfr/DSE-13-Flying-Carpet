@@ -183,7 +183,6 @@ print("Iterated total mass = ", Mass_tot1)
 
 print("Mass of the batteries needed for ascend", M_bat_asc_1)
 
-
 """   c.g computation and estimation  """
 
 cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                                       # C.g cabin
@@ -213,8 +212,6 @@ print("The approximate increase in c.g due to passengers laterally", Increment_s
 print("The approximate increase in c.g due to passengers longitudinally", Increment_seat135 * 100, "%")
 
 
-
-
 """   One engine pair inoperative   """
 # The assumption is that the engines are paired having a rotation of 180deg between them. Thus, the net torque generated
 # in case of one pair of engines inoperative, is still equal to zero. Thus only roll of the craft is present due to
@@ -228,7 +225,7 @@ print("The approximate increase in c.g due to passengers longitudinally", Increm
 
 I_yy = 1/12 * ((W_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
 I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (L_person + (0.1 * L_cabin)/2)**2
-Operation_percentage = 0.5   # Assume the engine is still providing thrust just after the failure,
+Operation_percentage = 0   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
 
@@ -236,7 +233,7 @@ Operation_percentage = 0.5   # Assume the engine is still providing thrust just 
 My = (1 - Operation_percentage) * T2[4] * 2 * (L_cabin/2 + D_blade/2)
 Mx = (1 - Operation_percentage) * T2[4] * 2 * (W_cabin/2 + D_blade/2)
 
-t_response = 1                          # Unfeasible due to gyroscope limitations. Arvis has source for that
+t_response = 0.2                          # Unfeasible due to gyroscope limitations. Arvis has source for that
 
 alpha_y_init = My/I_xx                          # Rotation can be assumed to be accelerated in no wind conditions.
 alpha_x_init = Mx/I_yy                          # As the airflow is assumed to be zero for the critical conditions, the
@@ -247,7 +244,6 @@ theta_reached_x = alpha_x_init * t_response**2 * 57.3 / 2
 theta_reached_y = alpha_y_init * t_response**2 * 57.3 / 2
 
 print(theta_reached_x, theta_reached_y)
-
 
 """    Gust load estimation    """
 
