@@ -16,7 +16,7 @@ CL = 1.3                    # The cross section is assumed to be constant throug
                             # CL determined from airfoiltools by taking the heighest Reynolds number
 N_blade = 6                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
                             # it is not clear whether the amount of blades reduces the efficiency of the lift generation properties
-D_blade = 2.5    # Various diameters of the propellers are inspected to determine the best fit
+D_blade = 2.5            # Various diameters of the propellers are inspected to determine the best fit
 W_blade = 0.1 * D_blade     # The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
 t_blade = 0.01 * D_blade / 2        # Thickness of the blade assumed to be 1% of length on average
 rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
@@ -25,10 +25,17 @@ rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
 g = 9.81                    # kg/s^2
 Maxpayload = 600            # 6 people, each around 100kg
 M_person = 100              # kg
-t_mission = 30/60           # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
+#t_mission = 30/60          # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
 rho = 1.225                 # kg/m^3 - air density at sea level
-visc = 1.46*10**-5              # Viscosity at sea level
+visc = 1.46*10**-5          # Viscosity at sea level
+t_ascend = 51/3600
+t_hover = 10/60
+t_desc = 86/3600
+t_switch = 1/60 * 1                            # Multiplication by 0 means that external power line is present. Durring attachment some power is going to be taken
 
+t_desc_acc = 5                                # s. The acceleration time. It can be assumed to be anything to have a decent complete ascend/descend time. Also, not too high loads
+t_asc_acc = 10                                # s.  The acceleration time. It can be assumed to be anything to have a decent complete ascend/descend time. Also, not too high loads
+h = 400
 
 # Battery
 Bat_E_dense = 250           # Wh/kg A single high voltage battery assumed for now. A low voltage battery used for electronics
@@ -44,8 +51,8 @@ H_person = 1.5
 
 """ Efficiencies of the propulsion and power subsystem """
 
-Prop_eff = 0.85             # Propeller efficiency assumed for now
-Motor_eff = 0.85            # Motor efficiency. An assumption
+Prop_eff = 0.9             # Propeller efficiency assumed for now
+Motor_eff = 0.95            # Motor efficiency. An assumption
 Bat_eff = 0.9               # Assumed battery efficiency
 
 
@@ -59,29 +66,89 @@ I_tot = I_mot + I_prop                              # kg*m^2
 
 
 # Engine usage power and propeller velocities
-omega = Torque/I_tot                                # Angular velocity from angular momentum theory
-V_tip = D_blade /2 * omega                         # Velocity of blades tips
-P_eng = Torque * omega                              # Single engines power without efficiencies
-print("P_eng for hovering = ", I_prop)
+#max_omega = Torque/I_tot                                # Angular velocity from angular momentum theory
+P_eng = np.arange(10_000, 210_001, 10_000, dtype = np.int64)
+print("Initial ascend power = ", P_eng[12])
+omega = P_eng/Torque * Motor_eff
+V_tip = D_blade / 2 * omega                         # Velocity of blades tips
+#P_eng = Torque * omega                              # Single engines power without efficiencies
+#print("omega = ", omega)
 
 # Reynolds number
-V = V_tip / np.sqrt(2)              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
+V = V_tip / 2              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
 Re = rho * V * W_blade / visc       # Reynolds number of the blades at sea level
 
 
 # Thrust per engine
 T = V_tip**2 / 6 * rho * CL * Sb * Prop_eff         # Thrust of a single engine. Only propeller efficiency taken into account as it corresponds to generation of mechanical energy
-print("Mass to be carried by engines = ", T * N_motor / g)
+
+T2 = (np.pi/2 * D_blade**2 * rho * P_eng*P_eng * Motor_eff**2 * Prop_eff**2) ** (1/3)
+#print("Thrust difference = ", T/T2)
+print("Mass possible to be carried by engines = ", (T2 * N_motor / g))
 
 # Power required and the mass estimations
 P_req = P_eng * N_motor / Motor_eff / Prop_eff                          # Power required from the batteries for operative engines
-M_bat = P_req * t_mission / Bat_E_dense / Bat_eff                       # Mass of the batteries
-Mass_tot = 1.2 * (M_bat + Maxpayload + N_motor * (M_eng + M_blades))    # The structures mass is assumed to be 1.2 of the total mass, thus the introduction of the term
+M_bat_asc = P_req * t_ascend / Bat_E_dense / Bat_eff                   # Mass of the batteries
+M_bat_hov = P_req * t_hover / Bat_E_dense / Bat_eff                       # Mass of the batteries
+M_bat_desc = P_req * t_desc / Bat_E_dense / Bat_eff                       # Mass of the batteries
+M_bat_switch = P_req * t_switch / Bat_E_dense / Bat_eff
+
+#print("Ascend battery mass = ", M_bat_asc)
+#print("ascend energy", E_asc)
+M_asc = 1.2 * (M_bat_asc + M_bat_hov + M_bat_desc + Maxpayload/6 + N_motor * (M_eng + M_blades))
+#print("Ascend mass = ", M_asc[5])
+#print("Stored energy", M_bat_asc * Bat_E_dense * 60)
+
+
+
+#E_asc = 1.2 * (M_bat_asc + Maxpayload/6 + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff
+
+#Mass_hower = 1.2 * (M_bat_asc + Maxpayload + N_motor * (M_eng + M_blades))    # The structures mass is assumed to be 1.2 of the total mass, thus the introduction of the term
+
+
+E_desc_act = M_bat_desc * Bat_E_dense
+E_asc_act = M_bat_asc * Bat_E_dense
+E_asc = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload/6 + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
+E_desc = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
+
+
+#M_bat_switch = P_req * t_switch / Bat_E_dense / Bat_eff                       # Mass of the batteries
+
+#print("Energy ratios between actual and needed energy in ascend and descend = ", E_asc_act/E_asc, E_desc_act/E_desc)
+
+Mass_tot = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload + N_motor * (M_eng + M_blades))
 M_cabin = Mass_tot - Maxpayload
 print("Total mass = ", Mass_tot)
-print("Safety margin = ", T/Mass_tot)
+SM = T2*N_motor/(Mass_tot*g)                      # Assumed deacceleration
+print("Safety margin = ", T2*N_motor/(Mass_tot*g))
+
+
+t_desc_deac = t_desc_acc
+h_desc_deac = (SM[4] - 1) * g * t_desc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
+h_desc_acc = - (SM[2] - 1) * g * t_desc_acc**2 / 2
+h_left = h - h_desc_acc - h_desc_deac
+t_left = h_left/((- SM[2] + 1) * g * t_desc_acc)
+t_desc_act = t_left + 2 * t_desc_deac
+
+print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
+                                    # However, the thrust durations are different to have 2 different times
+
+
+t_asc_deac = t_asc_acc
+h_asc_acc = (SM[4] - 1) * g * t_asc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
+h_asc_deac = - (SM[2] - 1) * g * t_asc_deac**2 / 2
+h_left_asc = h - h_asc_acc - h_asc_deac
+t_left_asc = h_left_asc/((SM[4] - 1) * g * t_asc_acc)
+t_asc_act = t_left_asc + 2 * t_asc_deac
+
+print("Approximate time of ascend (actual) ", t_asc_act)
+
+#t_descend_act = np.sqrt(-4 / ((SM-1) * g) * h)        # Multiplied by 2 just to have acceleration only at half the time and then deacceleration
+#print("Approximate time of descend (actual) ", t_descend_act)
 
 """   Initial area and volume sizing   """
+
+M_bat = M_bat_asc + M_bat_hov + M_bat_desc
 
 SF_dimensions = 1.1                             # A assumed safety factor for the dimensions of the cabin to provide clearances
 SF_engine_diemensions = 1.15
@@ -99,7 +166,21 @@ V_cabin = H_cabin * W_cabin * L_cabin               # m^3
 V_battery = M_bat * Bat_E_dense / rho_battery       # m^3
 V_tot = V_battery + V_cabin + N_motor * V_engine    # m^3
 
-print("Total Volume = ", V_tot)
+# print("Total Volume = ", V_tot)
+
+"""     Iteration of mass    """
+
+M_bat_asc_1 = N_motor * ((P_eng[4] + P_eng[2]) * t_asc_acc + P_eng[3] * t_left_asc) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_desc_1 = N_motor * ((P_eng[4] + P_eng[2]) * t_desc_acc + P_eng[3] * t_left) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_hov_1 = N_motor * (t_hover * P_eng[3]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+M_bat_switch_1 = N_motor * (t_switch * P_eng[3]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+
+
+Mass_tot1 = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades))
+
+print("Iterated total mass = ", Mass_tot1)
+
+print("Mass of the batteries needed for ascend", M_bat_asc_1)
 
 
 """   c.g computation and estimation  """
@@ -129,6 +210,8 @@ Increment_seat12 = cg_range[0] / 2 / L_cabin
 Increment_seat135 = cg_range[1] / 2 / W_cabin
 print("The approximate increase in c.g due to passengers laterally", Increment_seat12 * 100, "%")
 print("The approximate increase in c.g due to passengers longitudinally", Increment_seat135 * 100, "%")
+
+
 
 
 """   One engine pair inoperative   """
