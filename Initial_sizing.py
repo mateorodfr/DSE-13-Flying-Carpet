@@ -225,25 +225,88 @@ print("The approximate increase in c.g due to passengers longitudinally", Increm
 
 I_yy = 1/12 * ((W_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
 I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (L_person + (0.1 * L_cabin)/2)**2
-Operation_percentage = 0   # Assume the engine is still providing thrust just after the failure,
+Operation_percentage = np.array([1, 0.8, 0.6, 0.4, 0.2, 0])   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
 
 
-My = (1 - Operation_percentage) * T2[4] * 2 * (L_cabin/2 + D_blade/2)
-Mx = (1 - Operation_percentage) * T2[4] * 2 * (W_cabin/2 + D_blade/2)
+My_init = (1 - Operation_percentage[2]) * T2[8] * 2 * (L_cabin/2 + D_blade/2)
+Mx_init = (1 - Operation_percentage[2]) * T2[8] * 2 * (W_cabin/2 + D_blade/2)
 
 t_response = 0.2                          # Unfeasible due to gyroscope limitations. Arvis has source for that
 
-alpha_y_init = My/I_xx                          # Rotation can be assumed to be accelerated in no wind conditions.
-alpha_x_init = Mx/I_yy                          # As the airflow is assumed to be zero for the critical conditions, the
+alpha_y_init = My_init/I_xx                          # Rotation can be assumed to be accelerated in no wind conditions.
+alpha_x_init = Mx_init/I_yy                          # As the airflow is assumed to be zero for the critical conditions, the
                                                 # change in angular acceleration can be assumed constant due the lack of
                                                 # external forces.
 
-theta_reached_x = alpha_x_init * t_response**2 * 57.3 / 2
-theta_reached_y = alpha_y_init * t_response**2 * 57.3 / 2
+theta_reached_x = alpha_x_init * t_response**2 / 2
+theta_reached_y = alpha_y_init * t_response**2 / 2
 
-print(theta_reached_x, theta_reached_y)
+t_stop_engine = 0.2             # Engines are assumed to have the same velocity now. The functioning arm is now stopped and will be reversed to max thrust almost instantaneously
+                                # A time in which an engine of this size can be stopped and reversed has to be determined!
+theta_addition_x = theta_reached_x + alpha_x_init * t_response * t_stop_engine
+theta_addition_y = theta_reached_y + alpha_y_init * t_response * t_stop_engine
+
+My_reverse = - (1 + Operation_percentage[4]) * T2[-1] * 2 * (L_cabin/2 + D_blade/2)
+Mx_reverse = - (1 + Operation_percentage[4]) * T2[-1] * 2 * (W_cabin/2 + D_blade/2)
+
+alpha_y_reverse = My_reverse/I_xx
+alpha_x_reverse = Mx_reverse/I_yy
+
+theta_zero_vec_x = theta_addition_x + alpha_x_reverse * (alpha_x_init * t_response / alpha_x_reverse)
+theta_zero_vec_y = theta_addition_y + alpha_y_reverse * (alpha_y_init * t_response / alpha_y_reverse)
+
+a_1_x = (N_motor * (3 + Operation_percentage[2]) / 4 * np.cos(np.pi / 2 - theta_reached_x) * T[3]) / Mass_tot1
+a_1_y = (N_motor * (3 + Operation_percentage[2]) / 4 * np.cos(np.pi / 2 - theta_reached_x) * T[3]) / Mass_tot1
+
+S_1_x = a_1_x / 2 * t_response**2
+S_1_y = a_1_y / 2 * t_response**2
+
+a_2_x = (N_motor * (2 + Operation_percentage[4]) / 2 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T[6] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T[-1]) / Mass_tot1
+a_2_y = (N_motor * (2 + Operation_percentage[4]) / 2 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T[6] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T[-1]) / Mass_tot1
+
+
+t_reverse = 0.2
+
+theta_reverse_x = alpha_x_init * t_response + alpha_x_reverse * t_reverse**2 / 2
+theta_reverse_y = alpha_y_init * t_response + alpha_y_reverse * t_reverse**2 / 2
+
+S_x = S_1_x + a_1_x * t_stop_engine * t_reverse + a_2_x / 2 * t_reverse**2
+S_y = S_1_y + a_1_y * t_stop_engine * t_reverse + a_2_y / 2 * t_reverse**2
+
+x_max = S_1_x - a_1_x**2 * t_stop_engine**2 / a_2_x + (a_1_x * t_stop_engine)**2/4
+y_max = S_1_y - a_1_y**2 * t_stop_engine**2 / a_2_y + (a_1_y * t_stop_engine)**2/4
+
+V_x = a_1_x * t_stop_engine + a_2_x * t_reverse
+V_y = a_1_y * t_stop_engine + a_2_y * t_reverse
+
+theta_tot_x = theta_addition_x + theta_reverse_x
+theta_tot_y = theta_addition_y + theta_reverse_y
+
+omega_tot_x = alpha_x_init * t_response + alpha_x_reverse * t_reverse
+omega_tot_y = alpha_y_init * t_response + alpha_y_reverse * t_reverse
+
+t_stop_engine_2 = 0.2
+theta_stop_x = theta_tot_x + omega_tot_x * t_stop_engine_2
+theta_stop_y = theta_tot_y + omega_tot_y * t_stop_engine_2
+t_stabilise_x = - 2 * theta_tot_x / omega_tot_x
+t_stabilise_y = - 2 * theta_tot_y / omega_tot_y
+alpha_stabilise_x = - omega_tot_x / t_stabilise_x
+alpha_stabilise_y = - omega_tot_y / t_stabilise_y
+
+T_needed_x = alpha_stabilise_x * I_yy / 2 / (L_cabin/2 + D_blade/2)
+T_needed_y = alpha_stabilise_y * I_xx / 2 / (W_cabin/2 + D_blade/2)
+
+print(" Angle reached in the response time = ", theta_tot_x , theta_tot_y * 57.3)
+print("Angular velocity to be counteracted = ", omega_tot_x, omega_tot_y)
+print("Velocity of the craft = ", V_x, V_y)
+print("Maximum positions = ", S_x, y_max)
+
+print("Thrusts = ", T_needed_x, alpha_stabilise_y)
+print(T2)
+
+
 
 """    Gust load estimation    """
 
