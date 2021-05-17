@@ -333,7 +333,6 @@ print("Speed of craft relative to Earth = ", V_x_E_end, V_y_E_end, V_Z_E_end)
 print("Accelerations relative to Earth", a_1_z_E, a_2_z_E, a_3_z_E)
 
 
-
 """    Gust load estimation    """
 
 
