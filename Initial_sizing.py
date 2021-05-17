@@ -4,7 +4,7 @@ import Parameters as pm
 """ Constants and mission parameters """
 
 # Motors
-motor = pm.MotorParameters(0)
+motor = pm.MotorParameters(1)
 N_motor = motor.N_motor                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
                             # 180 deg and attached on top
 R_motor = motor.R_motor        # The diameter of the motor is found on internet. Reference by Chloe
@@ -15,7 +15,7 @@ SF_Rotational = motor.SF_rotational         # Rotational part of the engine
 Motor_eff = motor.eff_motor
 
 # Propellers
-prop = pm.PropellerParameters(0)
+prop = pm.PropellerParameters(1)
 CL = prop.CL_prop                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
                             # CL determined from airfoiltools by taking the heighest Reynolds number
 N_blade = prop.N_prop                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
@@ -24,8 +24,8 @@ D_blade = prop.D_prop               # Various diameters of the propellers are in
 W_blade = prop.W_prop     # The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
 t_blade = prop.t_prop        # Thickness of the blade assumed to be 1% of length on average
 rho_blade = prop.rho_prop                     # kg/m^3. Assumed to be be black walnut
-Sb = prop.S_prop    # m^2 - lift area of all the blades (Only 2D area) for a single engine
-M_blades = prop.M_blades # Mass of all the blades in kg for a single engine
+Sb = prop.S_prop                    # m^2 - lift area of all the blades (Only 2D area) for a single engine
+M_blades = prop.M_blades            # Mass of all the blades in kg for a single engine
 Prop_eff = prop.eff_prop             # Propeller efficiency assumed for now
 
 
@@ -42,9 +42,9 @@ M_person = 100              # kg
 #t_mission = 30/60          # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
 rho = 1.225                 # kg/m^3 - air density at sea level
 visc = 1.46*10**-5          # Viscosity at sea level
-t_ascend = 52/3600
-t_hover = 12/60
-t_desc = 72/3600
+t_ascend = 50/3600
+t_hover = 10/60
+t_desc = 86/3600
 t_switch = 1/60 * 1                            # Multiplication by 0 means that external power line is present. Durring attachment some power is going to be taken
 
 t_desc_acc = 5                                # s. The acceleration time. It can be assumed to be anything to have a decent complete ascend/descend time. Also, not too high loads
@@ -77,7 +77,7 @@ V_tip = D_blade / 2 * omega                         # Velocity of blades tips
 #print("omega = ", omega)
 
 # Reynolds number
-V = V_tip / 2              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
+V = V_tip / np.sqrt(2)              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
 Re = rho * V * W_blade / visc       # Reynolds number of the blades at sea level
 
 
@@ -88,69 +88,52 @@ T2 = (np.pi/2 * D_blade**2 * rho * P_eng*P_eng * Motor_eff**2 * Prop_eff**2) ** 
 #print("Thrust difference = ", T/T2)
 print("Mass possible to be carried by engines = ", (T2 / g))
 
-# Power required and the mass estimations
-P_req = P_eng * N_motor / Motor_eff / Prop_eff                          # Power required from the batteries for operative engines
-M_bat_asc = P_req * t_ascend / Bat_E_dense / Bat_eff                   # Mass of the batteries
-M_bat_hov = P_req * t_hover / Bat_E_dense / Bat_eff                       # Mass of the batteries
-M_bat_desc = P_req * t_desc / Bat_E_dense / Bat_eff                       # Mass of the batteries
-M_bat_switch = P_req * t_switch / Bat_E_dense / Bat_eff
+# Ascend
+t_asc_deac = t_asc_acc
+h_asc_acc = (1.1 - 1) * g * t_asc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
+h_asc_deac = - (0.9 - 1) * g * t_asc_deac**2 / 2
+h_left_asc = h - h_asc_acc - h_asc_deac
+t_left_asc = h_left_asc/((1.1 - 1) * g * t_asc_acc)
+t_asc_act = t_left_asc + 2 * t_asc_deac
 
-#print("Ascend battery mass = ", M_bat_asc)
-#print("ascend energy", E_asc)
-M_asc = 1.2 * (M_bat_asc + M_bat_hov + M_bat_desc + Maxpayload/6 + N_motor * (M_eng + M_blades))
-#print("Ascend mass = ", M_asc[5])
-#print("Stored energy", M_bat_asc * Bat_E_dense * 60)
-
-
-
-#E_asc = 1.2 * (M_bat_asc + Maxpayload/6 + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff
-
-#Mass_hower = 1.2 * (M_bat_asc + Maxpayload + N_motor * (M_eng + M_blades))    # The structures mass is assumed to be 1.2 of the total mass, thus the introduction of the term
-
-
-E_desc_act = M_bat_desc * Bat_E_dense
-E_asc_act = M_bat_asc * Bat_E_dense
-E_asc = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload/6 + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
-E_desc = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
-
-
-#M_bat_switch = P_req * t_switch / Bat_E_dense / Bat_eff                       # Mass of the batteries
-
-#print("Energy ratios between actual and needed energy in ascend and descend = ", E_asc_act/E_asc, E_desc_act/E_desc)
-
-Mass_tot = 1.2 * (M_bat_desc + M_bat_asc + M_bat_hov + M_bat_switch + Maxpayload + N_motor * (M_eng + M_blades))
-#M_cabin = Mass_tot - Maxpayload
-print("Total mass = ", Mass_tot)
-SM = T2*N_motor/(Mass_tot*g)                      # Assumed deacceleration
-print("Safety margin = ", T2*N_motor/(Mass_tot*g))
-
-
+# Descend
 t_desc_deac = t_desc_acc
-h_desc_deac = (SM[4] - 1) * g * t_desc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
-h_desc_acc = - (SM[2] - 1) * g * t_desc_acc**2 / 2
+h_desc_deac = (1.1 - 1) * g * t_desc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
+h_desc_acc = - (0.9 - 1) * g * t_desc_acc**2 / 2
 h_left = h - h_desc_acc - h_desc_deac
-t_left = h_left/((- SM[2] + 1) * g * t_desc_acc)
+t_left = h_left/((- 0.9 + 1) * g * t_desc_acc)
 t_desc_act = t_left + 2 * t_desc_deac
+
+# Power required and the mass estimations
+M_bat_asc_1 = N_motor * ((P_eng[5] + P_eng[3]) * t_asc_acc + P_eng[4] * t_left_asc) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_desc_1 = N_motor * ((P_eng[5] + P_eng[3]) * t_desc_acc + P_eng[4] * t_left) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_hov_1 = N_motor * (t_hover * P_eng[4]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+M_bat_switch_1 = N_motor * (t_switch * P_eng[4]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+
+
+Mass_tot1 = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades))
+M_cabin = Mass_tot1 - Maxpayload
+
+E_desc_act = M_bat_desc_1 * Bat_E_dense
+E_asc_act = M_bat_asc_1 * Bat_E_dense
+E_asc = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload/6 + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
+E_desc = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades)) * g * h / Prop_eff / Motor_eff / 3600
+
+SM = T2*N_motor/(Mass_tot1*g)                      # Assumed deacceleration
+print("Safety margin = ", T2*N_motor/(Mass_tot1*g))
 
 print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
                                     # However, the thrust durations are different to have 2 different times
-
-
-t_asc_deac = t_asc_acc
-h_asc_acc = (SM[4] - 1) * g * t_asc_acc**2 / 2     # The deacceleration is assumed to be the same as the acceleration for those intervals
-h_asc_deac = - (SM[2] - 1) * g * t_asc_deac**2 / 2
-h_left_asc = h - h_asc_acc - h_asc_deac
-t_left_asc = h_left_asc/((SM[4] - 1) * g * t_asc_acc)
-t_asc_act = t_left_asc + 2 * t_asc_deac
 
 print("Approximate time of ascend (actual) ", t_asc_act)
 
 #t_descend_act = np.sqrt(-4 / ((SM-1) * g) * h)        # Multiplied by 2 just to have acceleration only at half the time and then deacceleration
 #print("Approximate time of descend (actual) ", t_descend_act)
 
+
 """   Initial area and volume sizing   """
 
-M_bat = M_bat_asc + M_bat_hov + M_bat_desc
+M_bat = M_bat_asc_1 + M_bat_hov_1 + M_bat_desc_1 + M_bat_switch_1
 
 SF_dimensions = 1.1                             # A assumed safety factor for the dimensions of the cabin to provide clearances
 SF_engine_diemensions = 1.15
@@ -169,17 +152,6 @@ V_battery = M_bat * Bat_E_dense / rho_battery       # m^3
 V_tot = V_battery + V_cabin + N_motor * V_engine    # m^3
 
 # print("Total Volume = ", V_tot)
-
-"""     Iteration of mass    """
-
-M_bat_asc_1 = N_motor * ((P_eng[4] + P_eng[2]) * t_asc_acc + P_eng[3] * t_left_asc) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
-M_bat_desc_1 = N_motor * ((P_eng[4] + P_eng[2]) * t_desc_acc + P_eng[3] * t_left) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
-M_bat_hov_1 = N_motor * (t_hover * P_eng[3]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
-M_bat_switch_1 = N_motor * (t_switch * P_eng[3]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
-
-
-Mass_tot1 = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades))
-M_cabin = Mass_tot1 - Maxpayload
 
 print("Iterated total mass = ", Mass_tot1)
 
@@ -271,9 +243,9 @@ S_1_x_E = a_1_x_E / 2 * t_stop_engine**2
 S_1_y_E = a_1_y_E / 2 * t_stop_engine**2
 S_1_z_E = a_1_z_E / 2 * t_stop_engine**2
 
-a_2_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[-4] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T[-4]) / Mass_tot1
-a_2_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[-4] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T[-4]) / Mass_tot1
-a_2_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[-4] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T[-4] + Mass_tot1 * g) / Mass_tot1
+a_2_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[-4] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[-4]) / Mass_tot1
+a_2_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[-4] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[-4]) / Mass_tot1
+a_2_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[-4] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[-4] + Mass_tot1 * g) / Mass_tot1
 
 
 theta_reverse_x = theta_addition_x + omega_x_init * t_reverse + alpha_x_reverse * t_reverse**2 / 2

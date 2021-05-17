@@ -19,6 +19,7 @@ class MotorParameters(object):
     #Motor List
     #The object with index 0 is the currently selected one. All other indices are for comparison
     motor0 = ["Siemens SP260D",8,0.418/2,1500,204000,49,0.95,0.8] #Strong motor used on City airbus
+    motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
 
     #Initialization if no key is given takes the default object '0'
     def __init__(self,key=0):
@@ -71,6 +72,7 @@ class PropellerParameters(object):
     #For the width and thickness of blade please enter the ratio in terms of Diameter i.e W/D & t/D
 
     propeller0 = ['NACA2412', 1.3, 6, 2.5, 0.1,0.01,660,0.9]
+    propeller1 = ['NACA2412', 1.3, 6, 3.5, 0.1, 0.01, 660, 0.9]
 
     #Initialization if no key is given takes the default object '0'
     def __init__(self,key=0):
