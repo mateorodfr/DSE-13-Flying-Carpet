@@ -32,5 +32,5 @@ def plot_boxplot(filename, save=False):
         plt.show()
 
 if __name__ == "__main__":
-    plot_boxplot("sensitivity.csv")
-    plot_boxplot("sensitivity_new.csv", save=True)
+    plot_boxplot("tradeoff_data/sensitivity_iterations.csv")
+    plot_boxplot("tradeoff_data/sensitivity_combinations.csv")
