@@ -18,7 +18,7 @@ class MotorParameters(object):
 
     #Motor List
     #The object with index 0 is the currently selected one. All other indices are for comparison
-    motor0 = ["Siemens SP260D",8,0.418/2,1500,204000,49,0.95,0.8] #Strong motor used on City airbus
+    motor0 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8] #Strong motor used on City airbus
     motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
 
     #Initialization if no key is given takes the default object '0'
@@ -32,6 +32,16 @@ class MotorParameters(object):
             self.M_motor = self.motor0[5]
             self.eff_motor = self.motor0[6]
             self.SF_rotational = self.motor0[7]
+
+        elif key == 1:
+            self.Name_motor = self.motor1[0]
+            self.N_motor = self.motor1[1]
+            self.R_motor = self.motor1[2]
+            self.Torque = self.motor1[3]
+            self.P_max = self.motor1[4]
+            self.M_motor = self.motor1[5]
+            self.eff_motor = self.motor1[6]
+            self.SF_rotational = self.motor1[7]
 
     #function that returns the object properties in an array
     #can also print properties if given True as an argument
@@ -71,8 +81,8 @@ class PropellerParameters(object):
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #For the width and thickness of blade please enter the ratio in terms of Diameter i.e W/D & t/D
 
-    propeller0 = ['NACA2412', 1.3, 6, 2.5, 0.1,0.01,660,0.9]
-    propeller1 = ['NACA2412', 1.3, 6, 3.5, 0.1, 0.01, 660, 0.9]
+    propeller0 = ['NACA2412', 1.3, 4, 2.5, 0.1,0.01,660,0.9]
+    propeller1 = ['NACA2412', 1.3, 4, 3.5, 0.1, 0.01, 660, 0.9]
 
     #Initialization if no key is given takes the default object '0'
     def __init__(self,key=0):
@@ -86,6 +96,19 @@ class PropellerParameters(object):
             self.t_prop = self.propeller0[5] * self.D_prop / 2
             self.rho_prop = self.propeller0[6]
             self.eff_prop = self.propeller0[7]
+            self.S_prop = self.W_prop * self.D_prop * self.N_prop
+            self.M_blades = self.S_prop * self.t_prop * self.rho_prop
+
+        if key == 1:
+
+            self.airfoil_prop = self.propeller1[0]
+            self.CL_prop = self.propeller1[1]
+            self.N_prop = self.propeller1[2]
+            self.D_prop = self.propeller1[3]
+            self.W_prop = self.propeller1[4] * self.D_prop
+            self.t_prop = self.propeller1[5] * self.D_prop / 2
+            self.rho_prop = self.propeller1[6]
+            self.eff_prop = self.propeller1[7]
             self.S_prop = self.W_prop * self.D_prop * self.N_prop
             self.M_blades = self.S_prop * self.t_prop * self.rho_prop
 
