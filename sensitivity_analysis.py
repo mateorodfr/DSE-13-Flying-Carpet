@@ -17,8 +17,8 @@ def plot_boxplot(filename, save=False):
         patch.set(facecolor='cyan')
 
     ax.set_ylabel('Trade-off Score')
-    major_ticks = np.linspace(2, 4, 5)
-    minor_ticks = np.linspace(2, 4, 25)
+    major_ticks = np.linspace(2, 4.5, 6)
+    minor_ticks = np.linspace(2, 4.5, 26)
     ax.set_yticks(major_ticks)
     ax.set_yticks(minor_ticks, minor=True)
     ax.grid(which='minor', alpha=0.2)
@@ -32,5 +32,5 @@ def plot_boxplot(filename, save=False):
         plt.show()
 
 if __name__ == "__main__":
-    plot_boxplot("sensitivity.csv")
-    plot_boxplot("sensitivity_new.csv", save=True)
+    # plot_boxplot("tradeoff_data/sensitivity_iterations.csv")
+    plot_boxplot("tradeoff_data/sensitivity_combinations.csv", save=True)
