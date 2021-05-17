@@ -1,26 +1,40 @@
 import numpy as np
+import Parameters as pm
 
 """ Constants and mission parameters """
 
 # Motors
-N_motor = 8                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
+motor = pm.MotorParameters(0)
+N_motor = motor.N_motor                 # Number of engines and thus the propellers. If assumed a quad copter, the engines are rotated by
                             # 180 deg and attached on top
-R_motor = 0.418 / 2         # The diameter of the motor is found on internet. Reference by Chloe
-Torque = 1500               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
+R_motor = motor.R_motor        # The diameter of the motor is found on internet. Reference by Chloe
+Torque = motor.Torque               # The maximum continuous torque is 1500 Nm. When the critical loading configuration has been determined
                             # the Torque can be adapted, such that the power usage is half of the maximum needed. P_max_motor = 204 kW
-M_eng = 49                  # kg. Motor mass, found on internet
-SF_Rotational = 0.8         # Rotational part of the engine
+M_eng = motor.M_motor                  # kg. Motor mass, found on internet
+SF_Rotational = motor.SF_rotational         # Rotational part of the engine
+Motor_eff = motor.eff_motor
 
 # Propellers
-CL = 1.3                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
+prop = pm.PropellerParameters(0)
+CL = prop.CL_prop                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
                             # CL determined from airfoiltools by taking the heighest Reynolds number
-N_blade = 6                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
+N_blade = prop.N_prop                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
                             # it is not clear whether the amount of blades reduces the efficiency of the lift generation properties
-D_blade = 2.5               # Various diameters of the propellers are inspected to determine the best fit
-W_blade = 0.1 * D_blade     # The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
-t_blade = 0.01 * D_blade / 2        # Thickness of the blade assumed to be 1% of length on average
-rho_blade = 660                     # kg/m^3. Assumed to be be black walnut
+D_blade = prop.D_prop               # Various diameters of the propellers are inspected to determine the best fit
+W_blade = prop.W_prop     # The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
+t_blade = prop.t_prop        # Thickness of the blade assumed to be 1% of length on average
+rho_blade = prop.rho_prop                     # kg/m^3. Assumed to be be black walnut
+Sb = prop.S_prop    # m^2 - lift area of all the blades (Only 2D area) for a single engine
+M_blades = prop.M_blades # Mass of all the blades in kg for a single engine
+Prop_eff = prop.eff_prop             # Propeller efficiency assumed for now
 
+
+#Battery
+battery = pm.BatteryParameters(0)
+Bat_E_dense = battery.rhoE_battery           # Wh/kg A single high voltage battery assumed for now. A low voltage battery used for electronics
+                            # However it would be less heavy, thus not included for now (As the power requirements are not known yet)
+rho_battery = battery.rhoV_battery                       # Wh/m^3 Assumed for the time being as range is approximately 250 - 670
+Bat_eff = battery.eff_battery
 # Mission
 g = 9.81                    # kg/s^2
 Maxpayload = 600            # 6 people, each around 100kg
@@ -38,10 +52,7 @@ t_asc_acc = 10                                # s.  The acceleration time. It ca
 h = 400
 
 # Battery
-Bat_E_dense = 250           # Wh/kg A single high voltage battery assumed for now. A low voltage battery used for electronics
-                            # However it would be less heavy, thus not included for now (As the power requirements are not known yet)
-rho_battery = 400 * 10**3                       # Wh/m^3 Assumed for the time being as range is approximately 250 - 670
-
+              # Assumed battery efficiency
 # Cabin
 t_wall = 0.005
 L_person = 0.5
@@ -51,18 +62,16 @@ H_person = 1.5
 
 """ Efficiencies of the propulsion and power subsystem """
 
-Prop_eff = 0.9             # Propeller efficiency assumed for now
-Motor_eff = 0.95            # Motor efficiency. An assumption
-Bat_eff = 0.9               # Assumed battery efficiency
+
+            # Motor efficiency. An assumption
+
 
 
 """  Initial power and mass estimation of the craft  """
 # Engine dimensions
-Sb = W_blade * D_blade * N_blade                    # m^2 - lift area of all the blades (Only 2D area) for a single engine
-M_blades = Sb * t_blade * rho_blade                 # Mass of all the blades in kg for a single engine
-I_prop = 1/3 * M_blades * (D_blade*D_blade) / 4     # Mass moment of inertia for all the blades (A rectangle rotates around its base) of single motor
-I_mot = 1/2 * M_eng * R_motor**2 * SF_Rotational    # Mass moment of inertia for an engine (A rotating disc around its centre)
-I_tot = I_mot + I_prop                              # kg*m^2
+                   
+                 # Mass of all the blades in kg for a single engine
+
 
 
 # Engine usage power and propeller velocities
