@@ -1,4 +1,4 @@
-
+import numpy as np
 
 class MotorParameters(object):
 
@@ -164,5 +164,46 @@ class BatteryParameters(object):
             )
         return self.Parameters_battery
 
-motor = BatteryParameters(0)
-print(motor.getParameters(True))
+class CabinParameters(object):
+
+
+    """
+    Cabin initaliazation array
+    L_person: Length of one person from back to tip of knees when seating
+    W_person: Width of person from shoulder to shoulder when seating
+    H_person: Height of person when seating
+    t_wall: Thickness of the cabin walls
+    nRows: number of rows when looking from front (for 6 seats with 2 seats abreast you have nRows = 3)
+    nCols: number of seats abreast
+    SF: Safety factor for dimensions
+
+    """
+    W_person = 0.75
+    L_person = 0.5
+    H_person = 1.5
+    cabin0 = [0.5,0.75,1.5,0.0005,3,2,1.1]
+
+    def __init__(self,key=0):
+
+        if key == 0:
+            self.L_cabin = self.cabin0[-3]*self.cabin0[0]*self.cabin0[-1]
+            self.W_cabin = self.cabin0[-2]*self.cabin0[1]*self.cabin0[-1]
+            self.H_cabin = self.cabin0[2]*self.cabin0[-1]
+            self.t_cabin = self.cabin0[3]
+            self.S_cabin = [self.L_cabin*self.W_cabin,self.L_cabin*self.H_cabin,self.W_cabin*self.H_cabin] #LW, LH, WH
+            self.V_cabin = self.L_cabin*self.W_cabin*self.H_cabin
+    
+    def getParameters(self,printParameters = False):
+
+        self.Parameters_cabin = [self.L_cabin,self.W_cabin,self.H_cabin,self.t_cabin,self.S_cabin, self.V_cabin]
+        if printParameters:
+            print(f'The current cabin parameters are:'
+            + f'\n\tLength of Cabin: {np.round(self.Parameters_cabin[0],3)} [m]'
+            + f'\n\tWidth of Cabin: {np.round(self.Parameters_cabin[1],3)} [m]'
+            + f'\n\tHeight of Cabin: {np.round(self.Parameters_cabin[2],3)} [m]'
+            + f'\n\tThickness of Cabin: {np.round(self.Parameters_cabin[3],3)} [m]'
+            + f'\n\tSurface are of Faces of Cabin: {np.round(self.Parameters_cabin[4],3)} array[m2,m2,m2]'
+            + f'\n\tVolume of Cabin: {np.round(self.Parameters_cabin[5],3)} [m3]'
+            + f'\nThe variables in the output array appear in this order in SI units.'
+            )
+        return self.Parameters_cabin
