@@ -15,7 +15,7 @@ SF_Rotational = motor.SF_rotational         # Rotational part of the engine
 Motor_eff = motor.eff_motor
 
 # Propellers
-prop = pm.PropellerParameters(1)
+prop = pm.PropellerParameters(0)
 CL = prop.CL_prop                    # The cross section is assumed to be constant throughout the blade and the airfoil applied is NACA-2412
                             # CL determined from airfoiltools by taking the heighest Reynolds number
 N_blade = prop.N_prop                 # The blade count is assumed for now. No papers were found which derive the optimal number. Also,
@@ -43,7 +43,7 @@ M_person = 100              # kg
 rho = 1.225                 # kg/m^3 - air density at sea level
 visc = 1.46*10**-5          # Viscosity at sea level
 t_ascend = 50/3600
-t_hover = 10.5/60
+t_hover = 10/60
 t_desc = 86/3600
 t_switch = 1/60 * 1                            # Multiplication by 0 means that external power line is present. Durring attachment some power is going to be taken
 
@@ -68,7 +68,7 @@ H_person = 1.5
 """  Initial power and mass estimation of the craft  """
 # Engine usage power and propeller velocities
 #max_omega = Torque/I_tot                                # Angular velocity from angular momentum theory
-P_eng = np.arange(10_000, 205_001, 5_000, dtype = np.int64)
+P_eng = np.arange(10_000, 205_001, 5_000, dtype = np.int64)/2
 #print("Initial ascend power = ", P_eng[12])
 omega = P_eng/Torque * Motor_eff
 V_tip = D_blade / 2 * omega                         # Velocity of blades tips
@@ -105,10 +105,10 @@ t_left = h_left/((- 0.9 + 1) * g * t_desc_acc)
 t_desc_act = t_left + 2 * t_desc_deac
 
 # Power required and the mass estimations
-M_bat_asc_1 = N_motor * ((P_eng[8] + P_eng[11]) * t_asc_acc + P_eng[9] * t_left_asc) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
-M_bat_desc_1 = N_motor * ((P_eng[11] + P_eng[8]) * t_desc_acc + P_eng[9] * t_left) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
-M_bat_hov_1 = N_motor * (t_hover * P_eng[9]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
-M_bat_switch_1 = N_motor * (t_switch * P_eng[9]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+M_bat_asc_1 = N_motor * ((P_eng[7] + P_eng[10]) * t_asc_acc + P_eng[8] * t_left_asc) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_desc_1 = N_motor * ((P_eng[10] + P_eng[7]) * t_desc_acc + P_eng[8] * t_left) / Bat_E_dense /3600 / Bat_eff / Motor_eff / Prop_eff
+M_bat_hov_1 = N_motor * (t_hover * P_eng[8]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
+M_bat_switch_1 = N_motor * (t_switch * P_eng[8]) / Bat_E_dense / Bat_eff / Motor_eff / Prop_eff
 
 
 Mass_tot1 = 1.2 * (M_bat_desc_1 + M_bat_asc_1 + M_bat_hov_1 + M_bat_switch_1 + Maxpayload + N_motor * (M_eng + M_blades))
@@ -122,10 +122,10 @@ M_cabin = Mass_tot1 - Maxpayload
 SM = T2*N_motor/(Mass_tot1*g)                      # Assumed deacceleration
 print("Safety margin = ", T2*N_motor/(Mass_tot1*g))
 
-print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
+#print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
                                     # However, the thrust durations are different to have 2 different times
 
-print("Approximate time of ascend (actual) ", t_asc_act)
+#print("Approximate time of ascend (actual) ", t_asc_act)
 
 #t_descend_act = np.sqrt(-4 / ((SM-1) * g) * h)        # Multiplied by 2 just to have acceleration only at half the time and then deacceleration
 #print("Approximate time of descend (actual) ", t_descend_act)
@@ -159,26 +159,26 @@ print("Iterated total mass = ", Mass_tot1)
 
 """   c.g computation and estimation  """
 
-cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                                       # C.g cabin
-cg_seat_12 = np.array([(L_cabin - L_person/2 - (L_cabin-3*L_person)/4), W_cabin/2, H_cabin/2])    # C.g at longitudinal position
+cg_init = np.array([L_cabin/2, W_cabin/2, H_cabin/2])                                               # C.g cabin
+cg_seat_12 = np.array([(L_cabin - L_person/2 - (L_cabin-3*L_person)/4), W_cabin/2, H_cabin/2])      # C.g at longitudinal position
 cg_seat_135 = np.array([L_cabin/2, W_person/2, H_cabin/2])
 cg_tot_12 = (M_cabin * cg_init + 2 * M_person * cg_seat_12) / (M_cabin + 2 * M_person)
-#print(np.round(cg_tot_12, 3))
+print("The maximum variations in the c.g longitudinally = ", np.round(cg_tot_12 - cg_init, 3))
 cg_tot_135 = (M_cabin * cg_init + 3 * M_person * cg_seat_135) / (M_cabin + 3 * M_person)
-#print(np.round(cg_tot_135, 3))
+print("The maximum variations in the c.g laterally = ", np.round(cg_tot_135 - cg_init, 3))
 cg_range = (cg_tot_12 - cg_tot_135) * 2
-#print(cg_range)
+print("The complete range of c.gs = ", np.round(cg_range,3))
 
-Moment_seat12 = - N_motor * T2 / 2 * cg_range[0]
-Moment_seat135 = - N_motor * T2 / 2 * cg_range[1]
+Moment_seat12 = - N_motor * T2[8] / 2 * cg_range[0]
+Moment_seat135 = - N_motor * T2[8] / 2 * cg_range[1]
 
 #print("Moment c.g longitudinal = ", Moment_seat12, "Nm")
 #print("Moment c.g lateral = ", Moment_seat135, "Nm")
 
 T_diff_seat12 = Moment_seat12 / (cg_tot_12[0]+D_blade/2*SF_dimensions)
-T_diff_seat135 = Moment_seat135 / (cg_tot_135[1]++D_blade/2*SF_dimensions)
-#print("T difference seat12 = ", T_diff_seat12)
-#print("T difference seat135 = ", T_diff_seat135)
+T_diff_seat135 = Moment_seat135 / (cg_tot_135[1]+D_blade/2*SF_dimensions)
+print("T difference seat12 = ", T_diff_seat12)
+print("T difference seat135 = ", T_diff_seat135)
 
 Increment_seat12 = cg_range[0] / 2 / L_cabin
 Increment_seat135 = cg_range[1] / 2 / W_cabin
@@ -197,8 +197,10 @@ print("The approximate increase in c.g due to passengers longitudinally", Increm
 # Discuss verbally the concept of one engine inoperative, as that could be counteracted by shutting down a diagonal engine
 # Thus, can be discussed qualitatively
 
-I_yy = 1/12 * ((W_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
-I_xx = 1/12 * ((L_cabin**2 + H_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (L_person + (0.1 * L_cabin)/2)**2
+I_yy = 5/18 * ((W_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + W_cabin/2)**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 # The wall thickness is assumed. The cross section is still TBD
+I_xx = 5/18 * ((L_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + L_cabin/2)**2 + Maxpayload * (L_person + (0.1 * L_cabin))**2/2
+#I_zz = 5/18 * ((W_cabin**2 + L_cabin**2) * (Mass_tot1 - N_motor * (M_eng + M_blades) - Maxpayload)) + N_motor * (M_eng + M_blades) * (D_blade/2 + np.sqrt(L_cabin**2/4 + W_cabin**2/4))**2 + 4 * Maxpayload / 6 * (W_person + (W_cabin - 3 * W_person)/4)**2 + Maxpayload * (L_person + (0.1 * L_cabin))**2/2
+#print(I_zz)
 Operation_percentage = np.array([1, 0.8, 0.6, 0.4, 0.2, 0.0])   # Assume the engine is still providing thrust just after the failure,
                                                 # however, the percentage of thrust provision is f(t). If there is a
                                                 # large scale debri impact, the operational_perc = 0, thus, catastrophic event.
