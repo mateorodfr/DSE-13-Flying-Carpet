@@ -20,12 +20,8 @@ Umax = Uf[-1] #Max gust load
 
 #Import subsystem parameters
 cabin = pm.CabinParameters(0)
-motor = pm.MotorParameters(1)
+motor = pm.MotorParameters(0)
 propeller = pm.PropellerParameters(0)
-
-#Overwriting specific engine properties
-motor.M_motor = (49/2)*1.15
-motor.N_motor = 8
 
 #System parameters
 #all these variable sneed to be manually changed to perform a case specific analysis
@@ -56,13 +52,13 @@ S = np.array([Syz,Sxz,Sxy]) #Array to store surface areas in x,y,z direction
 
 
 """ Plot gusts"""
-plot = False
+plot = True
 if plot:
     plt.plot(z,Uf)
     plt.title('Gust speed at varying altitudes')
     plt.xlabel('Altitude: h [m]')
     plt.ylabel(r'Wind speed: U [ms$^{-1}$]')
-    plt.show()
+    plt.savefig("figures/gustload")
 
 """Compute Moment of Inertias"""
 
@@ -119,6 +115,8 @@ print(
     f'\n\t\t Ixx: {np.round(I_xx)} [kgm2]'
     f'\n\t\t Iyy: {np.round(I_yy)} [kgm2]'
     f'\n\t\t Izz: {np.round(I_zz)} [kgm2]'
+    f'\n\t The maximum gust speed in x,y,z:'
+    f'\n\t\t Umax: {np.round(Umax,2)} [m/s]'
     f'\n\tThe maximum distrubance force due to gust load in x,y,z:'
     f'\n\t\t Fx, Fy, Fz: {np.round(Dgust,2)} [N]'
     f'\n\tThe maximum translational accelerations due to disturbance in x,y,z'
