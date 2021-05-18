@@ -14,6 +14,7 @@ trad_mat = np.vstack((concept1, concept2, concept3, concept4))
 # Get weights array
 weights = np.array([0.395, 0.23, 0.07, 0.039, 0.15, 0.053, 0.063])
 
+
 def redistribute(weights, columnstodrop):
     """Takes the weights and redistributes the weight from the columns that will be dropped"""
     try:
@@ -24,10 +25,12 @@ def redistribute(weights, columnstodrop):
     except RuntimeWarning:
         print(f"lenght of columns to drop too long: {columnstodrop}")
 
+
 def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"""
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
 
 # Summarise data
 basescore = trad_mat @ weights.T
@@ -61,4 +64,3 @@ ax.set_xticklabels(["Concept 1", "Concept 2", "Concept 3", "Concept 4"], rotatio
 
 fig.tight_layout()
 plt.show()
-
