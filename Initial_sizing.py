@@ -41,7 +41,7 @@ Maxpayload = 600            # 6 people, each around 100kg
 M_person = 100              # kg
 #t_mission = 30/60          # TBD, a place holder as for now due to one cycle being of undetermined length. Expressed in hours
 rho = 1.225                 # kg/m^3 - air density at sea level
-visc = 1.46*10**-5          # Viscosity at sea level
+visc = 1.79*10**-5          # Viscosity at sea level
 t_ascend = 50/3600
 t_hover = 10/60
 t_desc = 86/3600
@@ -55,7 +55,7 @@ h = 400
 t_wall = 0.005
 L_person = 0.5
 W_person = 0.75
-H_engine = 0.3
+H_engine = 0.3/2*1.15
 H_person = 1.5
 
 """ Efficiencies of the propulsion and power subsystem """
@@ -72,15 +72,15 @@ P_eng = np.arange(10_000, 205_001, 5_000, dtype = np.int64)/2
 #print("Initial ascend power = ", P_eng[12])
 omega = P_eng/Torque * Motor_eff
 print(omega[8])
-V_tip = D_blade / 2 * omega                         # Velocity of blades tips
+V_tip = D_blade / 2 * omega[8]                         # Velocity of blades tips
 #print("V_tip = ", V_tip)
 #P_eng = Torque * omega                              # Single engines power without efficiencies
 #print("omega = ", omega)
 
 # Reynolds number
-V = V_tip / np.sqrt(2)              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
+V = V_tip / 1.5              # It is assumed that the average velocity of the engine blades is the RMS value of the tip velocity. Needs to be changed possibly
 Re = rho * V * W_blade / visc       # Reynolds number of the blades at sea level
-
+print(Re)
 
 # Thrust per engine
 T = V_tip**2 / 6 * rho * CL * Sb * Prop_eff         # Thrust of a single engine. Only propeller efficiency taken into account as it corresponds to generation of mechanical energy
@@ -123,10 +123,10 @@ M_cabin = Mass_tot1 - Maxpayload
 SM = T2*N_motor/(Mass_tot1*g)                      # Assumed deacceleration
 print("Safety margin = ", T2*N_motor/(Mass_tot1*g))
 
-#print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
+print("Approximate time of descend (actual) ", t_desc_act)     # The acceleration of descent is assumed to be the same as for ascend only reversed.
                                     # However, the thrust durations are different to have 2 different times
 
-#print("Approximate time of ascend (actual) ", t_asc_act)
+print("Approximate time of ascend (actual) ", t_asc_act)
 
 #t_descend_act = np.sqrt(-4 / ((SM-1) * g) * h)        # Multiplied by 2 just to have acceleration only at half the time and then deacceleration
 #print("Approximate time of descend (actual) ", t_descend_act)
@@ -149,10 +149,12 @@ S_cabin_bottom = W_cabin * L_cabin
 S_cabin_side = H_cabin * L_cabin
 S_cabin_front = W_cabin * H_cabin
 V_cabin = H_cabin * W_cabin * L_cabin               # m^3
-V_battery = M_bat * Bat_E_dense / rho_battery       # m^3
+V_battery = M_bat / rho_battery       # m^3
 V_tot = V_battery + V_cabin + N_motor * V_engine    # m^3
 
-# print("Total Volume = ", V_tot)
+print("Total Volume = ", V_tot - V_battery)
+print("Battry volume = ", V_battery)
+
 
 print("Iterated total mass = ", Mass_tot1)
 
@@ -208,7 +210,7 @@ Operation_percentage = np.array([1, 0.8, 0.6, 0.4, 0.2, 0.0])   # Assume the eng
 My_init = (1 - Operation_percentage[3]) * T2[8] * 2 * (L_cabin/2 + D_blade/2)
 Mx_init = (1 - Operation_percentage[3]) * T2[8] * 2 * (W_cabin/2 + D_blade/2)
 
-t_response = 0.25                                   # Unfeasible due to gyroscope limitations.
+t_response = 0.3                                   # Unfeasible due to gyroscope limitations.
 
 alpha_y_init = My_init/I_xx                         # Rotation can be assumed to be accelerated in no wind conditions.
 alpha_x_init = Mx_init/I_yy                         # As the airflow is assumed to be zero for the critical conditions, the
@@ -224,15 +226,15 @@ I_mot = 1/2*M_eng*R_motor**2
 I_tot = I_prop+I_mot
 
 
-t_stop_engine = omega[8]/Torque*I_tot + omega[23] /Torque*I_tot             # Engines are assumed to have the same velocity now. The functioning arm is now stopped and will be reversed to max thrust almost instantaneously
+t_stop_engine = omega[8]/Torque*I_tot + omega[8] /Torque*I_tot             # Engines are assumed to have the same velocity now. The functioning arm is now stopped and will be reversed to max thrust almost instantaneously
                                 # A time in which an engine of this size can be stopped and reversed has to be determined!
 theta_addition_x = theta_reached_x + omega_x_init * t_stop_engine
 theta_addition_y = theta_reached_y + omega_y_init * t_stop_engine
-#print(t_stop_engine)
-t_reverse = 0.15             # Matter of choice
+print(SM[12])
+t_reverse = (omega[12] /Torque*I_tot - omega[8] /Torque*I_tot)              # Matter of choice
 
-My_reverse = - (1 + Operation_percentage[-1]) * T2[23] * 2 * (L_cabin/2 + D_blade/2)
-Mx_reverse = - (1 + Operation_percentage[-1]) * T2[23] * 2 * (W_cabin/2 + D_blade/2)
+My_reverse = - (1 + Operation_percentage[-1]) * (T2[8] + T2[12]) / 2 * 2 * (L_cabin/2 + D_blade/2)
+Mx_reverse = - (1 + Operation_percentage[-1]) * (T2[8] + T2[12]) / 2 * 2 * (W_cabin/2 + D_blade/2)
 
 alpha_y_reverse = My_reverse/I_xx
 alpha_x_reverse = Mx_reverse/I_yy
@@ -240,17 +242,17 @@ alpha_x_reverse = Mx_reverse/I_yy
 theta_zero_vec_x = theta_addition_x - omega_x_init**2 / alpha_x_reverse + alpha_x_reverse * (- omega_x_init / alpha_x_reverse)**2 / 2
 theta_zero_vec_y = theta_addition_y - omega_y_init**2 / alpha_y_reverse + alpha_y_reverse * (- omega_y_init / alpha_y_reverse)**2 / 2
 
-a_1_x_E = (N_motor * (3 + Operation_percentage[2]) / 4 * np.cos(np.pi / 2 - theta_reached_x) * (T2[8])) / Mass_tot1
-a_1_y_E = (N_motor * (3 + Operation_percentage[2]) / 4 * np.cos(np.pi / 2 - theta_reached_y) * (T2[8])) / Mass_tot1
-a_1_z_E = (- N_motor * (3 + Operation_percentage[2]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * (T2[8])/2 + Mass_tot1 * g) / Mass_tot1
+a_1_x_E = (N_motor * (3 + Operation_percentage[3]) / 4 * np.sin(theta_reached_x*np.sqrt(2)) * (T2[8])) / Mass_tot1
+a_1_y_E = (N_motor * (3 + Operation_percentage[3]) / 4 * np.sin(theta_reached_y*np.sqrt(2)) * (T2[8])) / Mass_tot1
+a_1_z_E = (- N_motor * (3 + Operation_percentage[3]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * (T2[8]) + Mass_tot1 * g) / Mass_tot1
 
 S_1_x_E = a_1_x_E / 2 * t_stop_engine**2
 S_1_y_E = a_1_y_E / 2 * t_stop_engine**2
 S_1_z_E = a_1_z_E / 2 * t_stop_engine**2
 
-a_2_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[7] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[23]) / Mass_tot1
-a_2_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[7] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[23]) / Mass_tot1
-a_2_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[23] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[23] + Mass_tot1 * g) / Mass_tot1
+a_2_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.sin(theta_zero_vec_x / np.sqrt(2)) * T2[30] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[14]) / Mass_tot1
+a_2_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.sin(theta_zero_vec_y / np.sqrt(2)) * T2[30] - N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[14]) / Mass_tot1
+a_2_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[30] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[14] + Mass_tot1 * g) / Mass_tot1
 
 theta_reverse_x = theta_addition_x + omega_x_init * t_reverse + alpha_x_reverse * t_reverse**2 / 2
 theta_reverse_y = theta_addition_y + omega_y_init * t_reverse + alpha_y_reverse * t_reverse**2 / 2
@@ -270,13 +272,27 @@ V_z_E = V_1_z_E + a_2_z_E * t_reverse
 omega_tot_x = omega_x_init + alpha_x_reverse * t_reverse
 omega_tot_y = omega_y_init + alpha_y_reverse * t_reverse
 
-t_stop_engine_2 = omega[8]/Torque*I_tot + omega[23] /Torque*I_tot
-theta_stop_x = theta_reverse_x + omega_tot_x * t_stop_engine_2      # Add the acc and velocity at this point
-theta_stop_y = theta_reverse_y + omega_tot_y * t_stop_engine_2
-t_stabilise_x = - 2 * theta_stop_x / omega_tot_x
-t_stabilise_y = - 2 * theta_stop_y / omega_tot_y
+t_stop_engine_2 = omega[12] /Torque*I_tot + omega[1]/Torque*I_tot
+
+My_stop = - (1 + Operation_percentage[-1]) * (-T2[1] + T2[12]) / 2 * 2 * (L_cabin/2 + D_blade/2)
+Mx_stop = - (1 + Operation_percentage[-1]) * (-T2[1] + T2[12]) / 2 * 2 * (W_cabin/2 + D_blade/2)
+
+alpha_y_stop = My_stop/I_xx
+alpha_x_stop = Mx_stop/I_yy
+
+theta_stop_x = theta_reverse_x + omega_tot_x * t_stop_engine_2 + alpha_x_stop * t_stop_engine_2**2 / 2
+theta_stop_y = theta_reverse_y + omega_tot_y * t_stop_engine_2 + alpha_y_stop * t_stop_engine_2**2 / 2
+
+omega_stop_x = omega_tot_x + alpha_x_stop * t_stop_engine_2
+omega_stop_y = omega_tot_y + alpha_y_stop * t_stop_engine_2
+
+#theta_stop_x = theta_reverse_x + omega_tot_x * t_stop_engine_2      # Add the acc and velocity at this point
+#theta_stop_y = theta_reverse_y + omega_tot_y * t_stop_engine_2
+t_stabilise_x = - 2 * theta_stop_x / omega_stop_x
+t_stabilise_y = - 2 * theta_stop_y / omega_stop_y
 alpha_stabilise_x = - omega_tot_x / t_stabilise_x
 alpha_stabilise_y = - omega_tot_y / t_stabilise_y
+#print(T2)
 print(t_stabilise_x)
 
 M_x_needed = alpha_stabilise_x * I_yy
@@ -285,13 +301,17 @@ M_y_needed = alpha_stabilise_y * I_xx
 T_needed_x = M_x_needed / 2 / (L_cabin/2 + D_blade/2)
 T_needed_y = M_y_needed / 2 / (W_cabin/2 + D_blade/2)
 
-a_3_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T2[23] + N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T_needed_x) / Mass_tot1
-a_3_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T2[23] + N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T_needed_y) / Mass_tot1
-a_3_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * T2[23] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * max(T_needed_x, T_needed_y) + Mass_tot1 * g) / Mass_tot1
+a_3_x_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.sin(theta_stop_x * np.sqrt(2)) * T2[30] + N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_x / np.sqrt(2)) * T_needed_x) / Mass_tot1
+a_3_y_E = (N_motor * (2 + Operation_percentage[-1]) / 4 * np.sin(theta_stop_y * np.sqrt(2)) * T2[30] + N_motor / 4 * np.cos(np.pi / 2 - theta_zero_vec_y / np.sqrt(2)) * T_needed_y) / Mass_tot1
+a_3_z_E = (- N_motor * (2 + Operation_percentage[-1]) / 4 * np.cos(max(theta_stop_x, theta_stop_y) * np.sqrt(2)) * T2[30] + N_motor / 4 * np.cos(max(theta_reached_x, theta_reached_y) / np.sqrt(2)) * max(T_needed_x, T_needed_y) + Mass_tot1 * g) / Mass_tot1
 
 V_x_E_end = V_x_E + a_3_x_E * t_stabilise_x
 V_y_E_end = V_y_E + a_3_y_E * t_stabilise_y
-V_Z_E_end = V_z_E + a_3_z_E * max(t_stabilise_x, t_stabilise_y)
+V_z_E_end = V_z_E + a_3_z_E * max(t_stabilise_x, t_stabilise_y)
+
+S_x_E_end = S_x_E + V_x_E_end * t_stop_engine_2 + a_2_x_E / 2 * t_stop_engine_2**2
+S_y_E_end = S_y_E + V_y_E_end * t_stop_engine_2 + a_2_y_E / 2 * t_stop_engine_2**2
+S_z_E_end = S_z_E + V_z_E_end * t_stop_engine_2 + a_2_z_E / 2 * t_stop_engine_2**2
 
 print("Angle reached in the response time = ", theta_zero_vec_y * 57.3, theta_addition_y * 57.3)
 print("Angular velocity to be counteracted = ", omega_tot_x, omega_tot_y)
@@ -299,17 +319,11 @@ print("Velocity of the craft = ", V_x_E, V_y_E)
 print("Maximum positions = ", S_x_E) #y_max_E)
 #print("Moments of inertia = ", I_xx, I_yy)
 
-print("Thrusts = ", T_needed_x, T_needed_y)
-print("Speed of craft relative to Earth = ", V_x_E_end, V_y_E_end, V_Z_E_end)
+print("Thrusts = ", T_needed_x/T2[8], T_needed_y)
+print("Speed of craft relative to Earth = ", V_x_E_end, V_y_E_end, V_z_E_end)
 print("Accelerations relative to Earth", a_1_z_E, a_2_z_E, a_3_z_E)
-
+print("Translations = ", S_x_E_end, S_y_E_end, S_z_E_end)
+print(P_eng[8])
 
 """    Gust load estimation    """
-
-
-
-
-
-
-
 

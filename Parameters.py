@@ -139,7 +139,7 @@ class BatteryParameters(object):
 
     cost_density = 0.1 #$/Wh
 
-    battery0 = ['Panasonic NCA Si-C', 260, 683e3,0.9]
+    battery0 = ['Panasonic NCA Si-C', 260, 683,0.9]
 
     def __init__(self,key=0):
 
