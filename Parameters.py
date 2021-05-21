@@ -262,3 +262,48 @@ class CabinParameters(object):
             + f'\nThe variables in the output array appear in this order in SI units.'
             )
         return self.Parameters_cabin
+
+class ConceptParameters(object):
+
+    """
+    CONCEPT
+    Name_concept: The name of the concept
+    Mtot_concept: Total concept mass
+    Mpay_concept: Maximum payload mass for this concept
+    Mbat_concept: Total concept battery mass
+    Vtot_concept: Total volume of  concept
+    Vbat_concept: Total battery volume of concept
+
+    Initialization array: [Name_concept, Mtot_concept, Mpay_concept, Mbat_concept, Vtot_concept, Vbat_concept]
+    """
+
+    #Battery list
+    #The object with index 0 is the currently selected one. All other indices are for comparison
+    #The battery cost is a constant currently set at 100$/kWh
+    concept0 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
+
+    def __init__(self,key=0):
+
+        if key == 0:
+            self.Name_concept = self.concept0[0]
+            self.Mtot_concept = self.concept0[1]
+            self.Mpay_concept = self.concept0[2]
+            self.Mbat_concept = self.concept0[3]
+            self.Vtot_concept = self.concept0[4]
+            self.Vbat_concept = self.concept0[5]
+    
+    def getParameters(self,printParameters = False):
+    
+        self.Parameters_concept = [self.Name_concept,self.Mtot_concept,self.Mpay_concept,self.Mbat_concept,self.Vtot_concept, self.Vbat_concept]
+        if printParameters:
+            print(f'The current concept parameters are:'
+            + f'\n\tName of Concept: {self.Parameters_concept[0]} [-]'
+            + f'\n\tMass Total of Concept: {self.Parameters_concept[1]} [kg]'
+            + f'\n\tMass Payload of Concept: {self.Parameters_concept[2]} [kg]'
+            + f'\n\tMass Battery of Concept: {self.Parameters_concept[3]} [kg]'
+            + f'\n\tVolume Total of Concept: {self.Parameters_concept[4]} [m3]'
+            + f'\n\tVolume Battery of Concept: {self.Parameters_concept[5]} [m3]'
+            + f'\nThe variables in the output array appear in this order in SI units.'
+            )
+        return self.Parameters_concept
+

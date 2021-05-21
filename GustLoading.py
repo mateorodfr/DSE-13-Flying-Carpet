@@ -1,6 +1,7 @@
 import numpy as np
 import Parameters as pm
 import matplotlib.pyplot as plt
+import MomentInertia as mi
 
 
 """Define Module Specific parameters"""
@@ -22,6 +23,7 @@ Umax = Uf[-1] #Max gust load
 cabin = pm.CabinParameters(0)
 motor = pm.MotorParameters(0)
 propeller = pm.PropellerParameters(0)
+concept = pm.ConceptParameters(0)
 
 #System parameters
 #all these variable sneed to be manually changed to perform a case specific analysis
@@ -52,7 +54,7 @@ S = np.array([Syz,Sxz,Sxy]) #Array to store surface areas in x,y,z direction
 
 
 """ Plot gusts"""
-plot = True
+plot = False
 if plot:
     plt.plot(z,Uf)
     plt.title('Gust speed at varying altitudes')
@@ -61,31 +63,7 @@ if plot:
     plt.savefig("figures/gustload")
 
 """Compute Moment of Inertias"""
-
-#Cabin moment of inertia (based on hollow cube mass moment of inertia, axis through cg)
-I_default = (5/18)*mOEW*Dim_cabin**2
-
-#Mass momnet of inertia around x axis
-I_xx_engines = (motor.N_motor*(motor.M_motor+propeller.M_blades))*(L_cabin/2+propeller.D_prop/2)**2 #Engine contribution
-rpayloadx = (L_person/2 + (0.1 * L_cabin)/2) #Payload zy distance 
-I_xx_payload = Mpayload*rpayloadx**2 #Payload Contribution
-I_xx = I_default[0] + I_xx_engines+ I_xx_payload #Total x mass moment of inertia
-
-#Mass momnet of inertia around y axis
-I_yy_engines = (motor.N_motor*(motor.M_motor+propeller.M_blades))*(W_cabin/2+propeller.D_prop/2)**2 #Engine contribution
-rpayloady = (W_person + (W_cabin - 3 * W_person)/4) #Payload zx distance
-I_yy_payload = (2/3)*Mpayload*rpayloady**2 #Payload Contribution
-I_yy = I_default[1] + I_yy_engines + I_yy_payload #Total y mass moment of inertia
-
-#Mass moment of inertia around z axis
-r2enginez = ((L_cabin+propeller.D_prop)/2)**2 + ((W_cabin+propeller.D_prop)/2)**2 #Distance to the engine in xy (squared already)
-I_zz_engines = (motor.N_motor*(motor.M_motor+propeller.M_blades))*r2enginez #Engine Contribution
-r2payload1256 = rpayloadx**2 + rpayloady**2 #Distance to seats 1256 in xy (squared already)
-I_zz_payload = (2/3)*Mpayload*r2payload1256 + (1/3)*Mpayload*rpayloady**2 #Payload Contribution
-I_zz = I_default[2]+I_zz_engines+I_zz_payload #Total mass moment of inertia in z
-
-I = [I_xx,I_yy,I_zz] #Array to store mass moments of inertia
-
+I = mi.MMOI(motor,propeller,cabin,concept)
 
 """Compute characteristics"""
 
@@ -104,17 +82,19 @@ The load is simplified as a point load applied at 1/3 of the load.
 Assuming the load goes from 0 to w0 over the cabin
 This means the load is applied at 1/3 Lcabin, Wcabin, Hcabin
 """
-d = (1/6)*Dim_cabin
-M  = Dgust*d
-alpha = M/I
+d = (1/6)*Dim_cabin #Moment arm
+M  = Dgust*d #Torque
+alpha = M/I #Angular accelerations
+
+
 
 """Print Characteristics"""
 print(
     f'The gust load analysis yields: '
     f'\n\tThe moment of inertias in x,y,z'
-    f'\n\t\t Ixx: {np.round(I_xx)} [kgm2]'
-    f'\n\t\t Iyy: {np.round(I_yy)} [kgm2]'
-    f'\n\t\t Izz: {np.round(I_zz)} [kgm2]'
+    f'\n\t\t Ixx: {np.round(I[0])} [kgm2]'
+    f'\n\t\t Iyy: {np.round(I[1])} [kgm2]'
+    f'\n\t\t Izz: {np.round(I[2])} [kgm2]'
     f'\n\tThe maximum gust speed in x,y,z:'
     f'\n\t\t Umax: {np.round(Umax,2)} [m/s]'
     f'\n\tThe maximum distrubance force due to gust load in x,y,z:'
