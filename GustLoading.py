@@ -52,21 +52,40 @@ Sxz = cabin.S_cabin[1] #xz plane
 Sxy = cabin.S_cabin[0] #xy plane
 S = np.array([Syz,Sxz,Sxy]) #Array to store surface areas in x,y,z direction
 
+""" Define Output Booleans"""
+plot = False #if this is true the program will plot the gust speed as a fucntion of height
+isPrint = True #if this is true the program will print all the characteristics
 
 """ Plot gusts"""
-plot = False
+
 if plot:
     plt.plot(z,Uf)
     plt.title('Gust speed at varying altitudes')
     plt.xlabel('Altitude: h [m]')
     plt.ylabel(r'Wind speed: U [ms$^{-1}$]')
-    plt.savefig("figures/gustload")
+    plt.show()
+    # plt.savefig("figures/gustload")
 
 """Compute Moment of Inertias"""
-I = mi.MMOI(motor,propeller,cabin,concept)
+I = mi.MMOI(motor,propeller,cabin,concept) #Mass moment of inertia stored n array xx,yy,zz
 
-"""Compute characteristics"""
+"""
+Compute characteristics
 
+Reasoning for Trans. Accelerations
+    The max gust speed is the same in all directions
+    The gust speed taken is the max vertical gust speed.
+    The max lateral gust speed is equal to vertical gust speed
+    Gust drag force is distributed around cg such that no torque is produced
+
+Reasoning for Rot. Accelerations
+    Assuming the same magnitude of gust but distributed in a triangle.
+    This will cause a translational acceleration equal to ax,ay,az calculated above.
+    The distributed load will cause a torque.
+    The load is simplified as a point load applied at 1/3 of the load.
+    Assuming the load goes from 0 to w0 over the cabin
+    This means the load is applied at 1/3 Lcabin, Wcabin, Hcabin
+"""
 #Maximum gust force
 Dgust = 0.5*rho*Umax**2*S*Cd
 
@@ -74,40 +93,33 @@ Dgust = 0.5*rho*Umax**2*S*Cd
 a = Dgust/m
 
 #Rotational accelerations due to distributed gust load.
-"""
-Assuming the same magnitude of gust but distributed in a triangle.
-This will cause a translational acceleration equal to ax,ay,az calculated above.
-The distributed load will cause a torque.
-The load is simplified as a point load applied at 1/3 of the load.
-Assuming the load goes from 0 to w0 over the cabin
-This means the load is applied at 1/3 Lcabin, Wcabin, Hcabin
-"""
 d = (1/6)*Dim_cabin #Moment arm
 M  = Dgust*d #Torque
 alpha = M/I #Angular accelerations
 
 
-
 """Print Characteristics"""
-print(
-    f'The gust load analysis yields: '
-    f'\n\tThe moment of inertias in x,y,z'
-    f'\n\t\t Ixx: {np.round(I[0])} [kgm2]'
-    f'\n\t\t Iyy: {np.round(I[1])} [kgm2]'
-    f'\n\t\t Izz: {np.round(I[2])} [kgm2]'
-    f'\n\tThe maximum gust speed in x,y,z:'
-    f'\n\t\t Umax: {np.round(Umax,2)} [m/s]'
-    f'\n\tThe maximum distrubance force due to gust load in x,y,z:'
-    f'\n\t\t Fx, Fy, Fz: {np.round(Dgust,2)} [N]'
-    f'\n\tThe maximum translational accelerations due to disturbance in x,y,z'
-    f'\n\t\t ax: {np.round(a[0],5)} [m/s2]'
-    f'\n\t\t ay: {np.round(a[1],5)} [m/s2]'
-    f'\n\t\t az: {np.round(a[2],5)} [m/s2]'
-    f'\n\tThe maxmimu disturbance torques due to gust load in x,y,z'
-    f'\n\t\t Mx, My, Mz: {np.round(M,2)}'
-    f'\n\tThe maxmimum angular acceleration due to distrubance torque in x,y,z'
-    f'\n\t\t alphax: {np.round(alpha[0],5)} [rad/s2]'
-    f'\n\t\t alphay: {np.round(alpha[1],5)} [rad/s2]'
-    f'\n\t\t alphaz: {np.round(alpha[2],5)} [rad/s2]'
-)
+
+if isPrint:
+    print(
+        f'The gust load analysis yields: '
+        f'\n\tThe moment of inertias in x,y,z'
+        f'\n\t\t Ixx: {np.round(I[0])} [kgm2]'
+        f'\n\t\t Iyy: {np.round(I[1])} [kgm2]'
+        f'\n\t\t Izz: {np.round(I[2])} [kgm2]'
+        f'\n\tThe maximum gust speed in x,y,z:'
+        f'\n\t\t Umax: {np.round(Umax,2)} [m/s]'
+        f'\n\tThe maximum distrubance force due to gust load in x,y,z:'
+        f'\n\t\t Fx, Fy, Fz: {np.round(Dgust,2)} [N]'
+        f'\n\tThe maximum translational accelerations due to disturbance in x,y,z'
+        f'\n\t\t ax: {np.round(a[0],5)} [m/s2]'
+        f'\n\t\t ay: {np.round(a[1],5)} [m/s2]'
+        f'\n\t\t az: {np.round(a[2],5)} [m/s2]'
+        f'\n\tThe maxmimu disturbance torques due to gust load in x,y,z'
+        f'\n\t\t Mx, My, Mz: {np.round(M,2)}'
+        f'\n\tThe maxmimum angular acceleration due to distrubance torque in x,y,z'
+        f'\n\t\t alphax: {np.round(alpha[0],5)} [rad/s2]'
+        f'\n\t\t alphay: {np.round(alpha[1],5)} [rad/s2]'
+        f'\n\t\t alphaz: {np.round(alpha[2],5)} [rad/s2]'
+    )
 
