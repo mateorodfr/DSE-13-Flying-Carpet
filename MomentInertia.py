@@ -7,12 +7,19 @@ def MMOI(motor, propeller,cabin,concept):
 
     """
     Mass Moment of Inertia function
-    This fucntion takes a certain motor, propeller, cabin and concept
+    This fucntion takes a certain motor, propeller, cabin and concept objects
     This functions returns the MMOI in x,y,z plane in an array
     This fucntion shoudl work for any motor, propeller, cabin and concept combination
 
-
+    Example syntax:
+    motor = pm.MotorParameters(0)
+    propeller = pm.PropellerParameters(0)
+    cabin = pm.CabinParameters(0)
+    concept = pm.ConceptParameters(0)
+    I = MMOI(motor,propeller,cabin,concept)
     """
+
+    """Initialize Parameters"""
 
     Mpayload = concept.Mpay_concept
     mOEW = concept.Mtot_concept-Mpayload- motor.N_motor*(motor.M_motor+propeller.M_blades)
@@ -46,12 +53,4 @@ def MMOI(motor, propeller,cabin,concept):
 
     return I
 
-"""Initialize variables and parameters"""
 
-motor = pm.MotorParameters(0)
-propeller = pm.PropellerParameters(0)
-cabin = pm.CabinParameters(0)
-concept = pm.ConceptParameters(0)
-
-
-I = MMOI(motor,propeller, cabin, concept)
