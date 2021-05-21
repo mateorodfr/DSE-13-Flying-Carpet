@@ -115,7 +115,7 @@ print(
     f'\n\t\t Ixx: {np.round(I_xx)} [kgm2]'
     f'\n\t\t Iyy: {np.round(I_yy)} [kgm2]'
     f'\n\t\t Izz: {np.round(I_zz)} [kgm2]'
-    f'\n\t The maximum gust speed in x,y,z:'
+    f'\n\tThe maximum gust speed in x,y,z:'
     f'\n\t\t Umax: {np.round(Umax,2)} [m/s]'
     f'\n\tThe maximum distrubance force due to gust load in x,y,z:'
     f'\n\t\t Fx, Fy, Fz: {np.round(Dgust,2)} [N]'
@@ -129,7 +129,5 @@ print(
     f'\n\t\t alphax: {np.round(alpha[0],5)} [rad/s2]'
     f'\n\t\t alphay: {np.round(alpha[1],5)} [rad/s2]'
     f'\n\t\t alphaz: {np.round(alpha[2],5)} [rad/s2]'
-
-
 )
 
