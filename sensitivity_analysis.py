@@ -33,4 +33,4 @@ def plot_boxplot(filename1, save=False):
 
 if __name__ == "__main__":
     # plot_boxplot("tradeoff_data/sensitivity_combinations.csv")
-    plot_boxplot("tradeoff_data/sensitivity_combinations.csv", save=True)
+    plot_boxplot("tradeoff_data/sensitivity_combinations.csv")
