@@ -1,5 +1,38 @@
 import numpy as np
 
+
+
+'''
+Introduction to Parameters
+This script contains the individual components of the design
+When calling this class in a module it creates an object based on the given parameters
+The classes are called using a key (integer from 0 to n) this key corresponds to a certain configuration
+By default when calling the class without a kehy it initializes key 0 which is the current selected componenent.
+
+
+The class works as such, calling the class creates an object with its properties.
+This allows to call the ibject and its variables in a script.
+Furthermroe the function getParameters() outputs all the parameters in an array.
+Optionally you can pass on a True argument to the fucntion to print the parameters
+
+Check the class syntax to get familiar with the order of variables and how to initialze a configuration.
+Different configurations can be input by creating an array inside the class which contains all relevenat information to build the object
+
+
+Example syntax:
+
+motor = MotorParameters(0) -> Create a motor object based on configuration 0 (default)
+motorParams = motor.getParameters(True) -> Stores the motor parameters in an array and print an informative message
+P_eng = motor.P_max -> assigns the max motor power to a variable.
+
+Example Initialization Array for Motor:
+
+motor0 = ["Siemens SP260D",8,0.418/4*1.15,1500/2,204000/2,49/2*1.15,0.95,0.8]
+motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
+
+
+'''
+
 class MotorParameters(object):
 
     """
@@ -14,6 +47,8 @@ class MotorParameters(object):
     P_max: The maximum engine power in watts, found from literature online.
     M_motor: Motor mass, found on internet [kg]
     SF_rotational: Safety factor for moment of inertia of rotational part of the engine
+
+    Initialization array: [Name_motor, N_motor, R_motor, Torque, P_max, M_motor, SF_rotational]
     """
 
     #Motor List
@@ -62,7 +97,6 @@ class MotorParameters(object):
             )
         return self.Parameters_motor
 
-
 class PropellerParameters(object):
 
     """
@@ -75,6 +109,9 @@ class PropellerParameters(object):
     W_blade: The width of the blade is assumed to be a tenth of the length. Could search for papers on propeller design
     t_blade: Thickness of the blade assumed to be 1% of length on average
     rho_blade: density of the propeller blades
+    eff_prop: efficieny of propeller
+
+    Initialization array: [Airfoil_name, CL, N_blade, D_blade, W/D , t/D, rho_blade, eff_prop]
     """
 
     #Propeller list
@@ -133,13 +170,25 @@ class PropellerParameters(object):
 
 class BatteryParameters(object):
 
+    """
+    BATTERY
+    Name_battery: The NACA identification number of the chosen airfoil
+    rhoE_battery: Specific energy density of battery in [Wh/kg]
+    rhoV_battery: Volumetric energy density of battery in [Wh/m3]
+    eff_battery: Efficiency of the battery chosen
+    rhoC_battery: Specific cost of batteries in [$/kg] this is calculated using the average cost_density
+
+    Initialization array: [Name_battery, rhoE_battery, rhoV_battery, eff_battery]
+    """
+
+    #Battery constants
+    cost_density = 0.1 #$/Wh
+
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-
-    cost_density = 0.1 #$/Wh
-
     battery0 = ['Panasonic NCA Si-C', 260, 683,0.9]
+
 
     def __init__(self,key=0):
 
@@ -177,10 +226,16 @@ class CabinParameters(object):
     nCols: number of seats abreast
     SF: Safety factor for dimensions
 
+    Initialization Array: [L_person, W_person, H_person, t_wall, nRows, nCols, SF_dimensions]
+
     """
+    #Cabin constants
     W_person = 0.75
     L_person = 0.5
     H_person = 1.5
+
+    #Cabin list
+    #The object with index 0 is the currently selected one. All other indices are for comparison
     cabin0 = [0.5,0.75,1.5,0.0005,3,2,1.1]
 
     def __init__(self,key=0):
