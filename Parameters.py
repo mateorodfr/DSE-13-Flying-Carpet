@@ -18,7 +18,7 @@ class MotorParameters(object):
 
     #Motor List
     #The object with index 0 is the currently selected one. All other indices are for comparison
-    motor0 = ["Siemens SP260D",8,0.418/4*1.15,1500/2*1.15,204000/2*1.15,49/2*1.15,0.95,0.8] #Strong motor used on City airbus
+    motor0 = ["Siemens SP260D",8,0.418/4*1.15,1500/2,204000/2,49/2*1.15,0.95,0.8] #Strong motor used on City airbus
     motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
 
     #Initialization if no key is given takes the default object '0'
@@ -139,7 +139,7 @@ class BatteryParameters(object):
 
     cost_density = 0.1 #$/Wh
 
-    battery0 = ['Panasonic NCA Si-C', 260, 683e3,0.9]
+    battery0 = ['Panasonic NCA Si-C', 260, 683,0.9]
 
     def __init__(self,key=0):
 
