@@ -1,7 +1,7 @@
 import numpy as np
 import Parameters as pm
 import matplotlib.pyplot as plt
-import MomentInertia as mi
+
 
 
 """Define Module Specific parameters"""
@@ -64,7 +64,7 @@ if plot:
     # plt.savefig("figures/gustload")
 
 """Compute Moment of Inertias"""
-I = mi.MMOI(concept) #Mass moment of inertia stored n array xx,yy,zz
+I = concept.MMOI() #Mass moment of inertia stored n array xx,yy,zz
 
 """
 Compute characteristics
