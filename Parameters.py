@@ -182,12 +182,12 @@ class BatteryParameters(object):
     """
 
     #Battery constants
-    cost_density = 0.1 #$/Wh
+    cost_density = 0.15 #$/Wh
 
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 260, 683,0.9]
+    battery0 = ['Panasonic NCA Si-C', 260, 683000,0.9]
 
 
     def __init__(self,key=0):
@@ -197,7 +197,7 @@ class BatteryParameters(object):
             self.rhoE_battery = self.battery0[1] #[Wh/kg]
             self.rhoV_battery = self.battery0[2] #[Wh/m3]
             self.eff_battery = self.battery0[3] #get source this is an assumption
-            self.rhoC_battery = self.rhoV_battery*self.cost_density # 100 dollars/kWh this is what tesla would like before 2020 so not an actual value, range is usual 150-125
+            self.rhoC_battery = self.rhoE_battery*self.cost_density # 100 dollars/kWh this is what tesla would like before 2020 so not an actual value, range is usual 150-125
 
     def getParameters(self, printParameters=False):
 
@@ -307,3 +307,5 @@ class ConceptParameters(object):
             )
         return self.Parameters_concept
 
+battery = BatteryParameters(0)
+print(battery.getParameters(True))
