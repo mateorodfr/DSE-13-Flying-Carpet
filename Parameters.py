@@ -31,6 +31,12 @@ motor0 = ["Siemens SP260D",8,0.418/4*1.15,1500/2,204000/2,49/2*1.15,0.95,0.8]
 motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
 
 
+UPDATED
+if you create a concept object this will return all relevant subclasses.
+This means that by passing a key between 0-3 you can generate each different concept
+These will contain the relevant conponent parameters for each configuration
+
+
 '''
 
 class MotorParameters(object):
@@ -84,7 +90,9 @@ class MotorParameters(object):
 
         self.Parameters_motor = [self.Name_motor, self.N_motor,self.R_motor,self.Torque,self.P_max, self.M_motor, self.eff_motor, self.SF_rotational]
         if printParameters:
-            print(f'The current motor parameters are:'
+            print(
+              f'*******************************************************************************'
+            + f'\nThe current MOTOR parameters are:'
             + f'\n\tName: {self.Parameters_motor[0]} [-]'
             + f'\n\tNumber of Motors: {self.Parameters_motor[1]} [-]'
             + f'\n\tRadius of Motor: {self.Parameters_motor[2]} [m]'
@@ -153,7 +161,9 @@ class PropellerParameters(object):
 
         self.Parameters_propeller = [self.airfoil_prop, self.CL_prop, self.N_prop,self.D_prop,self.W_prop,self.t_prop, self.rho_prop, self.eff_prop, self.S_prop,self.M_blades]
         if printParameters:
-            print(f'The current propeller parameters are:'
+            print(
+              f'*******************************************************************************'
+            + f'\nThe current PROPELLER parameters are:'
             + f'\n\tAirfoil: {self.Parameters_propeller[0]} [-]'
             + f'\n\tLift Coefficient of Propeller: {self.Parameters_propeller[1]} [-]'
             + f'\n\tNumber of Propeller: {self.Parameters_propeller[2]} [-]'
@@ -203,7 +213,10 @@ class BatteryParameters(object):
 
         self.Parameters_battery = [self.Name_battery,self.rhoE_battery,self.rhoV_battery,self.rhoC_battery, self.eff_battery]
         if printParameters:
-            print(f'The current battery parameters are:'
+            print(
+
+              f'*******************************************************************************'
+            + f'\nThe current BATTERY parameters are:'
             + f'\n\tName of Battery: {self.Parameters_battery[0]} [-]'
             + f'\n\tSpecific Energy of Battery: {self.Parameters_battery[1]} [Wh/kg]'
             + f'\n\tVolumetric Density of Battery: {self.Parameters_battery[2]} [Wh/m3]'
@@ -247,12 +260,14 @@ class CabinParameters(object):
             self.t_cabin = self.cabin0[3]
             self.S_cabin = [self.L_cabin*self.W_cabin,self.L_cabin*self.H_cabin,self.W_cabin*self.H_cabin] #LW, LH, WH
             self.V_cabin = self.L_cabin*self.W_cabin*self.H_cabin
-    
-    def getParameters(self,printParameters = False):
+
+    def getParameters(self,printParameters = False, getOutput = True):
 
         self.Parameters_cabin = [self.L_cabin,self.W_cabin,self.H_cabin,self.t_cabin,self.S_cabin, self.V_cabin]
         if printParameters:
-            print(f'The current cabin parameters are:'
+            print(
+              f'*******************************************************************************'
+            + f'\nThe current CABIN parameters are:'
             + f'\n\tLength of Cabin: {np.round(self.Parameters_cabin[0],3)} [m]'
             + f'\n\tWidth of Cabin: {np.round(self.Parameters_cabin[1],3)} [m]'
             + f'\n\tHeight of Cabin: {np.round(self.Parameters_cabin[2],3)} [m]'
@@ -291,12 +306,29 @@ class ConceptParameters(object):
             self.Mbat_concept = self.concept0[3]
             self.Vtot_concept = self.concept0[4]
             self.Vbat_concept = self.concept0[5]
-    
-    def getParameters(self,printParameters = False):
-    
+            self.motor = MotorParameters(key)
+            self.propeller = PropellerParameters(key)
+            self.battery = BatteryParameters(key)
+            self.cabin = CabinParameters(key)
+        if key == 1:
+            self.Name_concept = self.concept1[0]
+            self.Mtot_concept = self.concept1[1]
+            self.Mpay_concept = self.concept1[2]
+            self.Mbat_concept = self.concept1[3]
+            self.Vtot_concept = self.concept1[4]
+            self.Vbat_concept = self.concept1[5]
+            self.motor = MotorParameters(key)
+            self.propeller = PropellerParameters(key)
+            self.battery = BatteryParameters(key)
+            self.cabin = CabinParameters(key)
+
+    def getParameters(self,printParameters = False,printComponents=False):
+
         self.Parameters_concept = [self.Name_concept,self.Mtot_concept,self.Mpay_concept,self.Mbat_concept,self.Vtot_concept, self.Vbat_concept]
         if printParameters:
-            print(f'The current concept parameters are:'
+            print(
+              f'*******************************************************************************'
+            + f'\nThe current CONCEPT parameters are:'
             + f'\n\tName of Concept: {self.Parameters_concept[0]} [-]'
             + f'\n\tMass Total of Concept: {self.Parameters_concept[1]} [kg]'
             + f'\n\tMass Payload of Concept: {self.Parameters_concept[2]} [kg]'
@@ -304,8 +336,12 @@ class ConceptParameters(object):
             + f'\n\tVolume Total of Concept: {self.Parameters_concept[4]} [m3]'
             + f'\n\tVolume Battery of Concept: {self.Parameters_concept[5]} [m3]'
             + f'\nThe variables in the output array appear in this order in SI units.'
+            + f'\nThis concept contains a motor, propeller, battery and cabin object'
             )
+        if printComponents:
+            _ = self.motor.getParameters(True)
+            _ = self.propeller.getParameters(True)
+            _ = self.battery.getParameters(True)
+            _ = self.cabin.getParameters(True)
         return self.Parameters_concept
 
-battery = BatteryParameters(0)
-print(battery.getParameters(True))

@@ -20,9 +20,6 @@ Umax = Uf[-1] #Max gust load
 """ Import General Parameters"""
 
 #Import subsystem parameters
-cabin = pm.CabinParameters(0)
-motor = pm.MotorParameters(0)
-propeller = pm.PropellerParameters(0)
 concept = pm.ConceptParameters(0)
 
 #System parameters
@@ -32,24 +29,24 @@ rho = 1.255 #[kg/m3] density at sea level
 H_engine = 0.3
 m = 1455 #curent final iterated mass
 Mpayload = 600 #Current max payload mass
-mOEW = m - Mpayload - motor.N_motor*(motor.M_motor+propeller.M_blades)
+mOEW = m - Mpayload - concept.motor.N_motor*(concept.motor.M_motor+concept.propeller.M_blades)
 
 
 #Payload/Person dimensions
-L_person = cabin.L_person
-W_person = cabin.W_person
-H_person = cabin.H_person
+L_person = concept.cabin.L_person
+W_person = concept.cabin.W_person
+H_person = concept.cabin.H_person
 
 #Cabin dimensions
-L_cabin = cabin.L_cabin #Cabin length
-W_cabin = cabin.W_cabin #Cabin width
-H_cabin = cabin.H_cabin #Cabin height
+L_cabin = concept.cabin.L_cabin #Cabin length
+W_cabin = concept.cabin.W_cabin #Cabin width
+H_cabin = concept.cabin.H_cabin #Cabin height
 Dim_cabin = np.array([L_cabin,W_cabin,H_cabin]) #Array to store all cabin dimensions
 
 #Cabin surface Areas
-Syz = cabin.S_cabin[2] #yz plane
-Sxz = cabin.S_cabin[1] #xz plane
-Sxy = cabin.S_cabin[0] #xy plane
+Syz = concept.cabin.S_cabin[2] #yz plane
+Sxz = concept.cabin.S_cabin[1] #xz plane
+Sxy = concept.cabin.S_cabin[0] #xy plane
 S = np.array([Syz,Sxz,Sxy]) #Array to store surface areas in x,y,z direction
 
 """ Define Output Booleans"""
@@ -67,7 +64,7 @@ if plot:
     # plt.savefig("figures/gustload")
 
 """Compute Moment of Inertias"""
-I = mi.MMOI(motor,propeller,cabin,concept) #Mass moment of inertia stored n array xx,yy,zz
+I = mi.MMOI(concept) #Mass moment of inertia stored n array xx,yy,zz
 
 """
 Compute characteristics
