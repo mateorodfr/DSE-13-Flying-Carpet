@@ -1,10 +1,10 @@
 import numpy as np
 
-AoA = np.load(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\airfoils\naca2412aero\AoA.npy")
-Cd  = np.load(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\airfoils\naca2412aero\cd.npy")
-Cl  = np.load(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\airfoils\naca2412aero\cl.npy")
-Cm  = np.load(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\airfoils\naca2412aero\cm.npy")
-Cp  = np.load(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\airfoils\naca2412aero\cp.npy")
+AoA = np.load(r"airfoils\naca2412aero\AoA.npy")
+Cd  = np.load(r"airfoils\naca2412aero\cd.npy")
+Cl  = np.load(r"airfoils\naca2412aero\cl.npy")
+Cm  = np.load(r"airfoils\naca2412aero\cm.npy")
+Cp  = np.load(r"airfoils\naca2412aero\cp.npy")
 
 class Blade:
     def __init__(self, length: float):
