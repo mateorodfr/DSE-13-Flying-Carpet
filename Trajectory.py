@@ -41,11 +41,6 @@ a2 = -0.1*concept.physics.g
 r2 = h_max
 v2 = 0
 
-t_tot = 1000
-t0 = 0
-
-
-
 def motionTime(r0,v0,a0,r_max,t_req,dt):
     t_tot = 10000
     t0 = 0
@@ -109,7 +104,7 @@ for i in range(len(t)):
     elif t_hover+t_asc <= t[i] < t_mission:
         if t[i] < t_hover+t_asc+t_des_acc:
             ac = -0.1*concept.physics.g
-            vc = vl +  ac*(t[i]-t_hover-t_asc)
+            vc = vl + ac*(t[i]-t_hover-t_asc)
             rc = rl + 0.5*ac*(t[i]-t_hover-t_asc)**2
             tc = t[i]
             state.append([ac,vc,rc,tc])
@@ -151,45 +146,115 @@ state = np.array(state)
 T_req_eng = concept.Mtot_concept*(state[:,0]+concept.physics.g)/concept.motor.N_motor
 P_req_eng = np.sqrt((2*T_req_eng**3)/(concept.physics.rho0*np.pi*concept.propeller.D_prop**2))/(concept.propeller.eff_prop*concept.motor.eff_motor)
 
-
 E = np.sum((concept.motor.N_motor*P_req_eng)*dt)/concept.battery.eff_battery/concept.battery.dod_battery
 mbat = E/(concept.battery.rhoE_battery*3600)
 print(np.max(P_req_eng*concept.motor.N_motor)/concept.Mbat_concept)
 print(mbat,concept.Mbat_concept/0.7)
 
 
+# plt.subplot(3,2,1)
+# plt.plot(state[:,-1],state[:,0])
+# plt.title('Acceleration over time for one cycle')
+# plt.xlabel('Time [s]')
+# plt.ylabel(r'Acceleration [ms$^{-2}$]')
+# plt.subplot(3,2,2)
+# plt.plot(state[:,-1],state[:,1])
+# plt.title('Vertical velocity over time for one cycle')
+# plt.xlabel('Time [s]')
+# plt.ylabel(r'Velocity [ms$^{-1}$]')
+# plt.subplot(3,2,3)
+# plt.plot(state[:,-1],state[:,2])
+# plt.title('Altitude over time for one cycle')
+# plt.xlabel('Time [s]')
+# plt.ylabel(r'Altitude [m]')
+# plt.subplot(3,2,4)
+# plt.plot(state[:,-1],T_req_eng)
+# plt.title('Thrust over time for one cycle per engine')
+# plt.xlabel('Time [s]')
+# plt.ylabel(r'Thrust [N]')
+# plt.subplot(3,2,5)
+# plt.plot(state[:,-1],P_req_eng)
+# plt.title('Power over time for one cycle per engine')
+# plt.xlabel('Time [s]')
+# plt.ylabel(r'Power [W]')
+# plt.show()
 
 
+"""     OEI     """
+I_all = concept.MMOI()
+t_response = 0.2    #s
+Op_init = 0.8
+Op = Op_init
+theta_x = 0.0  #rad
+omega_x = 0.0  #rad/s
+t_I = 0
 
-plt.subplot(3,2,1)
-plt.plot(state[:,-1],state[:,0])
-plt.title('Acceleration over time for one cycle')
-plt.xlabel('Time [s]')
-plt.ylabel(r'Acceleration [ms$^{-2}$]')
-plt.subplot(3,2,2)
-plt.plot(state[:,-1],state[:,1])
-plt.title('Vertical velocity over time for one cycle')
-plt.xlabel('Time [s]')
-plt.ylabel(r'Velocity [ms$^{-1}$]')
-plt.subplot(3,2,3)
-plt.plot(state[:,-1],state[:,2])
-plt.title('Altitude over time for one cycle')
-plt.xlabel('Time [s]')
-plt.ylabel(r'Altitude [m]')
-plt.subplot(3,2,4)
-plt.plot(state[:,-1],T_req_eng)
-plt.title('Thrust over time for one cycle per engine')
-plt.xlabel('Time [s]')
-plt.ylabel(r'Thrust [N]')
-plt.subplot(3,2,5)
-plt.plot(state[:,-1],P_req_eng)
-plt.title('Power over time for one cycle per engine')
-plt.xlabel('Time [s]')
-plt.ylabel(r'Power [W]')
+I_prop = 1/3*(concept.propeller.D_prop/2)**2 * concept.propeller.M_blades
+I_mot = 1/2*concept.motor.M_motor * concept.motor.R_motor**2
+I_tot = I_prop+I_mot
+T_init = T_req_eng[len(T_req_eng) // 2]
+T = T_init
+P_init = P_req_eng[len(P_req_eng)//2]
+t_reverse = 2 * P_init / concept.motor.Torque **2 * I_tot
+t_stop_engine = (1 * P_init) / concept.motor.Torque **2 * I_tot #s
+
+theta_lst = []
+
+while t_I < t_response:
+    Op -= Op_init / 2 / t_response * dt
+    M_x_init = (1 - Op_init) * T_init * 2 * np.cos(theta_x) * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2)
+    alpha_x_init = M_x_init / I_all[1]
+    omega_x = omega_x + alpha_x_init * dt
+    theta_x = theta_x + omega_x * dt + 0.5 * alpha_x_init * dt**2
+    t_I += dt
+    theta_lst.append(theta_x)
+
+
+Op_1 = Op
+t_I = t_response
+while t_I < t_reverse + t_response:
+    Op -= Op_1 / t_reverse * dt
+    T -= (2 * T_init / t_reverse) * dt
+    M_x_init = (1 - Op) * T * 2 * np.cos(theta_x) * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2)
+    alpha_x_init = M_x_init / I_all[1]
+    omega_x = omega_x + alpha_x_init * dt
+    theta_x = theta_x + omega_x * dt + 0.5 * alpha_x_init * dt**2
+    t_I += dt
+    #print(omega_x)
+    theta_lst.append(theta_x)
+
+t_I = t_reverse + t_response
+while t_I < t_reverse + t_response + t_stop_engine:
+    T += (T_init / t_stop_engine) * dt
+    M_x_init = T * 2 * np.cos(theta_x) * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2)
+    alpha_x_init = M_x_init / I_all[1]
+    omega_x = omega_x + alpha_x_init * dt
+    theta_x = theta_x + omega_x * dt + 0.5 * alpha_x_init * dt**2
+    t_I += dt
+    theta_lst.append(theta_x)
+
+
+# t_level = -2 * theta_x / omega_x      # Apply 2 boundary conditions: omega = 0 and theta = 0
+# alpha_level = -omega_x / t_level
+# M_x_level = alpha_level * I_all[1]
+# T_level = M_x_level / (2 * np.cos(theta_x) * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2))
+# #P_level =
+# print(t_level)
+#
+# t_I = t_reverse + t_response + t_stop_engine
+# while t_I < t_reverse + t_response + t_stop_engine + t_level:
+#     T += (T_level / t_level) * dt
+#     M_x_init = T * 2 * np.cos(theta_x) * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2)
+#     alpha_x_init = M_x_init / I_all[1]
+#     omega_x = omega_x + alpha_x_init * dt
+#     theta_x = theta_x + omega_x * dt + 0.5 * alpha_x_init * dt**2
+#     t_I += dt
+#     theta_lst.append(theta_x)
+
+
+#print(T_level)
+t_theta = np.arange(0, t_I, dt)
+#print(t_theta)
+plt.plot(t_theta, np.array(theta_lst)*57.3)
 plt.show()
-
-
-
-
-a1 = 0
 
