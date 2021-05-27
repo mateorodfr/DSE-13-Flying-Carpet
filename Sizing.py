@@ -10,8 +10,8 @@ T_eng = ((np.pi/2)*concept.propeller.D_prop**2*physics.rho0*(P_eng*concept.motor
 
 
 #Concept Masses from initial sizing
-m_tot = concept.Mtot_concept 
-m_bat = concept.Mbat_concept
+m_tot = concept.Mtot_concept + 3.5*concept.Mbat_concept
+m_bat = concept.Mbat_concept*4.5
 m_pay = concept.Mpay_concept
 
 #Thurst over weight ration range
@@ -22,8 +22,12 @@ idx_ops = [np.abs(TW - 1.1).argmin(),np.abs(TW - 1.0).argmin(),np.abs(TW - 0.9).
 P_ops = np.array([P_eng[i] for i in idx_ops])
 T_ops = np.array([T_eng[i] for i in idx_ops])
 TW_ops = np.array([TW[i] for i in idx_ops])
+Hover_efficiency = (T_ops*1000)/(P_ops*physics.g)
 
 E_tot = m_bat*concept.battery.rhoE_battery*3600*concept.battery.eff_battery #Energy stored in joules
 t_ops = E_tot/(concept.motor.N_motor*P_ops)
-print('\nOperation time [min]: ', t_ops/60 ,'\nOperational Power [kW]: ' , P_ops/1000 , '\nOperational Thrust-over-Weight ratio [-]:' , TW_ops)
+
+isPrint = True
+if isPrint:
+    print('\nOperation time [min]: ', t_ops/60 ,'\nOperational Power [kW]: ' , 8*P_ops/m_bat , '\nOperational Thrust-over-Weight ratio [-]:' , TW_ops, '\nHover efficiency [kg/W]: ', Hover_efficiency)
 

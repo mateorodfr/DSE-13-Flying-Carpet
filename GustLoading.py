@@ -21,7 +21,6 @@ Umax = Uf[-1] #Max gust load
 
 #Import subsystem parameters
 concept = pm.ConceptParameters(0)
-
 #System parameters
 #all these variable sneed to be manually changed to perform a case specific analysis
 Cd = 1.2 #CD of squre at reynolds: 6e5

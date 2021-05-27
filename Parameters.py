@@ -196,7 +196,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 260, 683000,0.9]
+    battery0 = ['Panasonic NCA Si-C', 260, 683000,340,0.9]
 
 
     def __init__(self,key=0):
@@ -205,12 +205,13 @@ class BatteryParameters(object):
             self.Name_battery = self.battery0[0] # Get source
             self.rhoE_battery = self.battery0[1] #[Wh/kg]
             self.rhoV_battery = self.battery0[2] #[Wh/m3]
-            self.eff_battery = self.battery0[3] #get source this is an assumption
+            self.rhoP_battery = self.battery0[3] #W/kg
+            self.eff_battery = self.battery0[4] #get source this is an assumption
             self.rhoC_battery = self.rhoE_battery*self.cost_density # 100 dollars/kWh this is what tesla would like before 2020 so not an actual value, range is usual 150-125
 
     def getParameters(self, printParameters=False):
 
-        self.Parameters_battery = [self.Name_battery,self.rhoE_battery,self.rhoV_battery,self.rhoC_battery, self.eff_battery]
+        self.Parameters_battery = [self.Name_battery,self.rhoE_battery,self.rhoV_battery,self.rhoP_battery,self.rhoC_battery, self.eff_battery]
         if printParameters:
             print(
 
@@ -219,8 +220,9 @@ class BatteryParameters(object):
             + f'\n\tName of Battery: {self.Parameters_battery[0]} [-]'
             + f'\n\tSpecific Energy of Battery: {self.Parameters_battery[1]} [Wh/kg]'
             + f'\n\tVolumetric Density of Battery: {self.Parameters_battery[2]} [Wh/m3]'
-            + f'\n\tCost density of Battery: {self.Parameters_battery[3]} [$/kg]'
-            + f'\n\tEfficiency of Battery: {self.Parameters_battery[4]} [-]'
+            + f'\n\tPower Density of Battery: {self.Parameters_battery[3]} [W/kg]'
+            + f'\n\tCost density of Battery: {self.Parameters_battery[4]} [$/kg]'
+            + f'\n\tEfficiency of Battery: {self.Parameters_battery[5]} [-]'
             + f'\nThe variables in the output array appear in this order in SI units.'
             )
         return self.Parameters_battery
@@ -276,6 +278,9 @@ class CabinParameters(object):
             + f'\nThe variables in the output array appear in this order in SI units.'
             )
         return self.Parameters_cabin
+
+
+
 
 class ConceptParameters(object):
 
@@ -398,3 +403,5 @@ class PhysicalParameters(object):
         self.rho0 = 1.225
         self.g = 9.80665
 
+battery = BatteryParameters(0)
+battery.getParameters(True)
