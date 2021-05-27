@@ -187,7 +187,7 @@ class BatteryParameters(object):
     eff_battery: Efficiency of the battery chosen
     rhoC_battery: Specific cost of batteries in [$/kg] this is calculated using the average cost_density
 
-    Initialization array: [Name_battery, rhoE_battery, rhoV_battery, eff_battery]
+    Initialization array: [Name_battery, rhoE_battery, rhoV_battery,DOD, eff_battery]
     """
 
     #Battery constants
@@ -196,7 +196,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 260, 683000,340,0.9]
+    battery0 = ['Panasonic NCA Si-C', 260, 683000,340,0.7,0.9]
 
 
     def __init__(self,key=0):
@@ -206,12 +206,13 @@ class BatteryParameters(object):
             self.rhoE_battery = self.battery0[1] #[Wh/kg]
             self.rhoV_battery = self.battery0[2] #[Wh/m3]
             self.rhoP_battery = self.battery0[3] #W/kg
-            self.eff_battery = self.battery0[4] #get source this is an assumption
+            self.dod_battery = self.battery0[4]
+            self.eff_battery = self.battery0[5] #get source this is an assumption
             self.rhoC_battery = self.rhoE_battery*self.cost_density # 100 dollars/kWh this is what tesla would like before 2020 so not an actual value, range is usual 150-125
 
     def getParameters(self, printParameters=False):
 
-        self.Parameters_battery = [self.Name_battery,self.rhoE_battery,self.rhoV_battery,self.rhoP_battery,self.rhoC_battery, self.eff_battery]
+        self.Parameters_battery = [self.Name_battery,self.rhoE_battery,self.rhoV_battery,self.rhoP_battery,self.dod_battery,self.rhoC_battery, self.eff_battery]
         if printParameters:
             print(
 
@@ -221,8 +222,9 @@ class BatteryParameters(object):
             + f'\n\tSpecific Energy of Battery: {self.Parameters_battery[1]} [Wh/kg]'
             + f'\n\tVolumetric Density of Battery: {self.Parameters_battery[2]} [Wh/m3]'
             + f'\n\tPower Density of Battery: {self.Parameters_battery[3]} [W/kg]'
-            + f'\n\tCost density of Battery: {self.Parameters_battery[4]} [$/kg]'
-            + f'\n\tEfficiency of Battery: {self.Parameters_battery[5]} [-]'
+            + f'\n\tDepth of Discharge of Battery: {self.Parameters_battery[4]} [-]'
+            + f'\n\tCost density of Battery: {self.Parameters_battery[5]} [$/kg]'
+            + f'\n\tEfficiency of Battery: {self.Parameters_battery[6]} [-]'
             + f'\nThe variables in the output array appear in this order in SI units.'
             )
         return self.Parameters_battery
@@ -279,9 +281,6 @@ class CabinParameters(object):
             )
         return self.Parameters_cabin
 
-
-
-
 class ConceptParameters(object):
 
     """
@@ -323,6 +322,7 @@ class ConceptParameters(object):
         self.propeller = PropellerParameters(key)
         self.battery = BatteryParameters(key)
         self.cabin = CabinParameters(key)
+        self.physics = PhysicalParameters()
 
     def getParameters(self,printParameters = False,printComponents=False):
 
@@ -394,14 +394,21 @@ class ConceptParameters(object):
         I_zz_payload = (2/3)*Mpayload*r2payload1256 + (1/3)*Mpayload*rpayloady**2 #Payload Contribution
         I_zz = I_default[2]+I_zz_engines+I_zz_payload #Total mass moment of inertia in z
 
-        I = np.array([I_xx,I_yy,I_zz]) #Array to store mass moments of inertia
+        self.I = np.array([I_xx,I_yy,I_zz]) #Array to store mass moments of inertia
 
         return I
+
+    def Thrust(self,n):
+        P_eng = np.arange(0,self.motor.P_max+1,self.motor.P_max/n).astype(np.float32) #Single motor power range
+        T_eng = ((np.pi/2)*self.propeller.D_prop**2*self.physics.rho0*(P_eng*self.motor.eff_motor*self.propeller.eff_prop)**2)**(1/3)
+        return T_eng,P_eng
+
+
 class PhysicalParameters(object):
 
     def __init__(self):
         self.rho0 = 1.225
         self.g = 9.80665
 
-battery = BatteryParameters(0)
-battery.getParameters(True)
+
+

@@ -6,12 +6,12 @@ concept = pm.ConceptParameters(0) #Concept
 physics = pm.PhysicalParameters() #Physical constants
 
 P_eng = np.arange(0,concept.motor.P_max+1,concept.motor.P_max/1000).astype(np.float32) #Single motor power range
-T_eng = ((np.pi/2)*concept.propeller.D_prop**2*physics.rho0*(P_eng*concept.motor.eff_motor)**2)**(1/3) #Single motor thrust range
+T_eng = ((np.pi/2)*concept.propeller.D_prop**2*physics.rho0*(P_eng*concept.motor.eff_motor*concept.propeller.eff_prop)**2)**(1/3) #Single motor thrust range
 
 
 #Concept Masses from initial sizing
-m_tot = concept.Mtot_concept + 3.5*concept.Mbat_concept
-m_bat = concept.Mbat_concept*4.5
+m_tot = concept.Mtot_concept
+m_bat = concept.Mbat_concept
 m_pay = concept.Mpay_concept
 
 #Thurst over weight ration range
@@ -29,5 +29,5 @@ t_ops = E_tot/(concept.motor.N_motor*P_ops)
 
 isPrint = True
 if isPrint:
-    print('\nOperation time [min]: ', t_ops/60 ,'\nOperational Power [kW]: ' , 8*P_ops/m_bat , '\nOperational Thrust-over-Weight ratio [-]:' , TW_ops, '\nHover efficiency [kg/W]: ', Hover_efficiency)
+    print('\nOperation time [min]: ', t_ops/60 ,'\nOperational Power [kW]: ' , P_ops/1000 , '\nOperational Thrust-over-Weight ratio [-]:' , TW_ops, '\nHover efficiency [kg/W]: ', Hover_efficiency)
 
