@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 '''
 Introduction to Parameters
 This script contains the individual components of the design
@@ -394,7 +393,7 @@ class ConceptParameters(object):
         I_zz_payload = (2/3)*Mpayload*r2payload1256 + (1/3)*Mpayload*rpayloady**2 #Payload Contribution
         I_zz = I_default[2]+I_zz_engines+I_zz_payload #Total mass moment of inertia in z
 
-        self.I = np.array([I_xx,I_yy,I_zz]) #Array to store mass moments of inertia
+        I = np.array([I_xx,I_yy,I_zz]) #Array to store mass moments of inertia
 
         return I
 
