@@ -17,7 +17,7 @@ concept = pm.ConceptParameters(0)
 
 
 #Operational times (arbitrary)
-n_cyc = 1
+n_cyc = 1.
 t_asc_req = 60*n_cyc #time taken to ascend in s
 t_des_req = 60*n_cyc #time taken to descend in s
 t_hover_req = 11*60*n_cyc #time taken to hover in s
@@ -144,12 +144,25 @@ for i in range(len(t)):
 
 state = np.array(state)
 T_req_eng = concept.Mtot_concept*(state[:,0]+concept.physics.g)/concept.motor.N_motor
-P_req_eng = np.sqrt((2*T_req_eng**3)/(concept.physics.rho0*np.pi*concept.propeller.D_prop**2))/(concept.propeller.eff_prop*concept.motor.eff_motor)
+P_req_eng = np.sqrt((2*T_req_eng**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/concept.motor.eff_motor
 
-E = np.sum((concept.motor.N_motor*P_req_eng)*dt)/concept.battery.eff_battery/concept.battery.dod_battery
-mbat = E/(concept.battery.rhoE_battery*3600)
-print(np.max(P_req_eng*concept.motor.N_motor)/concept.Mbat_concept)
-print(mbat,concept.Mbat_concept/0.7)
+
+E_tot = np.sum((concept.motor.N_motor*P_req_eng)*dt)/concept.battery.eff_battery/concept.battery.dod_battery
+P_max = np.max(P_req_eng)*concept.motor.N_motor
+rhoE_req = E_tot/(3600*concept.Mbat_concept)
+rhoP_req = P_max/concept.Mbat_concept
+print('Energy required for a cycle: ', E_tot/1e6)
+print('Energy on board with current battery and battery mass: ', concept.Mbat_concept*concept.battery.rhoE_battery*3600/1e6/concept.battery.dod_battery)
+print('Energy density required: ', rhoE_req)
+print('Energy density avaialble: ', concept.battery.rhoE_battery)
+print('Power density required: ', rhoP_req)
+print('Power density avaialble: ', concept.battery.rhoP_battery)
+print('New Battery Mass required:')
+
+# rhoE_req = E/(concept.Mbat_concept*3600)
+# mbat = E/(concept.battery.rhoE_battery*3600)
+# print(np.max(P_req_eng*concept.motor.N_motor)/concept.Mbat_concept)
+# print(rhoE_req,E/(rhoE_req*3600),concept.Mbat_concept)
 
 
 # plt.subplot(3,2,1)

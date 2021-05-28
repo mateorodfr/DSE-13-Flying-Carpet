@@ -6,6 +6,7 @@
     "python.linting.pylamaArgs": [
         "--ignore E501",
         "--ignore E303"
-      ]
+      ],
+      "python.pythonPath": "C:\\ProgramData\\Anaconda3\\envs\\controlenv\\python.exe"
 
 }
