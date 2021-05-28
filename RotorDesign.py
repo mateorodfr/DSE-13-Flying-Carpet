@@ -1,5 +1,6 @@
 from xfoil import XFoil
 from xfoil.model import Airfoil
+from xfoil.test import naca0012
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -16,6 +17,7 @@ def read_airfoil(filename):
         return Airfoil(x_arr, y_arr)
     else:
         raise ValueError("airfoil file contains NaN")
+
 
 def compare_airfoils():
     path_str = r"airfoils/all_airfoils/coord_seligFmt"
@@ -36,11 +38,32 @@ def compare_airfoils():
     plt.show()
 
 
-# TODO build software to analyse airfoils in rotor design
+def analyse_airfoil(airfoilname, astart, afinal, astep):
+    path_str = r"airfoils/all_airfoils/coord_seligFmt"
+    foil = read_airfoil(os.path.join(path_str, airfoilname + '.dat'))
+    xf.airfoil = foil
+    xf.Re = 1e6
+    xf.max_iter = 40
+    a, cl, cd, cm, cp = xf.aseq(astart, afinal, astep)
+    return a, cl, cd, cm, cp
+
+def export_aerodata(airfoilname):
+    pass # TODO
+
+
+class Airfoildata:
+    """Contains airfoil data and methods to export"""
+    def __init__(self, foilname):
+        path_str = r"airfoils/all_airfoils/coord_seligFmt"
+        self.foilname = foilname
+        self.filepath = os.path.join(path_str, self.foilname + '.dat')
+
+    def ReadGeometry(self):
+        pass # TODO
 
 if __name__ == "__main__":
     # select airfoils from database
-    foil = read_airfoil(r"airfoils/naca23018.csv")
+    foil = naca0012# read_airfoil(r"airfoils/naca23018.csv")
     xf.airfoil = foil
     xf.Re = 1e6
     xf.max_iter = 40
@@ -49,8 +72,8 @@ if __name__ == "__main__":
     # plt.show()
 
     # TODO make this a function
-    np.save("airfoils/naca23018aero/AoA.npy", a)
-    np.save("airfoils/naca23018aero/cl.npy", cl)
-    np.save("airfoils/naca23018aero/cd.npy", cd)
-    np.save("airfoils/naca23018aero/cm.npy", cm)
-    np.save("airfoils/naca23018aero/cp.npy", cp)
+    np.save("airfoils/naca0012aero/AoA.npy", a)
+    np.save("airfoils/naca0012aero/cl.npy", cl)
+    np.save("airfoils/naca0012aero/cd.npy", cd)
+    np.save("airfoils/naca0012aero/cm.npy", cm)
+    np.save("airfoils/naca0012aero/cp.npy", cp)
