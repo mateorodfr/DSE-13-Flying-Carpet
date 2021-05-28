@@ -514,9 +514,11 @@ print(theta_x * 57.3)
 print(omega_y * 57.3)
 print(theta_y * 57.3)
 
-#print(T_level)
+P_max = max(P_eng_carry * 4 + P_eng_rev * 2, P_init * concept.motor.N_motor)
+print(P_max/concept.Mbat_concept)
+
 t_theta = np.arange(0, t_I + 3 *dt, dt)
-#print(t_theta)
+
 plt.subplot(5, 2, 1)
 plt.plot(t_theta, np.array(theta_x_lst)*57.3)
 plt.title('Roll of the craft around x-axis')
