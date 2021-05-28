@@ -52,14 +52,20 @@ D = np.zeros((nOutput,nInput))
 # C[1,1] = 1
 # C[2,2] = 1
 
-#U = [yaw torque,pitch torque, roll torque, T-mg]
+#U = [T-mg,pitch torque, roll torque,yaw torque]
 
+az = np.loadtxt(r'Data/az.txt')
+Mx = np.loadtxt(r'Data/Mx.txt')
+My = np.loadtxt(r'Data/My.txt')
 
 ss = ctr.StateSpace(A,B,C,D)
-T = np.arange(0,2.5,0.001)
+T = np.arange(0,3,0.01)
 U = np.zeros((len(T),4))
-U[:,2] = -(1627+4438)/2
-U[:,3] = -0.3*concept.physics.g*concept.Mtot_concept #T-mg
+U[:len(Mx),1] = -Mx
+U[:len(My),2] = My
+U[:len(az),0] = az*concept.Mtot_concept #T-mg
+#U[len(az):int(np.round(len(az)*39.75)),0] = az[-1]*concept.Mtot_concept
+
 
 # U[len(U)//17:len(U)//16,2] = -10
 # U[len(U)//10:len(U)//8,2] = 3
@@ -69,22 +75,38 @@ y,t,x = sim.lsim(ss,U,T)
 
 
 # Plotting functions Symmetric
-plt.plot(t,U)
-plt.show()
-fig1, ax1 = plt.subplots(3, 2, figsize=(15, 10))
+fig,ax = plt.subplots(1,1,figsize=(5,10))
+rx = ax.plot(t,U)
+fig.suptitle('OEI Octorotor control input ')
+ax.legend(iter(rx), ('Force in z','Pitch Torque','Roll Torque','Yaw Torque'))
+
+fig1, ax1 = plt.subplots(3, 2, figsize=(14, 10))
 ax1 = ax1.ravel()
-ax1[0].plot(t, y[:, 0]*57.3)
-ax1[0].title.set_text(r"Roll angle $\phi$")
-ax1[1].plot(t, y[:, 1]*57.3)
-ax1[1].title.set_text(r"Pitch angle $\theta$")
-ax1[2].plot(t, y[:, 2]*57.3)
-ax1[2].title.set_text(r"Yaw angle $\chi$")
-ax1[3].plot(T, y[:,3])
-ax1[3].title.set_text(r"X")
-ax1[4].plot(T, y[:,4])
-ax1[4].title.set_text(r"Y")
-ax1[5].plot(T, y[:,5])
-ax1[5].title.set_text(r"Z")
+fig1.suptitle('OEI Octorotor Control Response')
+ax1[0].plot(t, y[:, 3]*57.3)
+ax1[0].title.set_text(r"Roll angle $\phi$ over time")
+ax1[0].set_ylabel(r'$\phi$ [deg]')
+ax1[0].set_xlabel(r't [s]')
+ax1[1].plot(t, y[:, 4]*57.3)
+ax1[1].title.set_text(r"Pitch angle $\theta$ over time")
+ax1[1].set_ylabel(r'$\theta$ [deg]')
+ax1[1].set_xlabel(r't [s]')
+ax1[2].plot(t, y[:, 5]*57.3)
+ax1[2].title.set_text(r"Yaw angle $\chi$ over time")
+ax1[2].set_ylabel(r'$\chi$ [deg]')
+ax1[2].set_xlabel(r't [s]')
+ax1[3].plot(T, y[:,0])
+ax1[3].title.set_text(r"X position over time")
+ax1[3].set_ylabel(r'X [m]')
+ax1[3].set_xlabel(r't [s]')
+ax1[4].plot(T, y[:,1])
+ax1[4].title.set_text(r"Y position over time [m]")
+ax1[4].set_ylabel(r'Y [m]')
+ax1[4].set_xlabel(r't [s]')
+ax1[5].plot(T, y[:,2])
+ax1[5].title.set_text(r"Z position over time [m]")
+ax1[5].set_ylabel(r'Z [m]')
+ax1[5].set_xlabel(r't [s]')
 
 # ax1[6].plot(T, U)
 # ax1[6].title.set_text(r"Input Function")

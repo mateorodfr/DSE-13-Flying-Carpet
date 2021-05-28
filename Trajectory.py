@@ -252,6 +252,8 @@ V_x_lst = []
 V_y_lst = []
 V_z_lst = []
 a_z_lst = []
+M_x_lst = []
+M_y_lst = []
 
 
 while t_I < t_response:
@@ -288,6 +290,8 @@ while t_I < t_response:
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -333,6 +337,8 @@ while t_I < t_reverse + t_response:
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -374,6 +380,8 @@ while t_I < t_reverse + t_response + t_const_motion:
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -412,6 +420,8 @@ while t_I < t_reverse + t_response + t_stop_engine + t_const_motion:
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -450,6 +460,8 @@ while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion:
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -487,6 +499,8 @@ while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion + 
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -525,6 +539,8 @@ while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion + 
     V_y_lst.append(V_y)
     V_z_lst.append(V_z)
     a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
 
     t_I += dt
 
@@ -541,6 +557,10 @@ print(P_max/concept.Mbat_concept)
 print(((t_hover_req + t_asc_req + t_des_req) * P_init*concept.motor.N_motor)/concept.Mbat_concept/3600)
 
 t_theta = np.arange(0, t_I + 3 *dt, dt)
+
+np.savetxt(r'Data/az.txt',a_z_lst)
+np.savetxt(r'Data/Mx.txt',M_x_lst)
+np.savetxt(r'Data/My.txt',M_y_lst)
 
 plt.subplot(5, 2, 1)
 plt.plot(t_theta, np.array(theta_x_lst)*57.3)
@@ -596,5 +616,13 @@ plt.title('Acc in z-axis')
 plt.xlabel('Time [s]')
 plt.ylabel('Acc [m/s^2]')
 
+plt.subplot(5, 2, 10)
+plt.plot(t_theta, np.array(M_x_lst))
+plt.title('Moment aroudn x')
+plt.xlabel('Time [s]')
+plt.ylabel('Torque [Nm]')
+
 plt.show()
+
+
 
