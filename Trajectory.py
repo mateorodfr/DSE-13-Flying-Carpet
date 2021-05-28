@@ -20,7 +20,7 @@ concept = pm.ConceptParameters(0)
 n_cyc = 1
 t_asc_req = 60*n_cyc #time taken to ascend in s
 t_des_req = 60*n_cyc #time taken to descend in s
-t_hover_req = 11*60*n_cyc #time taken to hover in s
+t_hover_req = 445.5*n_cyc #time taken to hover in s
 t_mission_req = (t_asc_req + t_hover_req + t_des_req) #total mission time
 
 #
@@ -203,7 +203,7 @@ I_tot = I_prop+I_mot
 T_init = T_req_eng[len(T_req_eng) // 2]
 T = T_init
 T_eng_op = T_init
-T_eng_carry = 2 * T_init
+T_eng_carry = 1.6 * T_init
 T_eng_rev = 0.4 * T_init        # 0.4 as initial
 T_eng_level = 0.1 * T_init
 
@@ -509,13 +509,17 @@ while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion + 
 
     t_I += dt
 
+
+
 print(omega_x * 57.3)
 print(theta_x * 57.3)
 print(omega_y * 57.3)
 print(theta_y * 57.3)
+print(a_z_init/concept.physics.g)
 
 P_max = max(P_eng_carry * 4 + P_eng_rev * 2, P_init * concept.motor.N_motor)
 print(P_max/concept.Mbat_concept)
+print(((t_hover_req + t_asc_req + t_des_req) * P_init*concept.motor.N_motor)/concept.Mbat_concept/3600)
 
 t_theta = np.arange(0, t_I + 3 *dt, dt)
 
