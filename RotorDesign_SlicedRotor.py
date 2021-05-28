@@ -1,18 +1,23 @@
 import numpy as np
 
-AoA = np.load(r"airfoils\naca2412aero\AoA.npy")
-Cd  = np.load(r"airfoils\naca2412aero\cd.npy")
-Cl  = np.load(r"airfoils\naca2412aero\cl.npy")
-Cm  = np.load(r"airfoils\naca2412aero\cm.npy")
-Cp  = np.load(r"airfoils\naca2412aero\cp.npy")
+AoA = np.load(r"airfoils\naca0012aero\AoA.npy")
+Cd  = np.load(r"airfoils\naca0012aero\cd.npy")
+Cl  = np.load(r"airfoils\naca0012aero\cl.npy")
+Cm  = np.load(r"airfoils\naca0012aero\cm.npy")
+Cp  = np.load(r"airfoils\naca0012aero\cp.npy")
+
+ClA = np.vstack((Cl, AoA)).T
+print(Cl[0])
 
 class Blade:
-    def __init__(self, length: float):
+    def __init__(self, length: float, Nslice: int = 1):
         self.length = length
-        self.chord  = self.length * .1
-        self.t      = self.chord  * .1
+        self.Nslice = Nslice
+    
+    def setSliceNum(self, Nslice: int):
+        self.Nslice = Nslice
 
-class BladeSlice:
+class BladeSlice(object):
     def __init__(self, local_r: float, local_dr: float):
         self.r  = local_r
         self.dr = local_dr
@@ -22,6 +27,7 @@ class BladeSlice:
         v = omega * r
         '''
         return ang_vel*self.r
+    
     def getLocalCl(self, AoA) -> float:
         '''
         Cl depends on the angle of attack
