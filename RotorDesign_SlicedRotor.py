@@ -3,11 +3,11 @@ import numpy as np
 
 
 def main():
-    AoA = np.load(r"airfoils\naca0012aero\AoA.npy")
-    Cd  = np.load(r"airfoils\naca0012aero\cd.npy")
-    Cl  = np.load(r"airfoils\naca0012aero\cl.npy")
-    Cm  = np.load(r"airfoils\naca0012aero\cm.npy")
-    Cp  = np.load(r"airfoils\naca0012aero\cp.npy")
+    AoA = np.load(r"airfoils\naca633418aero\AoA.npy")
+    Cd  = np.load(r"airfoils\naca633418aero\cd.npy")
+    Cl  = np.load(r"airfoils\naca633418aero\cl.npy")
+    Cm  = np.load(r"airfoils\naca633418aero\cm.npy")
+    Cp  = np.load(r"airfoils\naca633418aero\cp.npy")
 
     ClA = np.vstack((Cl, AoA)).T
     CdA = np.vstack((Cd, AoA)).T
@@ -25,7 +25,7 @@ def main():
             self.genSlices()
         
         def genSlices(self):
-            self.Slices = [BladeSlice(self.span/self.Nslice, (self.span/self.Nslice)*(N-.5), 15) for N in range(1, self.Nslice+1)]
+            self.Slices = [BladeSlice(self.span/self.Nslice, (self.span/self.Nslice)*(N-.5), 13) for N in range(1, self.Nslice+1)]
 
         def getLift(self) -> float:
             return np.sum([sl.getLocalLift() for sl in self.Slices])
@@ -38,7 +38,7 @@ def main():
             self.chord = .25*.5
             self.pitch = local_pitch
 
-            self.ang_vel = 130 # HARD CODED, has to be adapted function
+            self.ang_vel = 87.5 # HARD CODED, has to be adapted function
 
             self.dL    = self.getLocalCl()
 
@@ -72,7 +72,7 @@ def main():
             
             return Cl * .5 * rho * V * V * S
     
-    ROTOR_BLADE = Blade(2.5/2, 100)
+    ROTOR_BLADE = Blade(2.5/2, 10)
     NN = 0
     print(f"\n\n\nLocal v of slice {NN} equals \t {ROTOR_BLADE.Slices[NN].getLocalVel()} [m/s]"
          +f"\nLocal Cl of slice {NN} equals \t {ROTOR_BLADE.Slices[NN].getLocalCl()} [-]"
@@ -80,7 +80,7 @@ def main():
          +f"\nLocal T of slice {NN} equals \t {ROTOR_BLADE.Slices[NN].getLocalLift()} [N]")
 
              
-    print(f"\nMax Weight equals {ROTOR_BLADE.Lift*4*4/9.80665} [kg]\n\n\n")
+    print(f"\nMax Weight equals {ROTOR_BLADE.Lift*8*4/9.80665} [kg]\n\n\n")
 
 
 
