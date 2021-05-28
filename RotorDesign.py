@@ -76,7 +76,13 @@ class Airfoildata:
 
     def getThicknessToCordRatio(self):
         """compute t/c from the geometry"""
-        pass # TODO
+        ncoord = len(self.y_geom)
+        if ncoord % 2 == 0:
+            top, bottom = self.y_geom[:ncoord//2], self.y_geom[ncoord//2::]
+        else:
+            top, bottom = self.y_geom[:ncoord//2 + 1], self.y_geom[ncoord//2::]
+        thickness = top - bottom
+        self.ttocratio, self.maxthickloc = np.max(thickness), self.x_geom[np.argmax(thickness)]
 
     def Analyse(self, astart, afinal, astep, Re=1e6, max_iter=40):
         """Run the XFoil script for this airfoil"""
@@ -92,6 +98,11 @@ class Airfoildata:
         self.cd = np.load(os.path.join(data_dir, "cd.npy"))
         self.cm = np.load(os.path.join(data_dir, "cm.npy"))
         self.cp = np.load(os.path.join(data_dir, "cp.npy"))
+
+    def getLiftSlope(self):
+        """Lift slope based on linear regime AoA [-6, 6]"""
+        idx_arr = np.where(np.abs(self.a) < 6)
+        self.cla = np.average(np.gradient(self.cl[idx_arr], self.a[idx_arr]))
 
     def PlotAeroData(self):
         """Plot the damn thing"""
@@ -131,7 +142,10 @@ class Airfoildata:
 
 
 if __name__ == "__main__":
-    airfoil = Airfoildata("naca633418")
-    airfoil.ReadGeometry()
-    airfoil.Analyse(1, 20, 2)
-    airfoil.ExportData()
+    airfoil = Airfoildata("naca642215")
+    airfoil.ReadGeometry(plot=True)
+    airfoil.getThicknessToCordRatio()
+    airfoil.Analyse(-20, 20, 0.5)
+    airfoil.getLiftSlope()
+    print(airfoil.ttocratio, airfoil.maxthickloc, airfoil.cla)
+    # airfoil.PlotAeroData()
