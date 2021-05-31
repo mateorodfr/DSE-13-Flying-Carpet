@@ -59,9 +59,9 @@ def internal_loading_beam(L,FSX,FSY,FSZ,MSX,MSY,MSZ,plot=False):
     MomentY = MSY(zz)
     TorqueZ = MSZ(zz)
 
-    if plot == True:
+    if plot:
         plt.subplot(231)
-        plt.plot(zz,Normalz)
+        plt.plot(zz,NormalZ)
         plt.title("NormalZ")
         plt.subplot(232)
         plt.plot(zz,ShearY)
@@ -80,9 +80,8 @@ def internal_loading_beam(L,FSX,FSY,FSZ,MSX,MSY,MSZ,plot=False):
         plt.title("TorqueZ")
         plt.show()
         
-        return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
-    elif plot == False:
-        return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
+    return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
+
 
 
 
