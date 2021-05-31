@@ -38,16 +38,6 @@ def compare_airfoils():
     plt.show()
 
 
-def analyse_airfoil(airfoilname, astart, afinal, astep):
-    path_str = r"airfoils/all_airfoils/coord_seligFmt"
-    foil = read_airfoil(os.path.join(path_str, airfoilname + '.dat'))
-    xf.airfoil = foil
-    xf.Re = 1e6
-    xf.max_iter = 40
-    a, cl, cd, cm, cp = xf.aseq(astart, afinal, astep)
-    return a, cl, cd, cm, cp
-
-
 class Airfoildata:
     """Contains airfoil data and methods to export"""
 
@@ -87,8 +77,16 @@ class Airfoildata:
     def Analyse(self, astart, afinal, astep, Re=1e6, max_iter=40):
         """Run the XFoil script for this airfoil"""
         xf.airfoil = Airfoil(self.x_geom, self.y_geom)
+        xf.repanel()
         xf.Re, xf.max_iter = Re, max_iter
-        self.a, self.cl, self.cd, self.cm, self.cp = xf.aseq(astart, afinal, astep)
+        if astart < 0: # apparently xfoil runs better if you start or end at 0 deg AoA
+            arr1 = xf.aseq(astart, 0, astep)
+            arr2 = xf.aseq(0, afinal, astep)
+            a, cl, cd, cm, cp = (np.concatenate((arr1[i], arr2[i])) for i in range(5))
+        else:
+            a, cl, cd, cm, cp = xf.aseq(astart, afinal, astep)
+
+        self.a, self.cl, self.cd, self.cm, self.cp = a, cl, cd, cm, cp
 
     def getFromFile(self):
         """construct airfoil data from binary files"""
@@ -142,10 +140,10 @@ class Airfoildata:
 
 
 if __name__ == "__main__":
-    airfoil = Airfoildata("naca642215")
+    airfoil = Airfoildata("n63412")
     airfoil.ReadGeometry(plot=True)
     airfoil.getThicknessToCordRatio()
-    airfoil.Analyse(-20, 20, 0.5)
+    airfoil.Analyse(-10, 20, 0.5)
     airfoil.getLiftSlope()
     print(airfoil.ttocratio, airfoil.maxthickloc, airfoil.cla)
-    # airfoil.PlotAeroData()
+    airfoil.PlotAeroData()
