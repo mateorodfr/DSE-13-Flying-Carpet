@@ -57,19 +57,21 @@ Mx = np.loadtxt(r'Data/Mx.txt')
 My = np.loadtxt(r'Data/My.txt')
 
 ss = ctr.StateSpace(A,B,C,D)
-
+Ka = np.zeros((nInput,nOutput))
+Ka[0,2] = -0.5
+Ka[-1,-1] = 100
+print(Ka)
 notDone = True
 i = 0
 nBest = -1
-bestK = 0
-imax = 2e5
-while notDone:
+bestK = K
+imax = -1#9e9
+nGood = 0
+
+while nGood != 12 and i  < imax:
     i+=1
 
-    K = np.matrix(np.random.uniform(-1,1,(nInput,nOutput)))
-
-
-
+    Ka[:,:] = np.random.uniform(-1,1,(nInput,nOutput))*1000
 
     # kz = 0.0
     # K[0,2] = 0.
@@ -99,8 +101,8 @@ while notDone:
 
 
     # ss = ctr.minreal(ss)
-    ss = ss.feedback(K)
-    poles = ss.pole()
+    ssi = ss.feedback(Ka)
+    poles = ssi.pole()
     nGood = 0
 
     for pole in poles:
@@ -111,13 +113,10 @@ while notDone:
 
     if nGood > nBest:
         nBest = nGood
-        bestK = K
-    if nGood == 12 or i  > imax:
-        notDone = False
-        ctr.pzmap(ss)
+        bestK = Ka
+        np.savetxt(r'Data/bestK.txt',bestK)
     if i%5000 ==0:
-        print(nGood,nBest,i)
-        print(np.round(bestK,2))
+        print(nBest,i)
 
 
 
@@ -125,9 +124,12 @@ while notDone:
 # ss = ctr.minreal(ss)
 
 
-
-
+bestK = np.loadtxt(r'Data/bestK.txt')
 ss = ss.feedback(bestK)
+ctr.pzmap(ss)
+tf = ctr.tf(ss)
+
+
 # ss = ss.minreal()
 T = np.arange(0,2500,0.01)
 U = np.zeros((len(T),4))
