@@ -195,7 +195,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 260, 683000,340,0.7,0.9]
+    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.85, 0.2, 0.95]
 
 
     def __init__(self,key=0):
@@ -208,6 +208,9 @@ class BatteryParameters(object):
             self.dod_battery = self.battery0[4]
             self.eff_battery = self.battery0[5] #get source this is an assumption
             self.rhoC_battery = self.rhoE_battery*self.cost_density # 100 dollars/kWh this is what tesla would like before 2020 so not an actual value, range is usual 150-125
+            self.eff_inverter = self.battery0[6]
+            self.loss_factor = self.battery0[7]
+            self.degradation = self.battery0[8]
 
     def getParameters(self, printParameters=False):
 
@@ -298,6 +301,7 @@ class ConceptParameters(object):
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
     concept0 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
+    concept1 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
 
@@ -399,7 +403,7 @@ class ConceptParameters(object):
 
     def Thrust(self,n):
         P_eng = np.arange(0,self.motor.P_max+1,self.motor.P_max/n).astype(np.float32) #Single motor power range
-        T_eng = ((np.pi/2)*self.propeller.D_prop**2*self.physics.rho0*(P_eng*self.motor.eff_motor*self.propeller.eff_prop)**2)**(1/3)
+        T_eng = ((np.pi/2)*self.propeller.D_prop**2*self.physics.rho0*(P_eng*self.propeller.eff_prop)**2)**(1/3)/self.motor.eff_motor
         return T_eng,P_eng
 
 
