@@ -195,7 +195,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.85, 0.2, 0.95]
+    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 20]
 
 
     def __init__(self,key=0):
@@ -211,6 +211,7 @@ class BatteryParameters(object):
             self.eff_inverter = self.battery0[6]
             self.loss_factor = self.battery0[7]
             self.degradation = self.battery0[8]
+            self.inverter_mass = self.battery0[9]
 
     def getParameters(self, printParameters=False):
 
@@ -300,7 +301,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
+    concept0 = ['Pickup & Release', 1895.20, 600 ,428.93, 12.3, 0.325]
     concept1 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
