@@ -202,13 +202,13 @@ while abs(1-M_tot1/M_tot0) > 0.01:
     M_payload= concept.Mpay_concept
     M_struct_coeff= 1.2
 
-    M_tot1= (Mbat + M_motor + M_propeller +M_payload)*M_struct_coeff
+    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass)*M_struct_coeff
     iterations +=1
 
 print("Final mass",M_tot1, "After", iterations, "Iterations")
 print("Battery mass",Mbat)
 print("---------------")
-print("Required power", np.max(P_req_eng)*concept.motor.N_motor )
+print("Required power", np.max(P_req_eng)*concept.motor.N_motor)
 print("OEI power", np.max(P_req_eng_OEI))
 print("Required power density",np.max(P_req_eng*concept.motor.N_motor)/Mbat, P_req_eng_OEI/Mbat)
 print("Power density battery", concept.battery.rhoP_battery)
