@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pprint
+# import matplotlib.pyplot as plt
 
 # def is_all_n(s):
 #     """Checks if a string is a float"""
@@ -72,7 +73,7 @@ def contains_NaN(s):
     return newa
 
 for file_0 in allfiles:
-    with open(r"APC_Propellers\PERFILES_WEB\PERFILES2\PER3_5x4R-RH.dat", "r") as f:
+    with open(r"APC_Propellers\PERFILES_WEB\PERFILES2\PER3_5x3E.dat", "r") as f:
         lines = f.readlines()[1:-1]
         content = [c.strip() for c in lines]
 
@@ -90,6 +91,10 @@ for file_0 in allfiles:
         chunks = len(content[N-1:])//STEP + 1
         # pp.pprint(content)
         final3D = np.asarray([content[index*STEP:(index+1)*STEP] for index in range(chunks)])[:, 5:-2]
+        try:
+            final3D = np.array(np.char.split(final3D).tolist(), dtype=float)
+        except ValueError:
+            pass # TODO implement fix for NaN values
     break
 
-pp.pprint(final3D[0][0])
+pp.pprint(final3D[0])
