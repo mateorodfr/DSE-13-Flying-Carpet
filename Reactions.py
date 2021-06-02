@@ -85,7 +85,8 @@ class Reactions:
         Returns the forces and moments acting on hinge h1
         """
         # Assume thrust always acts along z-axis : rotation of motor assumed negligible
-        # F_h1_x and F_h1_y are therefore also zero
+        # F_h1_x and F_h1_y are therefore neglected
+        # Contribution of thrust force to M_h1_z is therefore also neglected
         F_h1_z = self.p1
         M_h1_x = self.p1 * self.l_a1 * sin(self.th1)
         M_h1_y = - self.p1 * self.l_a1 * cos(self.th1)
@@ -98,6 +99,7 @@ class Reactions:
         """
         # Assume thrust always acts along z-axis : rotation of motor assumed negligible
         # F_h2_x and F_h2_y are therefore also zero
+        # Contribution of thrust force to M_h2_z is therefore also neglected
         F_h2_z = self.p2
         M_h2_x = self.p2 * self.l_a2 * sin(self.th2)
         M_h2_y = - self.p2 * self.l_a2 * cos(self.th2)
@@ -110,6 +112,7 @@ class Reactions:
         """
         # Assume thrust always acts along z-axis : rotation of motor assumed negligible
         # F_h3_x and F_h3_y are therefore also zero
+        # Contribution of thrust force to M_h3_z is therefore also neglected
         F_h3_z = self.p3
         M_h3_x = self.p3 * self.l_a3 * sin(self.th3)
         M_h3_y = - self.p3 * self.l_a3 * cos(self.th3)
@@ -122,6 +125,7 @@ class Reactions:
         """
         # Assume thrust always acts along z-axis : rotation of motor assumed negligible
         # F_h4_x and F_h4_y are therefore also zero
+        # Contribution of thrust force to M_h4_z is therefore also neglected
         F_h4_z = self.p4
         M_h4_x = self.p4 * self.l_a4 * sin(self.th4)
         M_h4_y = - self.p4 * self.l_a4 * cos(self.th4)
