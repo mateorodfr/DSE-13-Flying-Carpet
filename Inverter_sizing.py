@@ -57,7 +57,7 @@ Q_wire_max = Inv_size * t_mission_req
 c = 385
 dT = Q_wire_max / c / np.max(m_wire)
 
-print(Inv_size)
+print(I_line_inv)
 
 
 
