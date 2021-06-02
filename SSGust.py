@@ -64,31 +64,39 @@ D = np.zeros((nOutput,nInput))
 
 K = np.zeros((nInput,nOutput))
 K_z_z = 0
+
 K_tx_y = 10
 K_tx_ydot = 100
 K_tx_phi = 4000
 K_tx_phidot = 5000
 
+K_ty_x = -10
+K_ty_xdot = -100
+K_ty_theta = 4000
+K_ty_thetadot = 5000
+
+
 K[0,2] = K_z_z
-K[4,8] = K_tx_phidot
-K[4,3] = K_tx_phi
-K[4,7] = K_tx_ydot
-K[4,1] = K_tx_y
 
 K[4,8] = K_tx_phidot
 K[4,3] = K_tx_phi
 K[4,7] = K_tx_ydot
 K[4,1] = K_tx_y
+
+K[5,9] = K_ty_thetadot
+K[5,4] = K_ty_theta
+K[5,6] = K_ty_xdot
+K[5,0] = K_ty_x
 
 ss = ctr.StateSpace(A,B,C,D)
 ss = ss.feedback(K)
 
-dt = 0.01
-T = np.arange(0,200+dt,dt)
+dt = 0.1
+T = np.arange(0,2000+dt,dt)
 U = np.zeros((len(T), nInput))
-# U[:,7] = np.append([100*(np.sin(2*np.pi - t/250)) for t in range(5000)] , np.zeros(len(T)-5000))
-# U[:,7] = np.append([2*np.pi - t**2 /1e5 for t in range(3000)] , np.zeros(len(T)-3000))
-U[len(T)//8:len(T)//7,7] = 100
+U[:,8] = np.append([100*(np.sin(2*np.pi - t/250)) for t in range(5000)] , np.zeros(len(T)-5000))
+U[:,5] = np.append([2*np.pi - t**2 /1e5 for t in range(3000)] , np.zeros(len(T)-3000))
+# U[len(T)//8:len(T)//7,8] = 100
 # U[:,4] = [10*np.cos(np.pi+ t) for t in T]
 y,t,x = sim.lsim(ss,U,T)
 
