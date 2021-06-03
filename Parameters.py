@@ -315,6 +315,7 @@ class ConceptParameters(object):
             self.Vbat_concept = self.concept0[5]
             self.M_LV_bat = self.concept0[6]
 
+
         if key == 1:
             self.Name_concept = self.concept1[0]
             self.Mtot_concept = self.concept1[1]

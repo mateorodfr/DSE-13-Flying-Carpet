@@ -193,7 +193,6 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     #     Mbat = P_req_eng_OEI / concept.battery.rhoP_battery
 
 
-
     M_tot0= M_tot1
 
 
