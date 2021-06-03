@@ -117,5 +117,6 @@ print(eff_buck_9)
 M_LV_bat = E_consumed / concept.battery.rhoE_battery / concept.battery.dod_battery / concept.battery.eff_battery / concept.battery.degradation / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
 M_tot = M_LV_bat + M_comp
 print(P_cons/M_LV_bat)
+
 print(M_tot)
 
