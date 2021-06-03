@@ -223,12 +223,14 @@ T_init = T_req_eng[len(T_req_eng) // 2]
 T = T_init
 T_eng_op = T_init
 T_eng_carry = 1.6 * T_init
-T_eng_rev = 0.4 * T_init        # 0.4 as initial
-T_eng_level = 0.1 * T_init
+T_eng_rev = 0.5 * T_init        # 0.4 as initial
+T_eng_level = 0.25 * T_init
+T_eng_final = 0.1 * T_init
 
 P_init = P_req_eng[len(P_req_eng)//2]
 P_eng_rev = np.sqrt((2*T_eng_rev**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
 P_eng_level = np.sqrt((2*T_eng_level**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
+P_eng_final = np.sqrt((2*T_eng_final**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
 P_eng_carry = np.sqrt((2*T_eng_carry**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
 
 t_response = 0.2    #s
@@ -237,8 +239,9 @@ t_stop_engine = (P_eng_rev) / concept.motor.Torque **2 * I_tot #s
 t_level = (P_eng_level) / concept.motor.Torque **2 * I_tot #s
 t_stop_engine_end = (P_eng_level) / concept.motor.Torque **2 * I_tot #s
 t_carry = (P_eng_carry) / concept.motor.Torque **2 * I_tot - P_init / concept.motor.Torque **2 * I_tot #s
-t_const_motion = 0.745    # s
-t_level_const = 0.98   # s
+t_const_motion = 0.95    # s
+t_level_const = 1.615  # s
+t_final = 1.425
 
 Op_init = 0.8
 Op = Op_init
@@ -299,7 +302,7 @@ while t_I < t_response:
 Op_1 = Op
 t_I = t_response
 
-print(t_reverse, t_carry)
+#print(t_reverse, t_carry)
 while t_I < t_reverse + t_response:
     Op -= Op_1 / t_reverse * dt
     T -= ((T_init + T_eng_rev) / t_reverse) * dt
@@ -344,7 +347,7 @@ while t_I < t_reverse + t_response:
 
 t_I = t_reverse + t_response
 
-print("T", T)
+#print("T", T)
 while t_I < t_reverse + t_response + t_const_motion:
     M_x_init = T * 2 * (concept.cabin.W_cabin/2 + concept.propeller.D_prop/2)
     alpha_x_init = M_x_init / I_all[1]
@@ -545,18 +548,59 @@ while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion + 
     t_I += dt
 
 
+t_I = t_reverse + t_response + t_stop_engine + t_level + t_const_motion + t_level_const + t_stop_engine_end
+while t_I < t_reverse + t_response + t_stop_engine + t_level + t_const_motion + t_level_const + t_stop_engine_end + t_final:
+    T = - T_eng_final
+    M_x_init = T * 2 * (concept.cabin.W_cabin/2 + concept.propeller.D_prop/2)
+    alpha_x_init = M_x_init / I_all[1]
+    omega_x += alpha_x_init * dt
+    theta_x += omega_x * dt + 0.5 * alpha_x_init * dt**2
 
-print(omega_x * 57.3)
-print(theta_x * 57.3)
-print(omega_y * 57.3)
-print(theta_y * 57.3)
+    M_y_init = T * 2 * (concept.cabin.L_cabin/2 + concept.propeller.D_prop/2)
+    alpha_y_init = M_y_init / I_all[0]
+    omega_y += alpha_y_init * dt
+    theta_y += omega_y * dt + 0.5 * alpha_y_init * dt**2
+
+    theta_x_lst.append(theta_x)
+    theta_y_lst.append(theta_y)
+
+    a_x_init = ((2 * T_eng_final + concept.motor.N_motor / 2 * min(T_eng_carry, T_eng_op)) * np.sin(theta_x)) / concept.Mtot_concept
+    a_y_init = ((2 * T_eng_final + concept.motor.N_motor / 2 * min(T_eng_carry, T_eng_op)) * np.sin(theta_y)) / concept.Mtot_concept
+    a_z_init = ((((concept.motor.N_motor / 2) * min(T_eng_carry, T_eng_op) + 2 * T) * np.cos(min(theta_x, theta_y))) - concept.Mtot_concept * concept.physics.g) / concept.Mtot_concept
+
+    V_x += a_x_init * dt
+    V_y += a_y_init * dt
+    V_z += a_z_init * dt
+
+    S_x += V_x * dt + 0.5 * a_x_init * dt ** 2
+    S_y += V_y * dt + 0.5 * a_y_init * dt ** 2
+    S_z += V_z * dt + 0.5 * a_z_init * dt ** 2
+
+    S_x_lst.append(S_x)
+    S_y_lst.append(S_y)
+    S_z_lst.append(S_z)
+    V_x_lst.append(V_x)
+    V_y_lst.append(V_y)
+    V_z_lst.append(V_z)
+    a_z_lst.append(a_z_init)
+    M_x_lst.append(M_x_init)
+    M_y_lst.append(M_y_init)
+
+    t_I += dt
+
+print("Omega x = ", omega_x * 57.3)
+print("Theta x = ", theta_x * 57.3)
+print("Omega y = ", omega_y * 57.3)
+print("Theta y = ", theta_y * 57.3)
+print("Velocity in x", V_x)
+print("Velocity in y", V_y)
 print(a_z_init/concept.physics.g)
 
 P_max = max(P_eng_carry * 4 + P_eng_rev * 2, P_init * concept.motor.N_motor)
 print(P_max/concept.Mbat_concept)
 print(((t_hover_req + t_asc_req + t_des_req) * P_init*concept.motor.N_motor)/concept.Mbat_concept/3600)
 
-t_theta = np.arange(0, t_I + 3 *dt, dt)
+t_theta = np.arange(0, (len(theta_x_lst)) *dt, dt)
 
 np.savetxt(r'Data/az.txt',a_z_lst)
 np.savetxt(r'Data/Mx.txt',M_x_lst)
@@ -618,7 +662,7 @@ plt.ylabel('Acc [m/s^2]')
 
 plt.subplot(5, 2, 10)
 plt.plot(t_theta, np.array(M_x_lst))
-plt.title('Moment aroudn x')
+plt.title('Moment around x')
 plt.xlabel('Time [s]')
 plt.ylabel('Torque [Nm]')
 

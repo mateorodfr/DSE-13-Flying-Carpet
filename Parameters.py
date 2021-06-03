@@ -195,7 +195,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.85, 0.2, 0.95]
+    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 20]
 
 
     def __init__(self,key=0):
@@ -211,6 +211,7 @@ class BatteryParameters(object):
             self.eff_inverter = self.battery0[6]
             self.loss_factor = self.battery0[7]
             self.degradation = self.battery0[8]
+            self.inverter_mass = self.battery0[9]
 
     def getParameters(self, printParameters=False):
 
@@ -300,7 +301,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
+    concept0 = ['Pickup & Release', 1895.20, 600 ,428.93, 12.3, 0.325]
     concept1 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
@@ -412,6 +413,35 @@ class PhysicalParameters(object):
     def __init__(self):
         self.rho0 = 1.225
         self.g = 9.80665
+
+class ElectronicsParameters(object):
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6]
+
+    # Initialization if no key is given takes the default object '0'
+    def __init__(self, key=0):
+        if key == 0:
+            self.camera_power = self.Electronics0[0]
+            self.camera_mass = self.Electronics0[1]
+            self.camera_amount = self.Electronics0[2]
+            self.T_sens_power = self.Electronics0[3]
+            self.T_sens_mass = self.Electronics0[4]
+            self.T_sens_amount = self.Electronics0[5]
+            self.motor_controller_power = self.Electronics0[6]
+            self.motor_controller_mass = self.Electronics0[7]
+            self.motor_controller_amount = self.Electronics0[8]
+            self.VCU_power = self.Electronics0[9]
+            self.VCU_mass = self.Electronics0[10]
+            self.VCU_amount = self.Electronics0[11]
+            self.FC_power = self.Electronics0[12]
+            self.FC_mass = self.Electronics0[13]
+            self.FC_amount = self.Electronics0[14]
+            self.AMS_power = self.Electronics0[15]
+            self.AMS_mass = self.Electronics0[16]
+            self.AMS_amount = self.Electronics0[17]
+            self.SN_power = self.Electronics0[18]
+            self.SN_mass = self.Electronics0[19]
+            self.SN_amount = self.Electronics0[20]
+
 
 
 
