@@ -52,7 +52,7 @@ def gustMax(Ui,zi,hmax,z0,dz):
 def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.1,plotGust=False,plotDisturbance=False,isPrint=False):
 
     #Define Masses
-    m = concept.Mtot_concept-concept.Mtot_concept #curent final iterated mass
+    m = concept.Mtot_concept-concept.Mpay_concept #curent final iterated mass
 
     #Cabin dimensions
     L_cabin = concept.cabin.L_cabin #Cabin length
@@ -161,7 +161,10 @@ def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.
 
     return Dgust,M,Ugust,tgust,a,alpha
 
+def saveArrays(root,names,arr):
 
+    for i in range(len(arr)):
+        np.savetxt(root+names[i],arr[i])
 
 
 """ Import General Parameters"""
@@ -173,8 +176,8 @@ concept = pm.ConceptParameters(0)
 #all these variable sneed to be manually changed to perform a case specific analysis
 Cd = 1.2 #CD of squre at reynolds: 6e5
 rho = concept.physics.rho0 #[kg/m3] density at sea level
-tsim = 100
-dtsim = 0.1
+tsim = 50
+dtsim = 0.01
 
 
 """Define Module Specific parameters"""
@@ -187,10 +190,19 @@ zf = 400 #Maximum operational height [m]
 dz = 0.1
 Hmax = 1000
 
+
 """ Define Output Booleans"""
+
 plotGust = True #if this is true the program will plot the gust speed as a fucntion of height and the gust envelope
 plotDisturbance = True
-isPrint = True #if this is true the program will print all the characteristics
+isPrint = False #if this is true the program will print all the characteristics
+saveText = True #Save arrays to text
 
 
+r = r'Data/Gust/'
+names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alphagust.txt']
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
+store = [Dgust,M,Ugust,tgust,a,alpha]
+
+if saveText:
+    saveArrays(r,names,store)
