@@ -140,10 +140,11 @@ class Airfoildata:
 
 
 if __name__ == "__main__":
-    airfoil = Airfoildata("n63412")
+    airfoil = Airfoildata("s8037")
     airfoil.ReadGeometry(plot=True)
     airfoil.getThicknessToCordRatio()
-    airfoil.Analyse(-10, 20, 0.5)
+    airfoil.Analyse(-10, 25, 0.5)
     airfoil.getLiftSlope()
+    airfoil.ExportData()
     print(airfoil.ttocratio, airfoil.maxthickloc, airfoil.cla)
-    airfoil.PlotAeroData()
+    # airfoil.PlotAeroData()
