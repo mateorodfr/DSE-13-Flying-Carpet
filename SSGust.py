@@ -63,19 +63,19 @@ C[9,10] = 1
 D = np.zeros((nOutput,nInput))
 
 K = np.zeros((nInput,nOutput))
-K_z_z = -1000
+K_z_z = -10000
 
-K_tx_y = 10
-K_tx_ydot = 100
-K_tx_phi = 4000
-K_tx_phidot = 5000
+K_tx_y = 100
+K_tx_ydot = 300
+K_tx_phi = 6500
+K_tx_phidot = 2500
 
 K_ty_x = -10
 K_ty_xdot = -100
 K_ty_theta = 4000
 K_ty_thetadot = 5000
 
-K_tz_yaw  = 1000
+K_tz_yaw  = 10000
 
 
 K[0,2] = K_z_z
@@ -96,13 +96,26 @@ ss = ctr.StateSpace(A,B,C,D)
 ss = ss.feedback(K)
 
 dt = 0.01
-T = np.arange(0,50+dt,dt)
+T = np.arange(0,350+dt,dt)
 U = np.zeros((len(T), nInput))
-az = np.loadtxt(r'Data/az.txt')
-Mx = np.loadtxt(r'Data/Mx.txt')
-My = np.loadtxt(r'Data/My.txt')
-U[:len(az),0] = 0#az*concept.Mtot_concept
-U[:,4] = 300
+az_OEI = np.loadtxt(r'Data/az.txt')
+Mx_OEI = np.loadtxt(r'Data/Mx.txt')
+My_OEI = np.loadtxt(r'Data/My.txt')
+
+a_gust = np.loadtxt(r'Data/Gust/agust.txt')
+F_gust = np.loadtxt(r'Data/Gust/Dgust.txt')
+M_gust = np.loadtxt(r'Data/Gust/Mgust.txt')
+alpha_gust = np.loadtxt(r'Data/Gust/alphagust.txt')
+t_gust = np.loadtxt(r'Data/Gust/tgust.txt')
+U_gust = np.loadtxt(r'Data/Gust/Ugust.txt')
+
+
+# U[:len(az),0] = 0#az*concept.Mtot_concept
+# U[:,4] = 300
+
+U[len(t_gust):2*len(t_gust),1:4] = F_gust[:,:]
+U[len(t_gust):2*len(t_gust),7:] = M_gust[:,:]
+
 
 
 # U[:len(My),5] = -My
