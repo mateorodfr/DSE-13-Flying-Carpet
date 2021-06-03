@@ -204,6 +204,7 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat)*M_struct_coeff
     iterations +=1
 
+print("Power loss of the battery = ", Mbat*concept.battery.rhoP_battery * (1 - concept.battery.eff_battery))
 print("Final mass",M_tot1, "After", iterations, "Iterations")
 print("Battery mass",Mbat)
 print("---------------")

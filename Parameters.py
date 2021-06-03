@@ -124,7 +124,7 @@ class PropellerParameters(object):
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #For the width and thickness of blade please enter the ratio in terms of Diameter i.e W/D & t/D
 
-    propeller0 = ['NACA2412', 1.3, 4, 2.5, 0.1,0.01,660,0.9]
+    propeller0 = ['NACA2412', 1.3, 2, 2.5, 0.1,0.01,660,0.9]
     propeller1 = ['NACA2412', 1.3, 4, 3.5, 0.1, 0.01, 660, 0.9]
 
     #Initialization if no key is given takes the default object '0'
@@ -195,7 +195,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 20]
+    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 25]
 
 
     def __init__(self,key=0):
