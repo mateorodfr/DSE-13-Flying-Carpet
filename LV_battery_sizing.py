@@ -41,7 +41,7 @@ dI_L_12 = (V_LV - V_buck_12) * D_12 * T_s / L_buck_12       # The current ripple
 
 d_V_out = 0.05
 
-C_1 = 1 / (2 * d_V_out) * (dI_L_12 - I_out_12) * (L_buck_12 * (dI_L_12 - I_out_12) / V_buck_12 + D_12 * T_s - L_buck_12 * I_out_12 / (V_LV - V_buck_12))
+C_12 = 1 / (2 * d_V_out) * (dI_L_12 - I_out_12) * (L_buck_12 * (dI_L_12 - I_out_12) / V_buck_12 + D_12 * T_s - L_buck_12 * I_out_12 / (V_LV - V_buck_12))
 d12 = D_12 * (V_LV/V_buck_12 - 1)
 t_zero_12 = T_s - d12 * T_s - D_12 * T_s
 I_rms_L_12 = np.sqrt((D_12 + d12) * dI_L_12**2 / 3)
@@ -62,6 +62,8 @@ print(eff_buck_12)
 
 """    Rest of the VCU and AMS systems work on 24V, thus Boost converter is applied     """
 
+d_V_out = 0.05
+
 P_out_boost_24 = 1/3*elect.VCU_power + 1/2*elect.AMS_power
 
 I_in_24 = P_out_boost_24 / V_LV
@@ -71,6 +73,8 @@ L_boost_24 = np.arange(20 * 10 ** -9, L_boost_24_max, 40 * 10 ** -9)
 dI_L_24 = np.sqrt(2 * P_out_boost_24 * T_s * (V_boost_24 - V_LV) / (V_boost_24 * L_boost_24))
 D_24 = dI_L_24 * L_boost_24 / V_LV / T_s
 d24 = 2 * I_out_24 / dI_L_24
+
+C_24 = 1 / (2 * d_V_out) * L_boost_24 * (dI_L_24 * I_out_24)**2/(V_boost_24 - V_LV)
 I_rms_L_24 = np.sqrt((D_24+d24) * dI_L_24**2 / 3)
 I_rms_sw_24 = np.sqrt(D_24 * dI_L_24**2 / 3)
 I_rms_d_24 = np.sqrt(d24 * dI_L_24**2 / 3)
