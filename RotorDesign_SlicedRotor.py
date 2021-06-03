@@ -1,5 +1,5 @@
 import numpy as np
-# import RotorDesign
+from RotorDesign import Airfoildata
 
 
 def main():
