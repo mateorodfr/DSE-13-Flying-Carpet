@@ -20,6 +20,7 @@ Beta = np.pi /6 # This is bridge angle going up. This is relative to the negativ
 Ixx_init = 1
 Iyy_init = 1
 Izz_init = 1
+mass = 1
 
 "Desired accellerations"
 
@@ -53,8 +54,7 @@ B = 1 # Bridge force
 W = 1 # Weight
 N = np.array([1,1,1,1]) #Normal force for each leg, defined clockwise starting at front right (looking at x axis, it's the same as for the rotors)
 
-
-"Here we want to solve for some loads based on some movement"
+"Here we want to solve for thrust and accellerations"
 
 #def DynamicAnalysis(        type):
 
@@ -63,36 +63,37 @@ N = np.array([1,1,1,1]) #Normal force for each leg, defined clockwise starting a
 #A_3 = np.cross(N_unit,N_3_pos).append(1)
 #A_4 = np.cross(N_unit,N_4_pos).append(1)
 
-A = np.vstack((np.append(np.cross(N_unit,N_1_pos),1),np.append(np.cross(N_unit,N_2_pos), 1),np.append(np.cross(N_unit,N_3_pos),1),np.append(np.cross(N_unit,N_4_pos),1)))
-print(A)
-#A2 = np.matrix([1,1,1,1])
-#A = np.vstack((A,A2))
-A = np.matrix.transpose(A)
-print(A)
-A2 = np.matrix([1,1,1,1])
-A = np.stack((A,A2))
-print(A)
-B = np.matrix([])
+Ttot = acc_z*mass
 
+A = np.vstack((np.append(np.cross(L_unit,L_1_pos),1),np.append(np.cross(L_unit,L_2_pos), 1),np.append(np.cross(L_unit,L_3_pos),1),np.append(np.cross(L_unit,L_4_pos),1)))
 
+A = np.matrix.T
 
+print((np.append(np.cross(L_unit,L_1_pos), 1))
 
-
-
+# B = np.matrix([])
 
    # L = np.linalg.inv(A).dot(B)
 
-
-
     #return 
 
+# Fz : -m*alpha_z = mg*cos(phi)*cos(theta) - (L1+L2+L3+L4) + (1 if boarding else 0) * [(N21+N22+N23+N24) + (Bx)]  # This one i'd like to get total T from
+#"If possible with the equation above, I would use it to get Ttot from"
+
+# Fy :  m*alpha_y = w *cos(phi)*sin(theta) - (1 if boarding else 0) * (By + sum_of(Ny))  #The problem with this one and the one below is that once both bridge and 
+# Fx :  m*alpha_x = w *sin(phi)*sin(theta) - (1 if boarding else 0) * (Bx + sum_of(Ny))
+
+# Mz : I_zz*alpha_z = sum_of(T_eng) + (1 if boarding else 0) * [sum_of(+/- w/2 * Nx) + sum_of(+/- d/2 * Ny) - By*(d/2 + L_B * cos(beta))]
+
+
+# W
 
 
 
 
 
 
-"Here all of the 5 main assemblies are defined, for each some properties are given to use in the analysis"
+#"Here all of the 5 main assemblies are defined, for each some properties are given to use in the analysis"
 
 class Rotorarm(object):
 
@@ -314,13 +315,10 @@ def internal_loading_beam(FSX,FSY,FSZ,MSX,MSY,MSZ,zz,plot=False):
     MomentY = MSY - FSX * zz
     TorqueZ = MSZ
 
-    if plot:
+    if plot == True:
         plt.subplot(231)
-<<<<<<< Updated upstream
-=======
         plt.ylim(-np.max(NormalZ),np.max(NormalZ))
         #plt.xlim(-zz[len(zz)],zz[len(zz)])
->>>>>>> Stashed changes
         plt.plot(zz,NormalZ)
         plt.title("NormalZ")
         plt.grid()
@@ -356,8 +354,9 @@ def internal_loading_beam(FSX,FSY,FSZ,MSX,MSY,MSZ,zz,plot=False):
         plt.grid()
         plt.show()
         
-    return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
-
+        return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
+    elif plot == False:
+        return zz, NormalZ, ShearX, ShearY, MomentX, MomentY, TorqueZ
 
 
 
