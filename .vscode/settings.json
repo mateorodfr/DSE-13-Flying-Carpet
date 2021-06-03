@@ -7,6 +7,6 @@
         "--ignore E501",
         "--ignore E303"
       ],
-      "python.pythonPath": "C:\\ProgramData\\Anaconda3\\envs\\controlenv\\python.exe"
+      "python.pythonPath": "C:\\Users\\mateo\\AppData\\Local\\Programs\\Python\\Python36\\python.exe"
 
 }
