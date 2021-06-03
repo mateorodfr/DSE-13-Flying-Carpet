@@ -598,6 +598,7 @@ print(a_z_init/concept.physics.g)
 
 P_max = max(P_eng_carry * 4 + P_eng_rev * 2, P_init * concept.motor.N_motor)
 print(P_max/concept.Mbat_concept)
+print("Initial power", P_init)
 print(((t_hover_req + t_asc_req + t_des_req) * P_init*concept.motor.N_motor)/concept.Mbat_concept/3600)
 
 t_theta = np.arange(0, (len(theta_x_lst)) *dt, dt)
