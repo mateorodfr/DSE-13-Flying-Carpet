@@ -21,3 +21,8 @@ Q_loss = P_loss * t_mission
 dT_per_HV = Q_loss / (C_tot * concept.Mbat_concept / n_HV_bat)
 print(P_loss)
 
+Cp = 4186 # J/kg K
+q = 1
+dt =1
+m_dot = q/(dT*Cp)
+
