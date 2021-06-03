@@ -414,5 +414,34 @@ class PhysicalParameters(object):
         self.rho0 = 1.225
         self.g = 9.80665
 
+class ElectronicsParameters(object):
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6]
+
+    # Initialization if no key is given takes the default object '0'
+    def __init__(self, key=0):
+        if key == 0:
+            self.camera_power = self.Electronics0[0]
+            self.camera_mass = self.Electronics0[1]
+            self.camera_amount = self.Electronics0[2]
+            self.T_sens_power = self.Electronics0[3]
+            self.T_sens_mass = self.Electronics0[4]
+            self.T_sens_amount = self.Electronics0[5]
+            self.motor_controller_power = self.Electronics0[6]
+            self.motor_controller_mass = self.Electronics0[7]
+            self.motor_controller_amount = self.Electronics0[8]
+            self.VCU_power = self.Electronics0[9]
+            self.VCU_mass = self.Electronics0[10]
+            self.VCU_amount = self.Electronics0[11]
+            self.FC_power = self.Electronics0[12]
+            self.FC_mass = self.Electronics0[13]
+            self.FC_amount = self.Electronics0[14]
+            self.AMS_power = self.Electronics0[15]
+            self.AMS_mass = self.Electronics0[16]
+            self.AMS_amount = self.Electronics0[17]
+            self.SN_power = self.Electronics0[18]
+            self.SN_mass = self.Electronics0[19]
+            self.SN_amount = self.Electronics0[20]
+
+
 
 
