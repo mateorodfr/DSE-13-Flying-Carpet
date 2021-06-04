@@ -1,6 +1,7 @@
 from xfoil import XFoil
 from xfoil.model import Airfoil
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
@@ -138,13 +139,35 @@ class Airfoildata:
         np.save(os.path.join(target_dir, "cm.npy"), self.cm)
         np.save(os.path.join(target_dir, "cp.npy"), self.cp)
 
+    def ReplaceNaNs(self):
+        """Replace the NaN values with an interpolant for the Aero Data"""
+        self.a = pd.DataFrame(self.a).interpolate().values.ravel()
+        self.cl = pd.DataFrame(self.cl).interpolate().values.ravel()
+        self.cd = pd.DataFrame(self.cd).interpolate().values.ravel()
+
+    def ExportToBEMT(self):
+        """Export airfoil parameters to format to be used in BEMT model"""
+        target_dir = "airfoils/BEMT_data"
+        target_name = f"{self.foilname}.dat"
+        filepath = os.path.join(target_dir, target_name)
+        header = ""
+        for i in range(13):
+            header += f"Headerline{i + 1} \n"
+        self.ReplaceNaNs()
+        aerodata = np.vstack((self.a, self.cl, self.cd)).T
+        print(header)
+        print(aerodata)
+        np.savetxt(filepath, aerodata, header=header, delimiter='\t')
+
 
 if __name__ == "__main__":
     airfoil = Airfoildata("s8037")
     airfoil.ReadGeometry(plot=True)
     airfoil.getThicknessToCordRatio()
-    airfoil.Analyse(-10, 25, 0.5)
-    airfoil.getLiftSlope()
-    airfoil.ExportData()
-    print(airfoil.ttocratio, airfoil.maxthickloc, airfoil.cla)
-    # airfoil.PlotAeroData()
+    airfoil.getFromFile()
+    # airfoil.Analyse(-20, 25, 0.5)
+    # airfoil.getLiftSlope()
+    # airfoil.ExportData()
+    # print(airfoil.ttocratio, airfoil.maxthickloc, airfoil.cla)
+    airfoil.PlotAeroData()
+    airfoil.ExportToBEMT()
