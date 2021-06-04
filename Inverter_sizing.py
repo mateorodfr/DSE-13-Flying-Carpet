@@ -9,6 +9,7 @@ t_des_req = 80*n_cyc #time taken to descend in s
 t_hover_req = 445.5*n_cyc #time taken to hover in s
 t_mission_req = (t_asc_req + t_hover_req + t_des_req) #total mission time
 
+n_bat = 4
 V_cell = 3.7
 V_engine = np.arange(450, 851, 10)
 P_engine = np.arange(0, 102000, 2500)
@@ -21,7 +22,7 @@ m_row = M_bat_it/n_cell
 Cap_tot = m_row * Cap_dens
 #I_bat = Cap_tot / t_mission_req * 3600
 Inv_size = P_cont_tot * concept.battery.degradation * concept.battery.eff_battery / concept.motor.N_motor# VA
-Bat_current = P_cont_tot / (V_cell * n_cell)
+Bat_current = P_cont_tot / (V_cell * n_cell) / n_bat
 
 """     Both the delta and star configurations have to be applied to the motor in order to reduce the inrush/surge 
         current of the motor and to have a safety mechanism/interlock to avoid burning of batteries. Star configuration
@@ -57,7 +58,12 @@ Q_wire_max = Inv_size * t_mission_req
 c = 385
 dT = Q_wire_max / c / np.max(m_wire)
 
-print(Inv_size)
+R_bat_wire = 1 * rho_wire / (np.pi * 0.003**2)
+Q_diss = Bat_current**2 * R_bat_wire * t_mission_req
+m_cop = (np.pi * 0.003**2) * 1 * rho_copper
+dT_tot = Q_diss / c / np.max(m_cop)
+
+print(dT_tot)
 
 
 

@@ -1,8 +1,8 @@
 {
-    "python.linting.pylintEnabled": false,
+    "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.linting.banditEnabled": false,
-    "python.linting.pylamaEnabled": true,
+    "python.linting.pylamaEnabled": false,
     "python.linting.pylamaArgs": [
         "--ignore E501",
         "--ignore E303"

@@ -76,7 +76,7 @@ Dblade = concept.propeller.D_prop
 torque = concept.motor.Torque
 
 iterations=0
-while abs(1-M_tot1/M_tot0) > 0.01:
+while abs(1-M_tot1/M_tot0) > 0.005:
     progress = 0
     state = []
     T_req_eng=[]
@@ -193,7 +193,6 @@ while abs(1-M_tot1/M_tot0) > 0.01:
     #     Mbat = P_req_eng_OEI / concept.battery.rhoP_battery
 
 
-
     M_tot0= M_tot1
 
 
@@ -202,9 +201,10 @@ while abs(1-M_tot1/M_tot0) > 0.01:
     M_payload= concept.Mpay_concept
     M_struct_coeff= 1.2
 
-    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass)*M_struct_coeff
+    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat + 131 + 40 + 4 * 1.2)*M_struct_coeff
     iterations +=1
 
+print("Power loss of the battery = ", Mbat*concept.battery.rhoP_battery * (1 - concept.battery.eff_battery))
 print("Final mass",M_tot1, "After", iterations, "Iterations")
 print("Battery mass",Mbat)
 print("---------------")

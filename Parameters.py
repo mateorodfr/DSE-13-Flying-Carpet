@@ -124,7 +124,7 @@ class PropellerParameters(object):
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #For the width and thickness of blade please enter the ratio in terms of Diameter i.e W/D & t/D
 
-    propeller0 = ['NACA2412', 1.3, 4, 2.5, 0.1,0.01,660,0.9]
+    propeller0 = ['NACA2412', 1.3, 2, 2.5, 0.1,0.01,660,0.9]
     propeller1 = ['NACA2412', 1.3, 4, 3.5, 0.1, 0.01, 660, 0.9]
 
     #Initialization if no key is given takes the default object '0'
@@ -195,7 +195,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 20]
+    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.95, 0.15, 0.95, 25]
 
 
     def __init__(self,key=0):
@@ -301,8 +301,8 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1895.20, 600 ,428.93, 12.3, 0.325]
-    concept1 = ['Pickup & Release', 1454, 600 ,221.82, 12.3, 0.325]
+    concept0 = ['Pickup & Release', 1970 + 345, 600, 460 + 120, 12.3, 0.325, 51]
+    concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
 
@@ -313,6 +313,8 @@ class ConceptParameters(object):
             self.Mbat_concept = self.concept0[3]
             self.Vtot_concept = self.concept0[4]
             self.Vbat_concept = self.concept0[5]
+            self.M_LV_bat = self.concept0[6]
+
 
         if key == 1:
             self.Name_concept = self.concept1[0]
@@ -413,6 +415,40 @@ class PhysicalParameters(object):
     def __init__(self):
         self.rho0 = 1.225
         self.g = 9.80665
+
+class ElectronicsParameters(object):
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4]
+
+    # Initialization if no key is given takes the default object '0'
+    def __init__(self, key=0):
+        if key == 0:
+            self.camera_power = self.Electronics0[0]
+            self.camera_mass = self.Electronics0[1]
+            self.camera_amount = self.Electronics0[2]
+            self.T_sens_power = self.Electronics0[3]
+            self.T_sens_mass = self.Electronics0[4]
+            self.T_sens_amount = self.Electronics0[5]
+            self.motor_controller_power = self.Electronics0[6]
+            self.motor_controller_mass = self.Electronics0[7]
+            self.motor_controller_amount = self.Electronics0[8]
+            self.VCU_power = self.Electronics0[9]
+            self.VCU_mass = self.Electronics0[10]
+            self.VCU_amount = self.Electronics0[11]
+            self.FC_power = self.Electronics0[12]
+            self.FC_mass = self.Electronics0[13]
+            self.FC_amount = self.Electronics0[14]
+            self.AMS_power = self.Electronics0[15]
+            self.AMS_mass = self.Electronics0[16]
+            self.AMS_amount = self.Electronics0[17]
+            self.SN_power = self.Electronics0[18]
+            self.SN_mass = self.Electronics0[19]
+            self.SN_amount = self.Electronics0[20]
+            self.eff_buck = self.Electronics0[21]
+            self.eff_boost = self.Electronics0[22]
+            self.PF_electronics = self.Electronics0[23]
+            self.pump_power = self.Electronics0[24]
+            self.pump_amount = self.Electronics0[25]
+
 
 
 
