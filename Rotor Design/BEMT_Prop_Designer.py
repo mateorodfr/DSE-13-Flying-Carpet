@@ -64,32 +64,20 @@ def main():
         return (Thrust/(rho * D*D*D*D * f * f)), (Thrust/(rho * D*D*D*D*D * f * f * f))
     
     
-    # setINI(6)
+    # setINI(10)
 
 
     solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
     T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
+    
     try:
         a1 = solver.turbine_coeffs(T, Q, P)
         a2 = solver.turbine_coeffs(T2, Q2, P2)
     except ZeroDivisionError:
-        a1 = (np.nan, CT_CP(T, 1.225, 3.0, 1300/60))
-        a2 = (np.nan, CT_CP(T2, 1.225, 3.0, 1300/60))
+        a1 = (np.nan, CT_CP(T, 1.225, 3.0, 1000/60))
+        a2 = (np.nan, CT_CP(T2, 1.225, 3.0, 1000/60))
 
-    print(a1)
-    print(a2)
-
-
-
-
-
-
-
-
-
-
-
-
+    print(f"\n{(T+T2)*4 / 9.80665} [kg]")
 
 
 if __name__ == '__main__':
