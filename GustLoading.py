@@ -203,6 +203,7 @@ r = r'Data/Gust/'
 names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alphagust.txt']
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
 store = [Dgust,M,Ugust,tgust,a,alpha]
-
+print(np.max(Dgust[:,0]))
+print(np.max())
 if saveText:
     saveArrays(r,names,store)
