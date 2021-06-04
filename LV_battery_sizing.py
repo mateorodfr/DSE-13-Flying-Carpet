@@ -7,7 +7,7 @@ concept = pm.ConceptParameters(0)
 V_cell = 3.7
 n_cell = 4
 
-P_cons = elect.camera_power + elect.T_sens_power + elect.motor_controller_power + elect.VCU_power + elect.FC_power + elect.AMS_power + elect.SN_power
+P_cons = elect.pump_amount * elect.pump_power + elect.camera_power + elect.T_sens_power + elect.motor_controller_power + elect.VCU_power + elect.FC_power + elect.AMS_power + elect.SN_power
 M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.motor_controller_mass * elect.motor_controller_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
 
 n_cyc = 20
@@ -30,7 +30,7 @@ T_s = 1 / f_s
          the current ripple on the inductor has to be larger than twice the output power        """
 
 
-P_out_12 = 2/3*(elect.VCU_power + elect.FC_power) + 1/2*elect.AMS_power
+P_out_12 = 2/3*(elect.VCU_power + elect.FC_power) + 1/2*elect.AMS_power + elect.pump_power * elect.pump_amount
 I_out_12 = P_out_12/V_buck_12
 L_buck_12_max = (np.sqrt((V_LV - V_buck_12) * T_s * 2 * P_out_12 / V_LV)/2/I_out_12)**2
 L_buck_12 = np.arange(5*10**-9, L_buck_12_max, 5 * 10 ** -9)

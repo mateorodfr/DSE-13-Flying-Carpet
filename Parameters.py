@@ -301,7 +301,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1970 + 131 + 70, 600, 460 + 66, 12.3, 0.325, 36.8]
+    concept0 = ['Pickup & Release', 1970 + 131 + 30, 600, 460 + 40, 12.3, 0.325, 51]
     concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
@@ -417,7 +417,7 @@ class PhysicalParameters(object):
         self.g = 9.80665
 
 class ElectronicsParameters(object):
-    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9]
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4]
 
     # Initialization if no key is given takes the default object '0'
     def __init__(self, key=0):
@@ -446,6 +446,8 @@ class ElectronicsParameters(object):
             self.eff_buck = self.Electronics0[21]
             self.eff_boost = self.Electronics0[22]
             self.PF_electronics = self.Electronics0[23]
+            self.pump_power = self.Electronics0[24]
+            self.pump_amount = self.Electronics0[25]
 
 
 

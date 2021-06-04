@@ -201,7 +201,7 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     M_payload= concept.Mpay_concept
     M_struct_coeff= 1.2
 
-    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat + 131 + 70)*M_struct_coeff
+    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat + 131 + 40 + 4 * 1.2)*M_struct_coeff
     iterations +=1
 
 print("Power loss of the battery = ", Mbat*concept.battery.rhoP_battery * (1 - concept.battery.eff_battery))
