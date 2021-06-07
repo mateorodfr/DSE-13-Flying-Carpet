@@ -29,7 +29,7 @@ dT_per_HV = Q_loss / (C_tot * concept.Mbat_concept)
 
 print(P_loss)
 
-eff_cooling = 0.7       # Due the brass/copper presence and the water friction with the pipes
+eff_cooling = 0.7       # Due the brass/copper presence and the water friction with the pipes the efficiency is not 100%. The 0.7 is an estimation
 T_min = 20  # Celsius   # Start cooling when the temperature is above this value
 T_max = 50  # Celsius   # for the efficient work of the batteries the temperature has to be limited to this value
 Cp = 4186   # J/kg K    # Specific heat of the water
@@ -78,13 +78,13 @@ print(A_cooling * n_HV_bat)
 print("The water mass in the pipes =", M_water, "kg")
 
 A_mat_pipes = A_pipe - A_pipe/mat_perc
-L_pipes = (V_cooling * Perc_water * (1 - 1/mat_perc))/A_mat_pipes + extra_meters    # Length of the pipes
+L_pipes = (V_cooling * Perc_water * (1 - 1/mat_perc))/A_pipe + extra_meters    # Length of the pipes
 M_plate = V_cooling * (1 - Perc_water) * rho_plate * Plate_filling * n_HV_bat
 #M_plate_verif = P_loss / 910
 #print(M_plate_verif * n_HV_bat)
 M_pipes = A_mat_pipes * L_pipes * rho_pipes * n_HV_bat
 M_tot = M_pipes + M_plate + M_water
-print(M_plate)
+print(M_tot)
 
 m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
