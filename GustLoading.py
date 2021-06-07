@@ -15,7 +15,7 @@ def gustDisturbance(S,Uds,t,drag,dt,Cd,rho):
 
 def gustEnvelope(Hmax,hmax,Umax,concept,plot=False):
 
-    H = np.arange(10,Hmax,Hmax//100)
+    H = np.arange(10,Hmax,Hmax/1000)
     Fgz = 1-hmax/76200
     R1 = concept.Mtot_concept/(concept.Mtot_concept-500)
     R2 = 1
@@ -177,7 +177,7 @@ concept = pm.ConceptParameters(0)
 Cd = 1.2 #CD of squre at reynolds: 6e5
 rho = concept.physics.rho0 #[kg/m3] density at sea level
 tsim = 50
-dtsim = 0.01
+dtsim = 0.001
 
 
 """Define Module Specific parameters"""
@@ -187,7 +187,7 @@ Ui = 5 #wind speed at sensor height in [m/s]
 z0 = 3 #surface roughness constant -> 3m for urban centers [m]
 zi = 10 #Anemometer height when measuring wind spped of ground [m]
 zf = 400 #Maximum operational height [m]
-dz = 0.1
+dz = 0.01
 Hmax = 1000
 
 
@@ -204,6 +204,5 @@ names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alph
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
 store = [Dgust,M,Ugust,tgust,a,alpha]
 print(np.max(Dgust[:,0]))
-print(np.max())
 if saveText:
     saveArrays(r,names,store)
