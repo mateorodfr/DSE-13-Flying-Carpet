@@ -57,7 +57,7 @@ class MotorParameters(object):
 
     #Motor List
     #The object with index 0 is the currently selected one. All other indices are for comparison
-    motor0 = ["Siemens SP260D",8,0.418/4*1.15,1500/2,204000/2,49/2*1.15,0.95,0.8] #Strong motor used on City airbus
+    motor0 = ["Siemens SP260D",8,0.418/2 * 3/5 *1.15,1500 * 3/5,204000 * 3/5,49*3/5 *1.15,0.95,0.8] #Strong motor used on City airbus
     motor1 = ["Siemens SP260D",4,0.418/2,1500,204000,49,0.95,0.8]
 
     #Initialization if no key is given takes the default object '0'
@@ -124,7 +124,7 @@ class PropellerParameters(object):
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #For the width and thickness of blade please enter the ratio in terms of Diameter i.e W/D & t/D
 
-    propeller0 = ['NACA2412', 1.3, 2, 2.5, 0.1,0.01,660,0.9]
+    propeller0 = ['NACA2412', 1.3, 3, 2.5, 0.1,0.01,660,0.9]
     propeller1 = ['NACA2412', 1.3, 4, 3.5, 0.1, 0.01, 660, 0.9]
 
     #Initialization if no key is given takes the default object '0'
@@ -301,7 +301,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1970 + 374, 600, 460 + 135, 12.3, 0.325, 51, 200]
+    concept0 = ['Pickup & Release', 2343, 600, 597, 12.3, 0.325, 51, 111]
     concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
