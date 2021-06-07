@@ -455,6 +455,26 @@ class CrossSectionParameters(object):
 
     def __init__(self,shape,props,ts):
 
+
+        """
+        To create a cross section.
+
+        1. Choose shape (string): 'square', 'circle', 'ibeam'
+        2. Initialize properties (array):
+            ts = array containing various thicknesses, if constant set all entries to be the same
+            props = section properties length of 
+            if square:
+                props = [height,width]
+                ts = [t_h,t_w]
+            if circle:
+                props = [radius]
+                ts = [t_r]
+            if ibeam:
+                props = [height flange, width flange]
+                ts = [thickness of vertical part, thickness of horizontal parts]
+
+
+        """
         if shape == 'square':
             self.h = props[0]
             self.w = props[1]
@@ -477,7 +497,7 @@ class CrossSectionParameters(object):
 
         elif shape == 'ibeam':
             self.h = props[0]
-            self.w = props[0]
+            self.w = props[1]
             self.t_h = ts[0]
             self.t_w = ts[0]
             self.A = self.h*self.t_h + 2*self.w*self.t_w
