@@ -48,6 +48,7 @@ B[10,8] = 1/I[1]
 B[11,6] = 1/I[2]
 B[11,9] = 1/I[2]
 
+#Output matrix
 C = np.zeros((nOutput,nState))
 C[0,0] = 1
 C[1,1] = 1
