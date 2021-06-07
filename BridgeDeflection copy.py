@@ -31,36 +31,43 @@ P = 100*9.80665
 Fdx,Fdy,Fdz = 203,203,203
 Mdx,Mdy,Mdz = 56,56,56
 
-
-#Set up reactions
-Ry = Fdy -3*P-w0*L_bridge
-Rx = Fdx
-Rz = Fdz
-
-Mrx = Ry*L_bridge+P*(L_bridge+L_bridge/2)+0.5*w0*L_bridge*L_bridge + Mdx
-Mry = Rx*L_bridge - Mdy
-Mrz = Mdz
-
 dz = 0.01
 z = np.arange(0,L_bridge+dz,dz)
 
-#Compute internal newtons
-Vy_int = -Ry*mc(z,0,0) -P*mc(z,0,0) - w0*mc(z,0,1) - P*mc(z,L_bridge/2,0) - P*mc(z,L_bridge,0) + Fdy*mc(z,L_bridge,0)
-Mx_int = -Ry*mc(z,0,1) - P*mc(z,0,1) - 0.5*w0*mc(z,0,2) - P*mc(z,L_bridge/2,1) + Mrx*mc(z,0,0)
-thetay = (-1/(E*Ixx)) * ( -0.5*Ry*mc(z,0,2) -0.5*P*mc(z,0,2) -(1/6)*w0*mc(z,0,3) -0.5*P*mc(z,L_bridge/2,2) + Mrx*mc(z,0,1)    )
-deflecty = (-1/(E*Ixx)) * ( (-1/6) * Ry * mc(z,0,3) + (-1/6) * P * mc(z,0,3) + (-1/24) * w0 * mc(z,0,4) + (1/2) * Mrx * mc(z,0,2) + (-1/6) * P *mc(z,L_bridge,3) )
+def internalloadings(E,Ixx,Iyy,z,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,L_bridge):
+    #Set up reactions
+    Ry = Fdy -3*P-w0*L_bridge
+    Rx = Fdx
+    Rz = Fdz
 
-#Axis now
-Vx_int = -Rx*mc(z,0,0) + Fdx*mc(z,L_bridge,0)
-My_int =  -Rx * mc(z,0,1) + Mry * mc(z,0,0)
-thetax = (-1/(E*Iyy))* ((-1/2) * Rx * mc(z,0,2) + Mry * mc(z,0,1))
-deflectx = (-1/(E*Iyy)) * ((-1/6)*Rx*mc(z,0,3) + (1/2)*Mry*mc(z,0,2))
+    Mrx = Ry*L_bridge+P*(L_bridge+L_bridge/2)+0.5*w0*L_bridge*L_bridge + Mdx
+    Mry = Rx*L_bridge - Mdy
+    Mrz = Mdz
 
-#Torque
-Nz_int = - Rz * mc(z,0,0) + Fdz*mc(z,L_bridge,0)
-Tz_int = Mrz * mc(z,0,0) - Mdz*mc(z,L_bridge,0)
-dtheta = st_integral*Tz_int/(4 * A_m**2 * G)
-thetaz = np.cumsum(dtheta*dz)
+    #Axis Y
+    Vy_int = -Ry*mc(z,0,0) -P*mc(z,0,0) - w0*mc(z,0,1) - P*mc(z,L_bridge/2,0) - P*mc(z,L_bridge,0) + Fdy*mc(z,L_bridge,0)
+    Mx_int = -Ry*mc(z,0,1) - P*mc(z,0,1) - 0.5*w0*mc(z,0,2) - P*mc(z,L_bridge/2,1) + Mrx*mc(z,0,0)
+    thetay = (-1/(E*Ixx)) * ( -0.5*Ry*mc(z,0,2) -0.5*P*mc(z,0,2) -(1/6)*w0*mc(z,0,3) -0.5*P*mc(z,L_bridge/2,2) + Mrx*mc(z,0,1)    )
+    deflecty = (-1/(E*Ixx)) * ( (-1/6) * Ry * mc(z,0,3) + (-1/6) * P * mc(z,0,3) + (-1/24) * w0 * mc(z,0,4) + (1/2) * Mrx * mc(z,0,2) + (-1/6) * P *mc(z,L_bridge,3) )
+
+    #Axis X
+    Vx_int = -Rx*mc(z,0,0) + Fdx*mc(z,L_bridge,0)
+    My_int =  -Rx * mc(z,0,1) + Mry * mc(z,0,0)
+    thetax = (-1/(E*Iyy))* ((-1/2) * Rx * mc(z,0,2) + Mry * mc(z,0,1))
+    deflectx = (-1/(E*Iyy)) * ((-1/6)*Rx*mc(z,0,3) + (1/2)*Mry*mc(z,0,2))
+
+    #Axis Z
+    Nz_int = - Rz * mc(z,0,0) + Fdz*mc(z,L_bridge,0)
+    Tz_int = Mrz * mc(z,0,0) - Mdz*mc(z,L_bridge,0)
+    dtheta = st_integral*Tz_int/(4 * A_m**2 * G)
+    thetaz = np.cumsum(dtheta*dz)
+    return Vy_int , Mx_int , thetay , deflecty , Vx_int , My_int , thetax , deflectx , Nz_int , Tz_int , dtheta , thetaz
+
+
+
+Vy_int , Mx_int , thetay , deflecty , Vx_int , My_int , thetax , deflectx , Nz_int , Tz_int , dtheta , thetaz = internalloadings(E,Ixx,Iyy,z,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,L_bridge)
+
+
 
 ys = [-h_bridge/2,h_bridge/2,h_bridge/2,-h_bridge/2]
 xs = [-w_bridge/2,w_bridge/2,-w_bridge/2,w_bridge]
@@ -76,7 +83,7 @@ for i in range(len(ys)):
 plt.plot(z,sigma_final)
 plt.show()
 
-plotInternal = False
+plotInternal = True
 if plotInternal:
     fig, ax = plt.subplots(3,4)
     ax = ax.ravel()
