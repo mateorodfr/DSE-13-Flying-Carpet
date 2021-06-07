@@ -49,7 +49,7 @@ def gustMax(Ui,zi,hmax,z0,dz):
     Uf = Ui*(np.log(z/z0)/np.log(zi/z0)) #Gust speed at given height [m/s]
     return Uf[-1],z,Uf #Max gust load
 
-def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.1,plotGust=False,plotDisturbance=False,isPrint=False):
+def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.1,plotGust=False,plotDisturbance=False,isPrint=False,saveText=False):
 
     #Define Masses
     m = concept.Mtot_concept-concept.Mpay_concept #curent final iterated mass
@@ -159,6 +159,10 @@ def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.
             f'\n\t\t alphaz: {np.round(np.max(alpha[:,2]),5)} [rad/s2]'
         )
 
+    if saveText:
+
+        saveArrays(r,names,store)
+
     return Dgust,M,Ugust,tgust,a,alpha
 
 def saveArrays(root,names,arr):
@@ -195,7 +199,7 @@ Hmax = 1000
 
 plotGust = True #if this is true the program will plot the gust speed as a fucntion of height and the gust envelope
 plotDisturbance = True
-isPrint = False #if this is true the program will print all the characteristics
+isPrint = True #if this is true the program will print all the characteristics
 saveText = True #Save arrays to text
 
 
@@ -204,5 +208,4 @@ names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alph
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
 store = [Dgust,M,Ugust,tgust,a,alpha]
 print(np.max(Dgust[:,0]))
-if saveText:
-    saveArrays(r,names,store)
+

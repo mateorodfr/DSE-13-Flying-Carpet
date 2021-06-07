@@ -50,7 +50,7 @@ def BridgeDeflect(z , BF_vec, BM_vec,  Weight_distrib_load,  People_distrib_load
     b4 = (-1/( bridge.crossection_E * bridge.crossection_Ixx)) * ( - 0.5* BM_vec[0] * L_bridge ** 2 - (1/3)*BF_vec[1] * L_bridge ** 3 - np.sum(((Weight_distrib_load + People_distrib_load)*(1/24))* L_bridge ** 4) ) 
     B = np.array([[b1],[b2],[b3],[b4]])
     A = np.array([[1,0,0,0],[L_bridge,1,0,0],[0,0,1,0],[0,0,L_bridge,1]])
-    print(B)
+    # print(B)
     Cs = np.matmul(np.linalg.inv(A),B)
     Weight_and_People_load = np.cumsum((People_distrib_load + Weight_distrib_load)*dz)
     Vofy = BF_vec[1]*macaulay(z,0,0) + Weight_and_People_load*macaulay(z,0,0)
@@ -100,9 +100,9 @@ initialiserotorarm = False
 computerotorarm = False
 plotrotorarm = False
 
-initialisebridge = True
-computebridge = True
-plotbridge = True
+initialisebridge = False
+computebridge = False
+plotbridge = False
 
 
 
