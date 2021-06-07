@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import sin, cos, pi
 from scipy.linalg import solve
 
 
@@ -209,7 +209,7 @@ class Reactions:
             a3_3 = - self.__l1 ** 3 / (3 * self.__e_modulus * self.__moi41)
             a3_8 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
 
-            a4_3 = -self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
+            a4_3 = - self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
             a4_8 = self.__l1 / (self.__e_modulus * self.__moi41)
 
             a5_0 = - self.__l2 ** 3 / (3 * self.__e_modulus * self.__moi12)
@@ -242,7 +242,7 @@ class Reactions:
                  [0, a8_1, 0, 0, 0, 0, -1, 1, 0, 0, a8_10, 0],
                  [0, 0, a9_2, 0, 0, self.__l2, 0, 0, 0, 0, 0, a9_11],
                  [0, 0, a10_2, 0, 0, 1, 0, -1, 0, 0, 0, a10_11],
-                 [-self.__l2, self.__l1, self.__l2, -self.__l1, 0, 0, 0, 0, 0, 0, 0, 0]]
+                 [-self.__l2, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0]]
 
             # Assemble RHS Vector
             b5 = -T * self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
@@ -267,17 +267,17 @@ class Reactions:
             x = solve(A, b)
 
             # Converting solution to be coherent with FBD
-            self.__F_c1_y = -x[0]  # F_c1_y = -Ax
-            self.__F_c2_x = -x[1]  # F_c2_x = -Bx
-            self.__F_c3_y = -x[2]  # F_c3_y = -Cx
-            self.__F_c4_x = -x[3]  # F_c4_x = -Dy
+            self.__F_c1_y = float(-x[0])  # F_c1_y = -Ax
+            self.__F_c2_x = float(-x[1])  # F_c2_x = -Bx
+            self.__F_c3_y = float(-x[2])  # F_c3_y = -Cx
+            self.__F_c4_x = float(-x[3])  # F_c4_x = -Dy
 
             # Print deflections at hinges for solution verification
             if ver:
-                print("theta_BA|A = " + str(x[4]))
-                print("theta_AD|D = " + str(x[5]))
-                print("theta_CB|B = " + str(x[6]))
-                print("theta_DC|C = " + str(x[7]))
+                print("theta_BA|A = " + str(float(x[4])*180/pi))
+                print("theta_AD|D = " + str(float(x[5])*180/pi))
+                print("theta_CB|B = " + str(float(x[6])*180/pi))
+                print("theta_DC|C = " + str(float(x[7])*180/pi))
 
             # Store internal moments
             self.__Ma = x[8]
@@ -289,7 +289,10 @@ class Reactions:
             exit()
 
     def get_c(self):
-        if self.__F_c1_y.type() is not None:
+        """
+        Return reactions at connectors
+        """
+        if self.__F_c1_y is not None:
             return self.__F_c1_y, self.__F_c2_x, self.__F_c3_y, self.__F_c4_x
         else:
             print("Error: get_c() called before reactions are calculated using solve_c()")
