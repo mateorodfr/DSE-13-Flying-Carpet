@@ -4,9 +4,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pprint
+import configparser
 
 def main():
-    pp = pprint.PrettyPrinter(indent = 4)
     def setINI(n, *args) -> None:
         if not args:
             coaxial = input("Set coaxial:\t")
@@ -64,33 +64,24 @@ def main():
         return (Thrust/(rho * D*D*D*D * f * f)), (Thrust/(rho * D*D*D*D*D * f * f * f))
     
     
-    # setINI(6)
+    # setINI(10)
 
     solver = Solver(r"C:\Users\Mees de Graaf\PycharmProjects\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
     # solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
     T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
+    
     try:
         a1 = solver.turbine_coeffs(T, Q, P)
         a2 = solver.turbine_coeffs(T2, Q2, P2)
     except ZeroDivisionError:
-        a1 = (np.nan, CT_CP(T, 1.225, 3.0, 1300/60))
-        a2 = (np.nan, CT_CP(T2, 1.225, 3.0, 1300/60))
+        a1 = (np.nan, CT_CP(T, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60))
+        a2 = (np.nan, CT_CP(T2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60))
 
-    print(a1)
-    print(a2)
-
-
-
-
-
-
-
-
-
-
-
-
+    print(f"\n{(T+T2)*4 / 9.80665} [kg]")
 
 
 if __name__ == '__main__':
+    pp = pprint.PrettyPrinter(indent = 4)
+    config = configparser.ConfigParser()
+    config.read(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
     main()
