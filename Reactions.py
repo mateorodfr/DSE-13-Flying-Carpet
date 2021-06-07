@@ -1,4 +1,5 @@
 from math import sin, cos
+from scipy.linalg import solve
 
 
 class Reactions:
@@ -25,7 +26,6 @@ class Reactions:
         # ----------------------
         # Initializing constants
         # ----------------------
-
         self.__l_a1 = l_a1
         self.__l_a2 = l_a2
         self.__l_a3 = l_a3
@@ -65,11 +65,30 @@ class Reactions:
 
         # Initialize beam properties if beams_square cptype is used
         if cptype == "beams_square":
+            # Width and length of centerpiece
+            self.__l1 = None  # Width
+            self.__l2 = None  # Length
+
+            # Area Moments of Inertia of beams
             self.__moi12 = None
             self.__moi23 = None
             self.__moi34 = None
             self.__moi41 = None
+
+            # Young's Modulus
             self.__e_modulus = None
+
+            # Reactions at connectors
+            self.__F_c1_y = None
+            self.__F_c2_x = None
+            self.__F_c3_y = None
+            self.__F_c4_x = None
+
+            # Internal moments
+            self.__Ma = None
+            self.__Mb = None
+            self.__Mc = None
+            self.__Md = None
 
     def set_p(self, p1, p2, p3, p4):
         """
@@ -84,7 +103,7 @@ class Reactions:
 
     def set_t(self, t1, t2, t3, t4):
         """
-        Sets the torque of each engine
+        Sets the (net) torque at each arm tip
         Positive according to right hand rule in z-direction
         """
         self.__t1 = t1
@@ -166,6 +185,8 @@ class Reactions:
         float e_modulus : E-modulus of material (same material for all beams)
         """
         if self.__cptype == "beams_square":
+            self.__l1 = l1
+            self.__l2 = l2
             self.__moi12 = moi12
             self.__moi23 = moi23
             self.__moi34 = moi34
@@ -175,14 +196,100 @@ class Reactions:
             print("Error: set_beam_config called while cptype not a beam type")
             exit()
 
-    def get_c1(self):
+    def solve_c(self, ver=False):
         """
-        Returns forces and moments acting on connector c1
+        Solves for reactions (and structure rotations and internal moments) at connectors
         """
 
         if self.__cptype == "beams_square":
-            # TODO: Assemble matrix containing equations of statically indeterminate problem
-            # TODO: Solve matrix using sp.solve
-            # TODO: Return F_c1_x and F_c1_y reactions at connectors
+            # Total torque on centerpiece
+            T = self.get_h1()[3] + self.get_h2()[3] + self.get_h3()[3] + self.get_h4()[3]
 
+            # Larger matrix terms calculated beforehand to make the matrix cleaner
+            a3_3 = - self.__l1 ** 3 / (3 * self.__e_modulus * self.__moi41)
+            a3_8 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
 
+            a4_3 = -self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
+            a4_8 = self.__l1 / (self.__e_modulus * self.__moi41)
+
+            a5_0 = - self.__l2 ** 3 / (3 * self.__e_modulus * self.__moi12)
+            a5_9 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
+
+            a6_0 = - self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
+            a6_9 = self.__l2 / (self.__e_modulus * self.__moi12)
+
+            a7_1 = self.__l1 ** 3 / (3 * self.__e_modulus * self.__moi23)
+            a7_10 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi23)
+
+            a8_1 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi23)
+            a8_10 = self.__l1 / (self.__e_modulus * self.__moi23)
+
+            a9_2 = self.__l2 ** 3 / (3 * self.__e_modulus * self.__moi34)
+            a9_11 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi34)
+
+            a10_2 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi34)
+            a10_11 = self.__l2 / (self.__e_modulus * self.__moi34)
+
+            # Assemble matrix containing equations of statically indeterminate problem
+            A = [[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 0, self.__l2, -self.__l1, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, a3_3, self.__l1, 0, 0, 0, a3_8, 0, 0, 0],
+                 [0, 0, 0, a4_3, 1, -1, 0, 0, a4_8, 0, 0, 0],
+                 [a5_0, 0, 0, 0, 0, 0, self.__l2, 0, 0, a5_9, 0, 0],
+                 [a6_0, 0, 0, 0, -1, 0, 1, 0, 0, a6_9, 0, 0],
+                 [0, a7_1, 0, 0, 0, 0, 0, self.__l1, 0, 0, a7_10, 0],
+                 [0, a8_1, 0, 0, 0, 0, -1, 1, 0, 0, a8_10, 0],
+                 [0, 0, a9_2, 0, 0, self.__l2, 0, 0, 0, 0, 0, a9_11],
+                 [0, 0, a10_2, 0, 0, 1, 0, -1, 0, 0, 0, a10_11],
+                 [-self.__l2, self.__l1, self.__l2, -self.__l1, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+            # Assemble RHS Vector
+            b5 = -T * self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
+            b6 = -T * self.__l2 / (self.__e_modulus * self.__moi12)
+
+            b = [[0],
+                 [0],
+                 [-T],
+                 [0],
+                 [0],
+                 [b5],
+                 [b6],
+                 [0],
+                 [0],
+                 [0],
+                 [0],
+                 [-T]]
+
+            # Solve matrix problem
+            # x is the vector:
+            # [Ax, By, Cx, Dy, th_BA_A, th_AD_D, th_CB_B, th_DC_C, M_D, M_A, M_B, M_C]
+            x = solve(A, b)
+
+            # Converting solution to be coherent with FBD
+            self.__F_c1_y = -x[0]  # F_c1_y = -Ax
+            self.__F_c2_x = -x[1]  # F_c2_x = -Bx
+            self.__F_c3_y = -x[2]  # F_c3_y = -Cx
+            self.__F_c4_x = -x[3]  # F_c4_x = -Dy
+
+            # Print deflections at hinges for solution verification
+            if ver:
+                print("theta_BA|A = " + str(x[4]))
+                print("theta_AD|D = " + str(x[5]))
+                print("theta_CB|B = " + str(x[6]))
+                print("theta_DC|C = " + str(x[7]))
+
+            # Store internal moments
+            self.__Ma = x[8]
+            self.__Mb = x[9]
+            self.__Mc = x[10]
+            self.__Md = x[11]
+        else:
+            print("Error: cptype not yet supported")
+            exit()
+
+    def get_c(self):
+        if self.__F_c1_y.type() is not None:
+            return self.__F_c1_y, self.__F_c2_x, self.__F_c3_y, self.__F_c4_x
+        else:
+            print("Error: get_c() called before reactions are calculated using solve_c()")
