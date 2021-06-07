@@ -14,7 +14,7 @@ n_HV_bat = 4    # 4 battery concept chosen
 rho_pipes = 8730        # Copper-Nickel 70/30 applied to the pipes
 rho_plate = 2700        # Aluminium applied to the plate itself
 Plate_filling = 0       # How much the plate is filled - whether it has any heat sink parallel plates
-Perc_water = 0.9        # What percentage of the plate consists of the water
+Perc_water = 0.8        # What percentage of the plate consists of the water
 
 t_asc_req = 60
 t_des_req = 60
@@ -39,11 +39,12 @@ rho_water = 1000    # kg/m^3
 V_water = 4.6   # m/s                   # The velocity of the water through the pipes to have only partial turbulance.
 mat_perc = 1.1 ** 2                    # The volumetric percentage of the copper in the pipes
 A_pipe = m_dot / rho_water / V_water * mat_perc # The area of the pipes needed to reach teh given mass flow
-D_pipe = np.sqrt(A_pipe / np.pi) * 2
-
+#D_pipe = np.sqrt(A_pipe / np.pi) * 2
+W_pipe = np.sqrt(4 * A_pipe)
+H_pipe = W_pipe / 4
 
 V_bat = concept.Mbat_concept / 1000 / n_HV_bat      # Volume of the battery
-print(D_pipe)
+print(W_pipe, H_pipe)
 n_patch = 8         # Patches assumed per battery
 
 L_bat = 0.8         # Set dimensions for a single HV battery
@@ -72,7 +73,7 @@ V_cool_pipes = L_cool_pipes * A_cool_pipes
 m_cool_pipes = V_cool_pipes * rho_plate
 
 A_cooling = 1.05 * ((n_patch - 1) * H_bat * W_bat + 1 * (L_bat * H_bat * 0 + L_bat * W_bat))    # The area on which the cooling is applied
-V_cooling = A_cooling * D_pipe
+V_cooling = A_cooling * W_pipe #* D_pipe
 M_water = (V_cooling * Perc_water / mat_perc + A_pipe / mat_perc * extra_meters + V_cool_pipes / mat_perc) * n_HV_bat * rho_water   # Mass of the water needed for the cooling
 print(A_cooling * n_HV_bat)
 print("The water mass in the pipes =", M_water, "kg")
@@ -90,4 +91,3 @@ m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
 M_final = m_rad + M_tot + n_HV_bat * M_pump
 print(M_final)
-
