@@ -91,5 +91,5 @@ def main():
 if __name__ == '__main__':
     pp = pprint.PrettyPrinter(indent = 4)
     config = configparser.ConfigParser()
-    config.read(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
+    config.read("rot.ini")
     main()
