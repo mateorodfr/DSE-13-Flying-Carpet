@@ -14,7 +14,7 @@ n_HV_bat = 4    # 4 battery concept chosen
 rho_pipes = 8730        # Copper-Nickel 70/30 applied to the pipes
 rho_plate = 2700        # Aluminium applied to the plate itself
 Plate_filling = 1       # How much the plate is filled - whether it has any heat sink parallel plates
-Perc_water = 0.2        # What percentage of the plate consists of the water
+Perc_water = 1        # What percentage of the plate consists of the water
 
 t_asc_req = 60
 t_des_req = 60
@@ -29,7 +29,7 @@ dT_per_HV = Q_loss / (C_tot * concept.Mbat_concept)
 
 print(P_loss)
 
-eff_cooling = 0.7       # Due the brass/copper presence and the water friction with the pipes
+eff_cooling = 0.7       # Due the brass/copper presence and the water friction with the pipes the efficiency is not 100%. The 0.7 is an estimation
 T_min = 20  # Celsius   # Start cooling when the temperature is above this value
 T_max = 50  # Celsius   # for the efficient work of the batteries the temperature has to be limited to this value
 Cp = 4186   # J/kg K    # Specific heat of the water
@@ -37,7 +37,7 @@ dT = T_max - T_min
 m_dot = P_loss/(dT*Cp) / eff_cooling     # kg/m^2   The mass flow through the copper tubes or the heat sinks
 rho_water = 1000    # kg/m^3
 V_water = 4.6   # m/s                   # The velocity of the water through the pipes to have only partial turbulance.
-mat_perc = 1.05 ** 2                    # The volumetric percentage of the copper in the pipes
+mat_perc = 1.1 ** 2                    # The volumetric percentage of the copper in the pipes
 A_pipe = m_dot / rho_water / V_water * mat_perc # The area of the pipes needed to reach teh given mass flow
 D_pipe = np.sqrt(A_pipe / np.pi) * 2
 
@@ -78,13 +78,13 @@ print(A_cooling * n_HV_bat)
 print("The water mass in the pipes =", M_water, "kg")
 
 A_mat_pipes = A_pipe - A_pipe/mat_perc
-L_pipes = (V_cooling * Perc_water * (1 - 1/mat_perc))/A_mat_pipes + extra_meters    # Length of the pipes
+L_pipes = (V_cooling * Perc_water * (1 - 1/mat_perc))/A_pipe + extra_meters    # Length of the pipes
 M_plate = V_cooling * (1 - Perc_water) * rho_plate * Plate_filling * n_HV_bat
 #M_plate_verif = P_loss / 910
 #print(M_plate_verif * n_HV_bat)
 M_pipes = A_mat_pipes * L_pipes * rho_pipes * n_HV_bat
 M_tot = M_pipes + M_plate + M_water
-print(M_plate)
+print(M_pipes)
 
 m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
