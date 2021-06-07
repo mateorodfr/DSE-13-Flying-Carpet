@@ -66,8 +66,8 @@ def main():
     
     # setINI(6)
 
-
-    solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
+    solver = Solver(r"C:\Users\Mees de Graaf\PycharmProjects\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
+    # solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\rot.ini")
     T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
     try:
         a1 = solver.turbine_coeffs(T, Q, P)
