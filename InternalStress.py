@@ -1,17 +1,7 @@
 import Parameters as pm
 import numpy as np
-from BridgeDeflection import section ,Nz_int,Mx_int,My_int
+from BridgeDeflection import section #,Nz_int,Mx_int,My_int
 import matplotlib.pyplot as plt
-
-Ixx = section.Ix
-Iyy = section.Iy
-
-ys = [-section.h/2,section.h/2,section.h/2,-section.h/2]
-xs = [-section.w/2,section.w/2,-section.w/2,section.w/2]
-
-
-
-
 
 # sigmas = []
 # maxsigma = []
@@ -44,17 +34,19 @@ if section.shape == "square":
     tauz = Tmax / (2*section.Am) * ( (xyarr < (section.w /2)) * (1/section.t_w)   +  (xyarr >= (section.w /2)) * (1/section.t_h)    )
 
     tau = taux + tauy + tauz
-    #shearVx = (Vxmax/section.Iyy) * (section.w/2)*
 
 if section.shape == "circle":
-    xyarr = np.arange(0,section.r * np.pi() /2 + dxy, dxy)
-    tauy = (Vymax/section.Ix) * section.t * section.r ( - np.sin(xyarr / (np.pi()*section.r/2)) * 1/(np.pi()*section.r/2))
+    xyarr = np.arange(0,section.r * np.pi / 2 + dxy, dxy)
+    tauy = ((Vymax/section.Ix) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
 
-    taux = np.flip((Vxmax/section.Iy) * section.t * section.r ( - np.sin(xyarr / (np.pi()*section.r/2)) * 1/(np.pi()*section.r/2)))
+    taux = np.flip((Vxmax/section.Iy) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
 
     tauz = (Tmax / (2*section.Am * section.t)) * np.ones(len(xyarr)) 
 
     tau = taux + tauy + tauz
+
+if section.shape == "Ibeam":
+    raise NotImplementedError("Shear calculations for open sections not implemented")
 
 fig, ax = plt.subplots(2,2)
 ax = ax.ravel()

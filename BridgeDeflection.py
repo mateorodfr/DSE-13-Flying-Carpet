@@ -121,7 +121,8 @@ h_bridge = 0.1
 thicc_w = 0.001
 thicc_h = 0.001
 section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
-sectionn = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
+#section = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
+#section = pm.CrossSectionParameters('ibeam',[h_bridge,w_bridge],[thicc_h,thicc_w])
 
 Ix = section.Ix
 Iy = section.Iy
@@ -152,8 +153,8 @@ plotInternal = False
 reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plotInternal)
 
 
-def normalStress(Nz,My,Mx,section):
-
-    sigma = Nz/section.A + (Mx/section.Ix)*section.contour[:,1] + (My/section.Iy)*section.contour[:,0]
-    print(len(sigma))
-normalStress(Nz_int,My_int,Mx_int,section)
+#def normalStress(Nz,My,Mx,section):
+#
+#    sigma = Nz/section.A + (Mx/section.Ix)*section.contour[:,1] + (My/section.Iy)*section.contour[:,0]
+#    print(len(sigma))
+#normalStress(Nz_int,My_int,Mx_int,section)
