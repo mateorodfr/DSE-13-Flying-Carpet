@@ -46,9 +46,15 @@ if section.shape == "square":
     tau = taux + tauy + tauz
     #shearVx = (Vxmax/section.Iyy) * (section.w/2)*
 
-if section.shape == "circle"
-    xyarr = np.arange(0,section.r * )
+if section.shape == "circle":
+    xyarr = np.arange(0,section.r * np.pi() /2 + dxy, dxy)
+    tauy = (Vymax/section.Ix) * section.t * section.r ( - np.sin(xyarr / (np.pi()*section.r/2)) * 1/(np.pi()*section.r/2))
 
+    taux = np.flip((Vxmax/section.Iy) * section.t * section.r ( - np.sin(xyarr / (np.pi()*section.r/2)) * 1/(np.pi()*section.r/2)))
+
+    tauz = (Tmax / (2*section.Am * section.t)) * np.ones(len(xyarr)) 
+
+    tau = taux + tauy + tauz
 
 fig, ax = plt.subplots(2,2)
 ax = ax.ravel()
@@ -71,7 +77,7 @@ ax[2].set_xlabel(r'xy [m]')
 
 ax[3].plot(xyarr, tau)
 ax[3].title.set_text(r"Total shear stress")
-ax[3].set_ylabel(r'tauy - Shear flow in xy [N]')1
+ax[3].set_ylabel(r'tauy - Shear flow in xy [N]')
 ax[3].set_xlabel(r'xy [m]')
 
 plt.show()
