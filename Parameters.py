@@ -475,7 +475,9 @@ class CrossSectionParameters(object):
 
 
         """
-        if shape == 'square':
+        self.shape = shape
+        if self.shape == 'square':
+            
             self.h = props[0]
             self.w = props[1]
             self.t_h = ts[0]
@@ -487,7 +489,7 @@ class CrossSectionParameters(object):
             self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
             self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
 
-        elif shape == 'circle':
+        elif self.shape == 'circle':
             self.r = props[0]
             self.t = ts[0]
             self.A = np.pi*(self.r**2 - (self.r-self.t)**2)
@@ -495,7 +497,7 @@ class CrossSectionParameters(object):
             self.Ix = self.Iy = np.pi*self.r**3*self.t
             self.Jz = self.Ix + self.Iy
 
-        elif shape == 'ibeam':
+        elif self.shape == 'ibeam':
             self.h = props[0]
             self.w = props[1]
             self.t_h = ts[0]
@@ -505,6 +507,3 @@ class CrossSectionParameters(object):
             self.Ix = (1/12)*self.t_h*self.h**3 + 2*self.w*self.t_w*(self.h/2)**2
             self.Iy = (1/6)*self.t_w*self.w**3
             self.Jz = None
-
-
-

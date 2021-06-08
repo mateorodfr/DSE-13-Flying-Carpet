@@ -3,6 +3,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 import Parameters as pm
 
+def internalLoading(dz,section,mc,L_beam,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0):
+    """Returns internal loading diagrams in x,y,z for given loading"""
+
+    if section.shape == 'square':
+        st_integral = 2*section.h/section.t_h + 2*section.w/section.t_w
+    elif section.shape == 'circle':
+        st_integral = (2*np.pi*section.r)/section.t
+    elif section.shape == 'ibeam':
+        st_integral = 2*section.w*section.t_w + section.h*section.t_h
+
+
+    z = np.arange(0,L_beam+dz,dz)
+
+    Ry = Fdy - 3 * P - w0 * L_beam
+    Rx = Fdx
+    Rz = Fdz
+
+    Mrx = Ry*L_beam+P*(L_beam+L_beam/2)+0.5*w0*L_beam*L_beam + Mdx
+    Mry = Rx*L_beam - Mdy
+    Mrz = Mdz
+
+    reactions = [Ry,Rx,Rz,Mrx,Mry,Mrz]
+
+    Vy_int = -Ry*mc(z,0,0) -P*mc(z,0,0) - w0*mc(z,0,1) - P*mc(z,L_beam/2,0) - P*mc(z,L_beam,0) + Fdy*mc(z,L_beam,0)
+    Mx_int = -Ry*mc(z,0,1) - P*mc(z,0,1) - 0.5*w0*mc(z,0,2) - P*mc(z,L_beam/2,1) + Mrx*mc(z,0,0)
+    thetay = (-1/(E*section.Ix)) * ( -0.5*Ry*mc(z,0,2) -0.5*P*mc(z,0,2) -(1/6)*w0*mc(z,0,3) -0.5*P*mc(z,L_beam/2,2) + Mrx*mc(z,0,1)    )
+    deflecty = (-1/(E*section.Ix)) * ( (-1/6) * Ry * mc(z,0,3) + (-1/6) * P * mc(z,0,3) + (-1/24) * w0 * mc(z,0,4) + (1/2) * Mrx * mc(z,0,2) + (-1/6) * P *mc(z,L_beam,3) )
+
+    Vx_int = -Rx*mc(z,0,0) + Fdx*mc(z,L_beam,0)
+    My_int =  -Rx * mc(z,0,1) + Mry * mc(z,0,0)
+    thetax = (-1/(E*section.Iy))* ((-1/2) * Rx * mc(z,0,2) + Mry * mc(z,0,1))
+    deflectx = (-1/(E*section.Iy)) * ((-1/6)*Rx*mc(z,0,3) + (1/2)*Mry*mc(z,0,2))
+
+    Nz_int = - Rz * mc(z,0,0) + Fdz*mc(z,L_beam,0)
+    Tz_int = Mrz * mc(z,0,0) - Mdz*mc(z,L_beam,0)
+
+    if section.shape != 'ibeam':
+        dtheta = st_integral*Tz_int/(4 * section.Am**2 * G)
+        thetaz = np.cumsum(dtheta*dz)
+    else:
+        raise NotImplementedError('Twist for open sections needs to be implemented')
+        dtheta, thetaz = None, None
+
+    return reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz
 
 
 rho_bridge = 2700
@@ -12,74 +56,36 @@ thicc_w = 0.001
 thicc_h = 0.001
 section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
 
-
-
-A_bridge = section.A
-A_m = section.Am
-st_integral = 2*section.h/section.t_h + 2*section.w/section.t_w
-
-Ixx = section.Ix
-Iyy = section.Iy
+Ix = section.Ix
+Iy = section.Iy
 Jz = section.Jz
-
 
 
 E = 69e9
 G = 25.5e9
 L_bridge = 2.5
 
+isBridge = False
+isRotor = True
 
-w0 = rho_bridge * section.A * 9.80665
-
-P = 100*9.80665
-Fdx,Fdy,Fdz = 203,203,203
-Mdx,Mdy,Mdz = 56,56,56
-
+if isBridge:
+    w0 = rho_bridge * section.A * 9.80665
+    P = 100*9.80665
+    Fdx,Fdy,Fdz = 203,203,203
+    Mdx,Mdy,Mdz = 56,56,56
+elif isRotor:
+    w0 = rho_bridge * section.A * 9.80665
+    P = 0
+    Fdx,Fdy,Fdz = 0,2400*9.80665/4,0
+    Mdx,Mdy,Mdz = 0,750,0
 
 #Set up reactions
-Ry = Fdy -3*P-w0*L_bridge
-Rx = Fdx
-Rz = Fdz
-
-Mrx = Ry*L_bridge+P*(L_bridge+L_bridge/2)+0.5*w0*L_bridge*L_bridge + Mdx
-Mry = Rx*L_bridge - Mdy
-Mrz = Mdz
-
 dz = 0.01
-z = np.arange(0,L_bridge+dz,dz)
-
-#Compute internal newtons
-Vy_int = -Ry*mc(z,0,0) -P*mc(z,0,0) - w0*mc(z,0,1) - P*mc(z,L_bridge/2,0) - P*mc(z,L_bridge,0) + Fdy*mc(z,L_bridge,0)
-Mx_int = -Ry*mc(z,0,1) - P*mc(z,0,1) - 0.5*w0*mc(z,0,2) - P*mc(z,L_bridge/2,1) + Mrx*mc(z,0,0)
-thetay = (-1/(E*Ixx)) * ( -0.5*Ry*mc(z,0,2) -0.5*P*mc(z,0,2) -(1/6)*w0*mc(z,0,3) -0.5*P*mc(z,L_bridge/2,2) + Mrx*mc(z,0,1)    )
-deflecty = (-1/(E*Ixx)) * ( (-1/6) * Ry * mc(z,0,3) + (-1/6) * P * mc(z,0,3) + (-1/24) * w0 * mc(z,0,4) + (1/2) * Mrx * mc(z,0,2) + (-1/6) * P *mc(z,L_bridge,3) )
-
-#Axis now
-Vx_int = -Rx*mc(z,0,0) + Fdx*mc(z,L_bridge,0)
-My_int =  -Rx * mc(z,0,1) + Mry * mc(z,0,0)
-thetax = (-1/(E*Iyy))* ((-1/2) * Rx * mc(z,0,2) + Mry * mc(z,0,1))
-deflectx = (-1/(E*Iyy)) * ((-1/6)*Rx*mc(z,0,3) + (1/2)*Mry*mc(z,0,2))
-
-Nz_int = - Rz * mc(z,0,0) + Fdz*mc(z,L_bridge,0)
-Tz_int = Mrz * mc(z,0,0) - Mdz*mc(z,L_bridge,0)
-dtheta = st_integral*Tz_int/(4 * A_m**2 * G)
-thetaz = np.cumsum(dtheta*dz)
-
-ys = [-h_bridge/2,h_bridge/2,h_bridge/2,-h_bridge/2]
-xs = [-w_bridge/2,w_bridge/2,-w_bridge/2,w_bridge]
-sigmas = []
-maxsigma = []
-for i in range(len(ys)):
-    sigma_z = Nz_int/A_bridge + Mx_int/Ixx * ys[i] + (My_int/Iyy) * xs[i]
-    sigmas.append(sigma_z)
-    if np.sum(np.abs(sigma_z)) > np.sum(np.abs(maxsigma)):
-        maxsigma =  np.sum(np.abs(sigma_z))
-        sigma_final = sigma_z
+reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
 
 
 
-
-plotInternal = False
+plotInternal = True
 if plotInternal:
     fig, ax = plt.subplots(3,4)
     ax = ax.ravel()
@@ -135,12 +141,12 @@ if plotInternal:
     ax[9].set_ylabel(r'Tz - Torque around z [Nm]')
     ax[9].set_xlabel(r'z [m]')
 
-    ax[10].plot(z, thetax)
+    ax[10].plot(z, dtheta)
     ax[10].title.set_text(r"Rate of twist along z")
     ax[10].set_ylabel(r'$d\theta/dz$ - Rate of twist[rad/m]')
     ax[10].set_xlabel(r'z [m]')
 
-    ax[11].plot(z, deflectx)
+    ax[11].plot(z, thetaz)
     ax[11].title.set_text(r"Twist angle")
     ax[11].set_ylabel(r'$\theta_z$ - Twist [rad]')
     ax[11].set_xlabel(r'z [m]')
