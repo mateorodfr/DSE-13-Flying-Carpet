@@ -1,6 +1,6 @@
 import Parameters as pm
 import numpy as np
-from BridgeDeflection import section #,Nz_int,Mx_int,My_int
+from BridgeDeflection import section ,Nz_int,Mx_int,My_int
 import matplotlib.pyplot as plt
 
 Ixx = section.Ix

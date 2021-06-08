@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 '''
@@ -477,7 +478,6 @@ class CrossSectionParameters(object):
         """
         self.shape = shape
         if self.shape == 'square':
-            
             self.h = props[0]
             self.w = props[1]
             self.t_h = ts[0]
@@ -488,6 +488,9 @@ class CrossSectionParameters(object):
             self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w**3 #(1/3) * props[0]**2 * props[1] * t_avg
             self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
             self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
+            ys = np.arange(-self.h/2,self.h/2,0.01)
+            xs = np.arange(-self.w/2,self.w/2+0.01,0.01)
+            self.contour = np.array([ [self.w/2,-y] for y in ys] + [[-x,-self.h/2] for x in xs] + [[-self.w/2,y] for y in ys] + [[x,self.h/2] for x in xs])
 
         elif self.shape == 'circle':
             self.r = props[0]
@@ -496,6 +499,10 @@ class CrossSectionParameters(object):
             self.Am = np.pi*self.r**2
             self.Ix = self.Iy = np.pi*self.r**3*self.t
             self.Jz = self.Ix + self.Iy
+            rng = np.arange(0,2*np.pi+0.01,0.01)
+            xs = self.r*np.cos(rng)
+            ys = self.r*np.sin(rng)
+            self.contour = np.transpose(np.array([xs,ys]))
 
         elif self.shape == 'ibeam':
             self.h = props[0]
@@ -507,3 +514,7 @@ class CrossSectionParameters(object):
             self.Ix = (1/12)*self.t_h*self.h**3 + 2*self.w*self.t_w*(self.h/2)**2
             self.Iy = (1/6)*self.t_w*self.w**3
             self.Jz = None
+            self.contour = None
+    def plotContour(self):
+        plt.plot(self.contour[:,0],self.contour[:,1])
+        plt.show()
