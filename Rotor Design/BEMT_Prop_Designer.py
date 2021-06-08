@@ -60,8 +60,8 @@ def main():
 
         with open("rot.ini", "w+") as f:
             f.write(lines)
-    def CT_CP(Thrust, rho, D, f):
-        return (Thrust/(rho * D*D*D*D * f * f)), (Thrust/(rho * D*D*D*D*D * f * f * f))
+    def CT_CP(Thrust, Power, rho, D, f):
+        return Thrust/(rho * D*D*D*D * f * f), Power/(rho * D*D*D*D*D * f * f * f)
     
     
     # setINI(10)
@@ -74,10 +74,12 @@ def main():
         a1 = solver.turbine_coeffs(T, Q, P)
         a2 = solver.turbine_coeffs(T2, Q2, P2)
     except ZeroDivisionError:
-        a1 = (np.nan, CT_CP(T, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60))
-        a2 = (np.nan, CT_CP(T2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60))
+        a1 = (np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60))
+        a2 = (np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60))
 
     print(f"\n{(T+T2)*4 / 9.80665} [kg]")
+    print(f"\n rotor1: Ct = {a1[1]}, Cp = {a1[2]}, Ct/Cp = {a1[1] / a1[2]}")
+    print(f"\n rotor2: Ct = {a2[1]}, Cp = {a2[2]}, Ct/Cp = {a2[1] / a2[2]}")
 
 
 if __name__ == '__main__':
