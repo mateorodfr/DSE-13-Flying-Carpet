@@ -70,17 +70,19 @@ def main() -> None:
     
     T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
     try:
-        a1 = solver.turbine_coeffs(T, Q, P)
-        a2 = solver.turbine_coeffs(T2, Q2, P2)
+        TSR, CT, CP = solver.turbine_coeffs(T, Q, P)
+        TSR2, CT2, CP2 = solver.turbine_coeffs(T2, Q2, P2)
     except ZeroDivisionError:
-        a1 = (np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60))
-        a2 = (np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60))
+        TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
+        TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
 
 
     print(f"\n{(T+T2)*4 / G} [kg]")
-    print(f"\n rotor1: Ct = {a1[1]}, Cp = {a1[2]}, Ct/Cp = {a1[1] / a1[2]}")
-    print(f"\n rotor2: Ct = {a2[1]}, Cp = {a2[2]}, Ct/Cp = {a2[1] / a2[2]}")
+    print(f"\n\n\t\t{(P+P2)/2}\n\n")
+    print(f"Rotor1: {CT = }, {CP = }, Ct/Cp = {CT / CP}\n")
+    print(f"Rotor2: {CT2 = }, {CP2 = }, Ct/Cp = {CT2 / CP2}\n")
 
+    
 
 
 if __name__ == '__main__':
