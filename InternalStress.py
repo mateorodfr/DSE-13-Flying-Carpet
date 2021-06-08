@@ -18,14 +18,15 @@ import matplotlib.pyplot as plt
 taus = []
 maxtau = []
 
-dxy = 0.001
-Vymax, Vxmax , Tmax = 1 , 1, 1
+
+Vymax, Vxmax , Tmax = 1 , 1, 1 ######CHANGE MEEEEE########
 
 if section.shape == "square":
+    dxy = 0.001
     xyarr = np.arange(0,section.w * 0.5 +section.h * 0.5 + dxy, dxy)
-    tauy = ((Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
+    tauy = (((Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
     (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr >= section.w/2) * (section.w/2))/section.t_w + \
-    ((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  +section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h
+    ((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  +section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h)
 
     taux = np.flip(((Vxmax/section.Iy) * (section.w/2) * section.t_h * (xyarr < section.h/2) *xyarr + \
     ((Vxmax/section.Iy) * (section.w/2) * section.t_h) * (xyarr >= section.h/2)  * section.h/2)/section.t_h + \
@@ -36,11 +37,15 @@ if section.shape == "square":
     tau = taux + tauy + tauz
 
 if section.shape == "circle":
-    xyarr = np.arange(0,section.r * np.pi / 2 + dxy, dxy)
-    tauy = ((Vymax/section.Ix) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
 
-    taux = np.flip((Vxmax/section.Iy) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
+    dtheta = 0.0001
+    xyarr = np.arange(0, np.pi /2 + dtheta, dtheta)
 
+    #tauy = ((Vymax/section.Ix) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
+    tauy = (Vymax/section.Ix) * section.t * section.r * np.sin(xyarr)
+
+    #taux = np.flip((Vxmax/section.Iy) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
+    taux = np.flip((Vymax/section.Ix) * section.t * section.r * np.sin(xyarr))
     tauz = (Tmax / (2*section.Am * section.t)) * np.ones(len(xyarr)) 
 
     tau = taux + tauy + tauz

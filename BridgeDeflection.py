@@ -120,8 +120,8 @@ w_bridge = 0.5
 h_bridge = 0.1
 thicc_w = 0.001
 thicc_h = 0.001
-section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
-#section = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
+#section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
+section = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
 #section = pm.CrossSectionParameters('ibeam',[h_bridge,w_bridge],[thicc_h,thicc_w])
 
 Ix = section.Ix
