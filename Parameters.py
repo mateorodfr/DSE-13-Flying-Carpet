@@ -301,7 +301,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 2343, 600, 597, 12.3, 0.325, 51, 111]
+    concept0 = ['Pickup & Release', 1995, 600, 357, 12.3, 0.325, 51, 60]
     concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
