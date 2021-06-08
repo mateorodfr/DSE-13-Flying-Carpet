@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import sin, cos, pi
 from scipy.linalg import solve
 
 
@@ -79,16 +79,20 @@ class Reactions:
             self.__e_modulus = None
 
             # Reactions at connectors
+            self.__F_c1_x = None
             self.__F_c1_y = None
             self.__F_c2_x = None
+            self.__F_c2_y = None
+            self.__F_c3_x = None
             self.__F_c3_y = None
             self.__F_c4_x = None
+            self.__F_c4_y = None
 
             # Internal moments
-            self.__Ma = None
-            self.__Mb = None
-            self.__Mc = None
-            self.__Md = None
+            self.__Mab = None
+            self.__Mbc = None
+            self.__Mcd = None
+            self.__Mda = None
 
     def set_p(self, p1, p2, p3, p4):
         """
@@ -202,94 +206,200 @@ class Reactions:
         """
 
         if self.__cptype == "beams_square":
-            # Total torque on centerpiece
-            T = self.get_h1()[3] + self.get_h2()[3] + self.get_h3()[3] + self.get_h4()[3]
+            # Assemble matrix
+            # Calculate some terms beforehand to keep matrix clean
+            L1 = self.__l1
+            L2 = self.__l2
 
-            # Larger matrix terms calculated beforehand to make the matrix cleaner
-            a3_3 = - self.__l1 ** 3 / (3 * self.__e_modulus * self.__moi41)
-            a3_8 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
+            A9_3 = L2 * L2 * L2 / (3 * self.__e_modulus * self.__moi12)
+            A9_10 = L2 * L2 / (2 * self.__e_modulus * self.__moi12)
+            A10_6 = -L1 * L1 * L1 / (3 * self.__e_modulus * self.__moi23)
+            A10_11 = L1 * L1 / (2 * self.__e_modulus * self.__moi23)
+            A11_7 = - L2 * L2 * L2 / (3 * self.__e_modulus * self.__moi34)
+            A11_12 = L2 * L2 / (2 * self.__e_modulus * self.__moi34)
+            A12_2 = L1 * L1 * L1 / (3 * self.__e_modulus * self.__moi41)
+            A12_9 = L1 * L1 / (2 * self.__e_modulus * self.__moi41)
+            A13_3 = L2 * L2 / (2 * self.__e_modulus * self.__moi12)
+            A13_10 = L2 / (self.__e_modulus * self.__moi12)
+            A14_6 = - L1 * L1 / (2 * self.__e_modulus * self.__moi23)
+            A14_11 = L1 / (self.__e_modulus * self.__moi23)
+            A15_7 = - L2 * L2 / (2 * self.__e_modulus * self.__moi34)
+            A15_12 = L2 / (self.__e_modulus * self.__moi34)
+            A16_2 = L1 * L1 / (2 * self.__e_modulus * self.__moi41)
+            A16_9 = L1 / (self.__e_modulus * self.__moi41)
 
-            a4_3 = -self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi41)
-            a4_8 = self.__l1 / (self.__e_modulus * self.__moi41)
+            # Matrix assembly
+            A = [
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # eq1
+                [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # eq2
+                [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # eq3
+                [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],  # eq4
+                [0, 0, L2, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0],  # eq5
+                [0, 0, 0, 0, 0, -L1, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0],  # eq6
+                [0, 0, 0, 0, 0, 0, -L2, 0, 0, 0, -1, 1, 0, 0, 0, 0],  # eq7
+                [0, L1, 0, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0],  # eq8
+                [0, 0, A9_3, 0, 0, 0, 0, 0, 0, A9_10, 0, 0, 0, 0, 0, L2],  # eq9
+                [0, 0, 0, 0, 0, A10_6, 0, 0, 0, 0, A10_11, 0, L1, 0, 0, 0],   # eq10
+                [0, 0, 0, 0, 0, 0, A11_7, 0, 0, 0, 0, A11_12, 0, L2, 0, 0],   # eq11
+                [0, A12_2, 0, 0, 0, 0, 0, 0, A12_9, 0, 0, 0, 0, 0, L1, 0],  # eq12
+                [0, 0, A13_3, 0, 0, 0, 0, 0, 0, A13_10, 0, 0, -1, 0, 0, 1],  # eq13
+                [0, 0, 0, 0, 0, A14_6, 0, 0, 0, 0, A14_11, 0, 1, -1, 0, 0],  # eq14
+                [0, 0, 0, 0, 0, 0, A15_7, 0, 0, 0, 0, A15_12, 0, 1, -1, 0],   # eq15
+                [0, A16_2, 0, 0, 0, 0, 0, 0, A16_9, 0, 0, 0, 0, 0, 1, -1],   # eq16
+            ]
 
-            a5_0 = - self.__l2 ** 3 / (3 * self.__e_modulus * self.__moi12)
-            a5_9 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
-
-            a6_0 = - self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
-            a6_9 = self.__l2 / (self.__e_modulus * self.__moi12)
-
-            a7_1 = self.__l1 ** 3 / (3 * self.__e_modulus * self.__moi23)
-            a7_10 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi23)
-
-            a8_1 = self.__l1 ** 2 / (2 * self.__e_modulus * self.__moi23)
-            a8_10 = self.__l1 / (self.__e_modulus * self.__moi23)
-
-            a9_2 = self.__l2 ** 3 / (3 * self.__e_modulus * self.__moi34)
-            a9_11 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi34)
-
-            a10_2 = self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi34)
-            a10_11 = self.__l2 / (self.__e_modulus * self.__moi34)
-
-            # Assemble matrix containing equations of statically indeterminate problem
-            A = [[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 0, self.__l2, -self.__l1, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 0, 0, a3_3, self.__l1, 0, 0, 0, a3_8, 0, 0, 0],
-                 [0, 0, 0, a4_3, 1, -1, 0, 0, a4_8, 0, 0, 0],
-                 [a5_0, 0, 0, 0, 0, 0, self.__l2, 0, 0, a5_9, 0, 0],
-                 [a6_0, 0, 0, 0, -1, 0, 1, 0, 0, a6_9, 0, 0],
-                 [0, a7_1, 0, 0, 0, 0, 0, self.__l1, 0, 0, a7_10, 0],
-                 [0, a8_1, 0, 0, 0, 0, -1, 1, 0, 0, a8_10, 0],
-                 [0, 0, a9_2, 0, 0, self.__l2, 0, 0, 0, 0, 0, a9_11],
-                 [0, 0, a10_2, 0, 0, 1, 0, -1, 0, 0, 0, a10_11],
-                 [-self.__l2, self.__l1, self.__l2, -self.__l1, 0, 0, 0, 0, 0, 0, 0, 0]]
-
-            # Assemble RHS Vector
-            b5 = -T * self.__l2 ** 2 / (2 * self.__e_modulus * self.__moi12)
-            b6 = -T * self.__l2 / (self.__e_modulus * self.__moi12)
-
-            b = [[0],
-                 [0],
-                 [-T],
-                 [0],
-                 [0],
-                 [b5],
-                 [b6],
-                 [0],
-                 [0],
-                 [0],
-                 [0],
-                 [-T]]
+            # RHS vector assembly
+            b = [
+                [0],
+                [0],
+                [0],
+                [0],
+                [-self.__t2],
+                [-self.__t3],
+                [-self.__t4],
+                [-self.__t1],
+                [-self.__t2 * L2 * L2 / (2 * self.__e_modulus * self.__moi12)],
+                [-self.__t3 * L1 * L1 / (2 * self.__e_modulus * self.__moi23)],
+                [-self.__t4 * L2 * L2 / (2 * self.__e_modulus * self.__moi34)],
+                [-self.__t1 * L1 * L1 / (2 * self.__e_modulus * self.__moi41)],
+                [-self.__t2 * L2 / (self.__e_modulus * self.__moi12)],
+                [-self.__t3 * L1 / (self.__e_modulus * self.__moi23)],
+                [-self.__t4 * L2 / (self.__e_modulus * self.__moi34)],
+                [-self.__t1 * L1 / (self.__e_modulus * self.__moi41)]
+            ]
 
             # Solve matrix problem
-            # x is the vector:
-            # [Ax, By, Cx, Dy, th_BA_A, th_AD_D, th_CB_B, th_DC_C, M_D, M_A, M_B, M_C]
+            # x = [Ax, Ay, Bx, By, Cx, Cy, Dx, Dy, Mab, Mbc, Mcd, Mda, th_ab_b, th_bc_c, th_cd_d, th_da_a]
             x = solve(A, b)
 
-            # Converting solution to be coherent with FBD
-            self.__F_c1_y = -x[0]  # F_c1_y = -Ax
-            self.__F_c2_x = -x[1]  # F_c2_x = -Bx
-            self.__F_c3_y = -x[2]  # F_c3_y = -Cx
-            self.__F_c4_x = -x[3]  # F_c4_x = -Dy
+            # Transfer to class variables
+            self.__F_c1_x = float(-x[1])  # F_c1_x = -Ay
+            self.__F_c1_y = float(-x[0])  # F_c1_y = -Ax
+            self.__F_c2_x = float(-x[3])  # F_c2_x = -By
+            self.__F_c2_y = float(-x[2])  # F_c2_y = -Bx
+            self.__F_c3_x = float(-x[5])  # F_c3_x = -Cy
+            self.__F_c3_y = float(-x[4])  # F_c3_y = -Cx
+            self.__F_c4_x = float(-x[7])  # F_c4_x = -Dy
+            self.__F_c4_y = float(-x[6])  # F_c4_y = -Dx
+            self.__Mab = float(x[8])
+            self.__Mbc = float(x[9])
+            self.__Mcd = float(x[10])
+            self.__Mda = float(x[11])
 
-            # Print deflections at hinges for solution verification
             if ver:
-                print("theta_BA|A = " + str(x[4]))
-                print("theta_AD|D = " + str(x[5]))
-                print("theta_CB|B = " + str(x[6]))
-                print("theta_DC|C = " + str(x[7]))
+                print("Ax = " + str(float(x[0])) + str(" N"))
+                print("Ay = " + str(float(x[1])) + str(" N"))
+                print("Bx = " + str(float(x[2])) + str(" N"))
+                print("By = " + str(float(x[3])) + str(" N"))
+                print("Cx = " + str(float(x[4])) + str(" N"))
+                print("Cy = " + str(float(x[5])) + str(" N"))
+                print("Dx = " + str(float(x[6])) + str(" N"))
+                print("Dy = " + str(float(x[7])) + str(" N"))
+                print("Mab = " + str(float(x[8])) + str(" Nm"))
+                print("Mbc = " + str(float(x[9])) + str(" Nm"))
+                print("Mcd = " + str(float(x[10])) + str(" Nm"))
+                print("Mda = " + str(float(x[11])) + str(" Nm"))
+                print("th_ab|b = " + str(float(x[12]) * 180 / pi) + str(" deg"))
+                print("th_bc|c = " + str(float(x[13]) * 180 / pi) + str(" deg"))
+                print("th_cd|d = " + str(float(x[14]) * 180 / pi) + str(" deg"))
+                print("th_da|a = " + str(float(x[15]) * 180 / pi) + str(" deg"))
 
-            # Store internal moments
-            self.__Ma = x[8]
-            self.__Mb = x[9]
-            self.__Mc = x[10]
-            self.__Md = x[11]
         else:
             print("Error: cptype not yet supported")
             exit()
 
     def get_c(self):
-        if self.__F_c1_y.type() is not None:
-            return self.__F_c1_y, self.__F_c2_x, self.__F_c3_y, self.__F_c4_x
+        """
+        Return reactions at connectors
+        """
+        if self.__F_c1_x is not None:
+            return self.__F_c1_x, self.__F_c1_y, \
+                   self.__F_c2_x, self.__F_c2_y, \
+                   self.__F_c3_x, self.__F_c3_y, \
+                   self.__F_c4_x, self.__F_c4_y
         else:
             print("Error: get_c() called before reactions are calculated using solve_c()")
+
+    def nvm_12(self, d):
+        """
+        Returns the internal force components of beam 12
+
+        parameters:
+            float d : distance along beam 12 from point 1
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l2:
+            n = 0
+            v = self.__F_c1_y
+            m = self.__Mab - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_12()")
+            exit()
+
+    def nvm_23(self, d):
+        """
+        Returns the internal force components of beam 23
+
+        parameters:
+            float d : distance along beam 23 from point 2
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l1:
+            n = 0
+            v = - self.__F_c2_x
+            m = self.__Mbc - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_23()")
+            exit()
+
+    def nvm_34(self, d):
+        """
+        Returns the internal force components of beam 34
+
+        parameters:
+            float d : distance along beam 34 from point 3
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l2:
+            n = 0
+            v = - self.__F_c3_y
+            m = self.__Mcd - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_34()")
+            exit()
+
+    def nvm_41(self, d):
+        """
+        Returns the internal force components of beam 41
+
+        parameters:
+            float d : distance along beam 41 from point 4
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l1:
+            n = 0
+            v = self.__F_c4_x
+            m = self.__Mda - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_34()")
+            exit()

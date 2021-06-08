@@ -91,3 +91,9 @@ m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
 M_final = m_rad + M_tot + n_HV_bat * M_pump
 print(M_final)
+print()
+print("Mass of the pipes: ", M_pipes)
+print("Length of the pipes: ", L_pipes)
+print("Mass of water in the system: ", M_water)
+print("Mass of the radiator: ", m_rad)
+print("Total mass: ", M_final)
