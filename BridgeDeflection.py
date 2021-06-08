@@ -56,7 +56,6 @@ My_int =  -Rx * mc(z,0,1) + Mry * mc(z,0,0)
 thetax = (-1/(E*Iyy))* ((-1/2) * Rx * mc(z,0,2) + Mry * mc(z,0,1))
 deflectx = (-1/(E*Iyy)) * ((-1/6)*Rx*mc(z,0,3) + (1/2)*Mry*mc(z,0,2))
 
-#Torque
 Nz_int = - Rz * mc(z,0,0) + Fdz*mc(z,L_bridge,0)
 Tz_int = Mrz * mc(z,0,0) - Mdz*mc(z,L_bridge,0)
 dtheta = st_integral*Tz_int/(4 * A_m**2 * G)

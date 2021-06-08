@@ -451,5 +451,60 @@ class ElectronicsParameters(object):
             self.pump_amount = self.Electronics0[25]
 
 
+class CrossSectionParameters(object):
+
+    def __init__(self,shape,props,ts):
+
+
+        """
+        To create a cross section.
+
+        1. Choose shape (string): 'square', 'circle', 'ibeam'
+        2. Initialize properties (array):
+            ts = array containing various thicknesses, if constant set all entries to be the same
+            props = section properties length of 
+            if square:
+                props = [height,width]
+                ts = [t_h,t_w]
+            if circle:
+                props = [radius]
+                ts = [t_r]
+            if ibeam:
+                props = [height flange, width flange]
+                ts = [thickness of vertical part, thickness of horizontal parts]
+
+
+        """
+        if shape == 'square':
+            self.h = props[0]
+            self.w = props[1]
+            self.t_h = ts[0]
+            self.t_w = ts[1]
+            self.t_avg = np.average(ts)
+            self.A = 2 * self.h * self.t_h + 2 * self.w * self.t_w
+            self.Am = self.h * self.w
+            self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w**3 #(1/3) * props[0]**2 * props[1] * t_avg
+            self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
+            self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
+
+        elif shape == 'circle':
+            self.r = props[0]
+            self.t = ts[0]
+            self.A = np.pi*(self.r**2 - (self.r-self.t)**2)
+            self.Am = np.pi*self.r**2
+            self.Ix = self.Iy = np.pi*self.r**3*self.t
+            self.Jz = self.Ix + self.Iy
+
+        elif shape == 'ibeam':
+            self.h = props[0]
+            self.w = props[1]
+            self.t_h = ts[0]
+            self.t_w = ts[0]
+            self.A = self.h*self.t_h + 2*self.w*self.t_w
+            self.Am = 0
+            self.Ix = (1/12)*self.t_h*self.h**3 + 2*self.w*self.t_w*(self.h/2)**2
+            self.Iy = (1/6)*self.t_w*self.w**3
+            self.Jz = None
+
 
 
