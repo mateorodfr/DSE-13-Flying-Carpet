@@ -281,6 +281,10 @@ class Reactions:
             self.__F_c3_y = float(-x[4])  # F_c3_y = -Cx
             self.__F_c4_x = float(-x[7])  # F_c4_x = -Dy
             self.__F_c4_y = float(-x[6])  # F_c4_y = -Dx
+            self.__Mab = float(x[8])
+            self.__Mbc = float(x[9])
+            self.__Mcd = float(x[10])
+            self.__Mda = float(x[11])
 
             if ver:
                 print("Ax = " + str(float(x[0])) + str(" N"))
@@ -291,6 +295,10 @@ class Reactions:
                 print("Cy = " + str(float(x[5])) + str(" N"))
                 print("Dx = " + str(float(x[6])) + str(" N"))
                 print("Dy = " + str(float(x[7])) + str(" N"))
+                print("Mab = " + str(float(x[8])) + str(" Nm"))
+                print("Mbc = " + str(float(x[9])) + str(" Nm"))
+                print("Mcd = " + str(float(x[10])) + str(" Nm"))
+                print("Mda = " + str(float(x[11])) + str(" Nm"))
                 print("th_ab|b = " + str(float(x[12]) * 180 / pi) + str(" deg"))
                 print("th_bc|c = " + str(float(x[13]) * 180 / pi) + str(" deg"))
                 print("th_cd|d = " + str(float(x[14]) * 180 / pi) + str(" deg"))
@@ -311,3 +319,87 @@ class Reactions:
                    self.__F_c4_x, self.__F_c4_y
         else:
             print("Error: get_c() called before reactions are calculated using solve_c()")
+
+    def nvm_12(self, d):
+        """
+        Returns the internal force components of beam 12
+
+        parameters:
+            float d : distance along beam 12 from point 1
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l2:
+            n = 0
+            v = self.__F_c1_y
+            m = self.__Mab - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_12()")
+            exit()
+
+    def nvm_23(self, d):
+        """
+        Returns the internal force components of beam 23
+
+        parameters:
+            float d : distance along beam 23 from point 2
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l1:
+            n = 0
+            v = - self.__F_c2_x
+            m = self.__Mbc - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_23()")
+            exit()
+
+    def nvm_34(self, d):
+        """
+        Returns the internal force components of beam 34
+
+        parameters:
+            float d : distance along beam 34 from point 3
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l2:
+            n = 0
+            v = - self.__F_c3_y
+            m = self.__Mcd - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_34()")
+            exit()
+
+    def nvm_41(self, d):
+        """
+        Returns the internal force components of beam 41
+
+        parameters:
+            float d : distance along beam 41 from point 4
+
+        returns:
+            float n : normal force
+            float v : shear force (clockwise positive)
+            float m : bending moment (counterclockwise positive)
+        """
+        if 0 <= d <= self.__l1:
+            n = 0
+            v = self.__F_c4_x
+            m = self.__Mda - v * d
+            return n, v, m
+        else:
+            print("Error: Invalid distance argument given in nvm_34()")
+            exit()
