@@ -114,15 +114,36 @@ def internalLoading(dz,section,mc,L_beam,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=False
 
     return reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz
 
+def normalStress(section, Nz, Mx, My,z):
+    sigma_max = 0
+    sigma_dist_max = []
+    for i in range(len(Nz)):
+        sigma_i = np.ones(len(section.contour))*(Nz[i]/section.A) \
+                  + (My[i]/section.Iy) * section.contour[:,0]     \
+                  + (Mx[i]/section.Ix) * section.contour[:,1]
+
+        if np.max(np.abs(sigma_i)) > np.abs(sigma_max):
+            sigma_low = np.amin(sigma_i)
+            sigma_high = np.amax(sigma_i)
+            if np.abs(sigma_low) > sigma_high:
+                sigma_max = sigma_low
+            else:
+                sigma_max = sigma_high
+            sigma_dist_max = sigma_i
+            z_max = z[i]
+    return sigma_dist_max, sigma_max, z_max
 
 rho_bridge = 2700
 w_bridge = 0.5
 h_bridge = 0.1
 thicc_w = 0.001
 thicc_h = 0.001
-#section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
+
+
 section = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
 #section = pm.CrossSectionParameters('ibeam',[h_bridge,w_bridge],[thicc_h,thicc_w])
+#section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
+
 
 Ix = section.Ix
 Iy = section.Iy
@@ -133,8 +154,8 @@ E = 69e9
 G = 25.5e9
 L_bridge = 2.5
 
-isBridge = False
-isRotor = True
+isBridge = True
+isRotor = False
 
 if isBridge:
     w0 = rho_bridge * section.A * 9.80665
@@ -149,12 +170,8 @@ elif isRotor:
 
 #Set up reactions
 dz = 0.01
-plotInternal = False
+plotInternal = True
 reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plotInternal)
+sigmas, sigma_max, z_max = normalStress(section, Nz_int, Mx_int, My_int,z)
+section.plotNormalStress(sigmas)
 
-
-#def normalStress(Nz,My,Mx,section):
-#
-#    sigma = Nz/section.A + (Mx/section.Ix)*section.contour[:,1] + (My/section.Iy)*section.contour[:,0]
-#    print(len(sigma))
-#normalStress(Nz_int,My_int,Mx_int,section)
