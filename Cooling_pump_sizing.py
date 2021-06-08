@@ -13,8 +13,8 @@ n_HV_bat = 4    # 4 battery concept chosen
 
 rho_pipes = 8730        # Copper-Nickel 70/30 applied to the pipes
 rho_plate = 2700        # Aluminium applied to the plate itself
-Plate_filling = 0       # How much the plate is filled - whether it has any heat sink parallel plates
-Perc_water = 0.9        # What percentage of the plate consists of the water
+Plate_filling = 1       # How much the plate is filled - whether it has any heat sink parallel plates
+Perc_water = 0.4        # What percentage of the plate consists of the water
 
 t_asc_req = 60
 t_des_req = 60

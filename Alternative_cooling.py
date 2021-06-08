@@ -73,7 +73,7 @@ V_cool_pipes = L_cool_pipes * A_cool_pipes
 m_cool_pipes = V_cool_pipes * rho_plate
 
 A_cooling = 1.05 * ((n_patch - 1) * H_bat * W_bat + 1 * (L_bat * H_bat * 0 + L_bat * W_bat))    # The area on which the cooling is applied
-V_cooling = A_cooling * W_pipe #* D_pipe
+V_cooling = A_cooling * H_pipe #* D_pipe
 M_water = (V_cooling * Perc_water / mat_perc + A_pipe / mat_perc * extra_meters + V_cool_pipes / mat_perc) * n_HV_bat * rho_water   # Mass of the water needed for the cooling
 print(A_cooling * n_HV_bat)
 print("The water mass in the pipes =", M_water, "kg")
@@ -91,3 +91,9 @@ m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
 M_final = m_rad + M_tot + n_HV_bat * M_pump
 print(M_final)
+print()
+print("Mass of the pipes: ", M_pipes)
+print("Length of the pipes: ", L_pipes)
+print("Mass of water in the system: ", M_water)
+print("Mass of the radiator: ", m_rad)
+print("Total mass: ", M_final)
