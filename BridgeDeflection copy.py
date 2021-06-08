@@ -2,6 +2,9 @@ from Macaulay import macaulay as mc
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+
+
 rho_bridge = 2700
 w_bridge = 0.5
 h_bridge = 0.1
