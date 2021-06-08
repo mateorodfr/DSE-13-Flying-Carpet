@@ -488,8 +488,8 @@ class CrossSectionParameters(object):
             self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w**3 #(1/3) * props[0]**2 * props[1] * t_avg
             self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
             self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
-            ys = np.arange(-self.h/2,self.h/2,0.01)
-            xs = np.arange(-self.w/2,self.w/2+0.01,0.01)
+            ys = np.arange(-self.h/2,self.h/2,0.001)
+            xs = np.arange(-self.w/2,self.w/2+0.001,0.001)
             self.contour = np.array([ [self.w/2,-y] for y in ys] + [[-x,-self.h/2] for x in xs] + [[-self.w/2,y] for y in ys] + [[x,self.h/2] for x in xs])
 
         elif self.shape == 'circle':
@@ -517,4 +517,9 @@ class CrossSectionParameters(object):
             self.contour = None
     def plotContour(self):
         plt.plot(self.contour[:,0],self.contour[:,1])
+        plt.show()
+    def plotNormalStress(self,sigma):
+        plt.scatter(self.contour[:,0],self.contour[:,1],c=sigma/np.max(np.abs(sigma)))
+        plt.xlim([-2*np.amax(self.contour[:,0]), 2*np.amax(self.contour[:,0])])
+        plt.ylim([-2*np.amax(self.contour[:,1]), 2*np.amax(self.contour[:,1])])
         plt.show()
