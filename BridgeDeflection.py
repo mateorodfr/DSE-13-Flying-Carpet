@@ -1,22 +1,26 @@
 from Macaulay import macaulay as mc
 import numpy as np
 import matplotlib.pyplot as plt
+import Parameters as pm
+
+
 
 rho_bridge = 2700
 w_bridge = 0.5
 h_bridge = 0.1
 thicc_w = 0.001
 thicc_h = 0.001
-thicc_avg = (thicc_h+thicc_w)/2
+section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
 
 
-A_bridge = 2*w_bridge * thicc_w + 2* h_bridge * thicc_h
-A_m = w_bridge*h_bridge
-st_integral = 2*h_bridge/thicc_h + 2*w_bridge/thicc_w
 
-Ixx = (1/3) * h_bridge**2 * w_bridge * thicc_avg
-Iyy = (1/3) * w_bridge**2 * h_bridge * thicc_avg
-Jz = (w_bridge*h_bridge*thicc_avg/3)*(h_bridge+w_bridge)
+A_bridge = section.A
+A_m = section.Am
+st_integral = 2*section.h/section.t_h + 2*section.w/section.t_w
+
+Ixx = section.Ix
+Iyy = section.Iy
+Jz = section.Jz
 
 
 
@@ -25,7 +29,7 @@ G = 25.5e9
 L_bridge = 2.5
 
 
-w0 = rho_bridge * A_bridge * 9.80665
+w0 = rho_bridge * section.A * 9.80665
 
 P = 100*9.80665
 Fdx,Fdy,Fdz = 203,203,203
@@ -72,8 +76,8 @@ for i in range(len(ys)):
         maxsigma =  np.sum(np.abs(sigma_z))
         sigma_final = sigma_z
 
-plt.plot(z,sigma_final)
-plt.show()
+
+
 
 plotInternal = False
 if plotInternal:
