@@ -196,7 +196,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 300, 683000,969,0.7,0.9, 0.98, 0.15, 0.02, 6.5]
+    battery0 = ['Panasonic NCA Si-C', 350, 683000,1086,0.7,0.9, 0.98, 0.15, 0.02, 6.5]
 
 
     def __init__(self,key=0):
@@ -302,7 +302,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1698, 600, 274, 12.3, 0.325, 51, 44]
+    concept0 = ['Pickup & Release', 1680, 600, 241, 12.3, 0.325, 44, 69]
     concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):

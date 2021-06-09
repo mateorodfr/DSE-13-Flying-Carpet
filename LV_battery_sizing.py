@@ -16,7 +16,7 @@ t_des_req = 80*n_cyc #time taken to descend in s
 t_hover_req = 445.5*n_cyc #time taken to hover in s
 t_mission_req = (t_asc_req + t_hover_req + t_des_req) #total mission time
 
-E_consumed = t_mission_req * P_cons / 3600
+E_consumed = t_mission_req * P_cons / 3600      # Wh
 
 
 V_LV = n_cell * V_cell
@@ -118,7 +118,7 @@ eff_buck_9 = (P_out_9 - P_loss_9) / P_out_9
 
 print(eff_buck_9)
 
-M_LV_bat = E_consumed / concept.battery.rhoE_battery / concept.battery.dod_battery / concept.battery.eff_battery / concept.battery.degradation / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
+M_LV_bat = E_consumed / concept.battery.rhoE_battery / concept.battery.dod_battery / concept.battery.eff_battery  / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
 M_tot = M_LV_bat + M_comp
 print(P_cons/M_LV_bat)
 
