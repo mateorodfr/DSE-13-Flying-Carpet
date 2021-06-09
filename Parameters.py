@@ -488,14 +488,14 @@ class CrossSectionParameters(object):
             self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w**3 #(1/3) * props[0]**2 * props[1] * t_avg
             self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
             self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
-            ys = np.arange(-self.h/2,self.h/2,0.001)
-            xs = np.arange(-self.w/2,self.w/2+0.001,0.001)
+            ys = np.arange(-self.h/2,self.h/2+(self.h/2)/100,+(self.h/2)/100)
+            xs = np.arange(-self.w/2,self.w/2++(self.w/2)/100,+(self.w/2)/100)
             self.contour = np.array([ [self.w/2,-y] for y in ys] + [[-x,-self.h/2] for x in xs] + [[-self.w/2,y] for y in ys] + [[x,self.h/2] for x in xs])
 
         elif self.shape == 'circle':
             self.r = props[0]
             self.t = ts[0]
-            self.A = np.pi*(self.r**2 - (self.r-self.t)**2)
+            self.A = 2*np.pi*self.r*self.t
             self.Am = np.pi*self.r**2
             self.Ix = self.Iy = np.pi*self.r**3*self.t
             self.Jz = self.Ix + self.Iy
@@ -518,8 +518,21 @@ class CrossSectionParameters(object):
     def plotContour(self):
         plt.plot(self.contour[:,0],self.contour[:,1])
         plt.show()
-    def plotNormalStress(self,sigma):
+    def plotNormalStress(self,sigma,mass=None,sigma_yield=None):
         plt.scatter(self.contour[:,0],self.contour[:,1],c=sigma/np.max(np.abs(sigma)))
         plt.xlim([-2*np.amax(self.contour[:,0]), 2*np.amax(self.contour[:,0])])
         plt.ylim([-2*np.amax(self.contour[:,1]), 2*np.amax(self.contour[:,1])])
+        plt.xlabel('x position [m]')
+        plt.ylabel('y position [m]')
+        plt.title('Normal Stress distribution at max stress point')
+        if self.shape == 'circle':
+            txt = f'Radius: ' + f'{np.round(self.r,3)} [m]' + f'\nThickness: ' + f'{np.round(self.t*1000,3)} [mm]' + f'\nMax Stress: ' + f'{np.round(1.5*np.max(np.abs(sigma))/1e6)} [MPa]'
+        elif self.shape == 'square':
+            txt = f'Height: ' + f'{np.round(self.h,3)} [m]' + f'\nWidth: ' + f'{np.round(self.w,3)} [m]' + f'\nThickness height: ' + f'{np.round(self.t_h*1000,3)} [mm]'+ f'\nThickness width: ' + f'{np.round(self.t_w*1000,3)} [mm]' + f'\nMax Stress: ' + f'{1.5*np.round(np.max(np.abs(sigma)))/1e6} [MPa]'
+        if mass is not None:
+            txt += (f'\nMass of Beam: ' + f'{np.round(mass,3)} [kg]')
+        if sigma_yield is not None:
+            txt += (f'\nYield Stress: ' + f'{np.round(sigma_yield/1e6,3)} [MPa]')
+
+        plt.text(-1.9*np.amax(self.contour[:,0]),0,txt)
         plt.show()
