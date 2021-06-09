@@ -178,11 +178,11 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     #T_req_eng = M_tot0*(state[:,0]+concept.physics.g)/concept.motor.N_motor /concept.propeller.eff_prop
     T_req_eng= np.array(T_req_eng)
     #P_req_eng= np.sqrt(T_req_eng/concept.physics.rho0/CL/Sb -0.25* state[:,1]**2) *3* torque/ np.pi**2/Dblade /concept.motor.eff_motor
-    P_req_eng = 39400
+    P_req_eng = 31100
     #P_req_eng = np.sqrt((2*T_req_eng**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor) * (1+ concept.battery.loss_factor) / concept.battery.eff_inverter / concept.battery.degradation
     P_req_eng_OEI = sqrt((2 * (M_tot1*a_OEI/2 + M_tot1*a_roll/4) ** 3) / (concept.physics.rho0 * np.pi * (concept.propeller.D_prop / concept.propeller.eff_prop) ** 2)) / (concept.motor.eff_motor) / concept.battery.loss_factor / concept.battery.eff_inverter
 
-    E_req = ((concept.motor.N_motor*P_req_eng * t_mission_req)) / concept.battery.eff_battery / concept.battery.dod_battery * (1 + concept.battery.loss_factor) / concept.battery.eff_inverter / concept.battery.degradation
+    E_req = ((concept.motor.N_motor*P_req_eng * t_mission_req)) / concept.battery.eff_battery / concept.battery.dod_battery * (1 + concept.battery.loss_factor) / concept.battery.eff_inverter * (1+ concept.battery.degradation)
     Mbat = E_req/ (concept.battery.rhoE_battery *3600)
 
 
