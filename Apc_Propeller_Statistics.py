@@ -72,29 +72,68 @@ def contains_NaN(s):
             newa.append(np.NaN)
     return newa
 
-for file_0 in allfiles:
-    with open(r"APC_Propellers\PERFILES_WEB\PERFILES2\PER3_5x3E.dat", "r") as f:
-        lines = f.readlines()[1:-1]
-        content = [c.strip() for c in lines]
+def read_individual_prop():
+    for file_0 in allfiles:
+        with open(r"APC_Propellers\PERFILES_WEB\PERFILES2\PER3_5x3E.dat", "r") as f:
+            lines = f.readlines()[1:-1]
+            content = [c.strip() for c in lines]
 
-        if content[17].startswith("PROP"):
-            # pp.pprint("17")
-            N = 16
-        elif content[12].startswith("PROP"):
-            # pp.pprint("12")
-            N = 11
-        else:
-            pp.pprint("Different Format")
-            break
-        STEP = 37
-        content = content[N:]
-        chunks = len(content[N-1:])//STEP + 1
-        # pp.pprint(content)
-        final3D = np.asarray([content[index*STEP:(index+1)*STEP] for index in range(chunks)])[:, 5:-2]
-        try:
-            final3D = np.array(np.char.split(final3D).tolist(), dtype=float)
-        except ValueError:
-            pass # TODO implement fix for NaN values
-    break
+            if content[17].startswith("PROP"):
+                # pp.pprint("17")
+                N = 16
+            elif content[12].startswith("PROP"):
+                # pp.pprint("12")
+                N = 11
+            else:
+                pp.pprint("Different Format")
+                break
+            STEP = 37
+            content = content[N:]
+            chunks = len(content[N-1:])//STEP + 1
+            # pp.pprint(content)
+            final3D = np.asarray([content[index*STEP:(index+1)*STEP] for index in range(chunks)])[:, 5:-2]
+            try:
+                final3D = np.array(np.char.split(final3D).tolist(), dtype=float)
+            except ValueError:
+                pass # TODO implement fix for NaN values
+        break
 
-pp.pprint(final3D[0])
+    pp.pprint(final3D[0])
+
+def pitch_to_angle(Diameter, pitch):
+    """Pitch at 75% of radius in inch to blade angle"""
+    pg = pitch * 2.54 / 100
+    D = Diameter * 2.54 / 100
+    beta_75 = np.degrees(np.arctan((4 * pg)/(3 * np.pi * D)))
+    return beta_75
+
+def get_rpmranges():
+    with open(r"APC_Propellers\PERFILES_WEB\PER2_RPMRANGE.DAT", "r") as f:
+        lines = f.readlines()
+        lines = [line.split() for line in lines]
+        rpm_ranges = {}
+        is_tenfold = lambda x: x % 10 == 0
+        for tag, min, max in lines:
+            min, max = int(min), int(max)
+            if not is_tenfold(int(max)):    # bodged fix for some rpms ending in 999
+                max += 1
+            rpm_ranges[tag] = (min, max)
+        return rpm_ranges
+
+def read_static_thrust():
+    with open(r"APC_Propellers\PERFILES_WEB\PER2_STATIC-2.DAT", "r") as f:
+        lines = f.readlines()[2:]
+
+    datalines = [line.split() for line in lines if line.strip()[:4].isdigit() and not line.strip().endswith(".dat")]
+    return np.asarray(datalines, dtype=float)    # Why won't you work
+
+def get_data_per_propeller(datalines, rpm_ranges):
+    for tag, vals in rpm_ranges.values():
+        pitch = tag.split('x')[-1]
+        if "-" in pitch:
+            pitch = float(pitch.split("-")[0])
+
+
+
+print(get_rpmranges()["9x4"])
+print(read_static_thrust())
