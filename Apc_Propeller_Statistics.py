@@ -129,9 +129,13 @@ def read_static_thrust():
 
 def get_data_per_propeller(datalines, rpm_ranges):
     for tag, vals in rpm_ranges.values():
-        pitch = tag.split('x')[-1]
+        diameter, pitch = tag.split('x')
         if "-" in pitch:
-            pitch = float(pitch.split("-")[0])
+            pitch = pitch.split("-")[0]
+        while (not pitch.isdigit()) or (len(pitch) == 0):
+            pitch = pitch[:-1:]
+        pitch = float(pitch)
+
 
 
 
