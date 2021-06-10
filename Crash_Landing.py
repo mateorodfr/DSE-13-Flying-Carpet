@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 class CrashLanding:
 
     def __init__(self, thrusttoweight, time, height, kmperh=False):
-        self.cd = 1.6
-        self.area = 1.5 * 1.5
+        self.cd = 0.8
+        self.area = 12.04
         self.rho = 1.225
         self.mass = 1995
         self.g = 9.80665
@@ -50,7 +50,7 @@ class CrashLanding:
 
 def main():
     thrustratios = [0, 0.8, 0.9, 0.95, 1]
-    t_arr = np.linspace(0, 25, 1000)
+    t_arr = np.linspace(0, 50, 1000)
     alt = 400
 
     fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
