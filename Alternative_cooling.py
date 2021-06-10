@@ -89,7 +89,7 @@ print(M_pipes)
 
 m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
 M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
-M_final = m_rad + M_tot + n_HV_bat * M_pump
+M_final = M_tot + n_HV_bat * M_pump + m_rad * n_HV_bat
 print(M_final)
 print()
 print("Mass of the pipes: ", M_pipes)

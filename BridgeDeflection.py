@@ -133,45 +133,132 @@ def normalStress(section, Nz, Mx, My,z):
             z_max = z[i]
     return sigma_dist_max, sigma_max, z_max
 
+def generateCrossSections(part,shape,prop_lim,t_lim,L,rho,syield,sf,n=100,dz=0.01):
+
+    SF = sf
+    sigma_good = []
+    ms = []
+    sigma_maxs = []
+    progress = -1
+    sections = []
+
+
+    if shape == 'circle':
+        r = np.arange(prop_lim[0]/n,prop_lim[0]+2*prop_lim[0]/n,prop_lim[0]/n)
+        t = np.arange(0.001,t_lim[0]+t_lim[0]/n, t_lim[0]/n)
+        for i in range(len(r)):
+            for j in range(len(t)):
+                section = pm.CrossSectionParameters(shape,[r[i]],[t[j]])
+                m = section.A*L*rho
+                w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(part,section,rho)
+                _,z, _, Mx_int, _, _, _, My_int, _, _, Nz_int, _, _, _ = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
+                sigmas, sigma_max, _ = normalStress(section, Nz_int, Mx_int, My_int,z)
+
+                if np.abs(sigma_max*SF) <= syield:
+                    sigma_good.append(sigmas)
+                    ms.append(m)
+                    sigma_maxs.append(sigma_max)
+                    sections.append(section)
+
+
+            if np.round((i/len(r))*100) > progress:
+                progress = np.round((i/len(r))*100)
+                print(f'Progress: {progress} %')
+
+    elif shape == 'square':
+        h = np.arange(prop_lim[0]/n,prop_lim[0]+2*prop_lim[0]/n,prop_lim[0]/n)
+        w = np.arange(prop_lim[1]/n,prop_lim[1]+2*prop_lim[1]/n,prop_lim[1]/n)
+        t = np.arange(0.001,t_lim[0]+2*t_lim[0]/(n/3),t_lim[0]/(n/3))
+
+        for i in h:
+            for j in w:
+                for k in t:
+                    section = pm.CrossSectionParameters(shape,[i,j],[k,k])
+                    m = section.A*rho*L
+                    w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(part,section,rho)
+                    _,z, _, Mx_int, _, _, _, My_int, _, _, Nz_int, _, _, _ = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
+                    sigmas, sigma_max, _ = normalStress(section, Nz_int, Mx_int, My_int,z)
+                    if np.abs(sigma_max*SF) <= syield:
+                        sigma_good.append(sigmas)
+                        ms.append(m)
+                        sigma_maxs.append(sigma_max)
+                        sections.append(section)
+            if np.round((i/h[-1])*100) > progress:
+                progress = np.round((i/h[-1])*100)
+                print(f'Progress: {progress} %')
+
+
+
+
+
+
+    return np.array(sigma_good),np.array(ms),np.array(sigma_maxs),sections
+
+def getReactions(part,section,rho):
+
+    if part == 'bridge':
+        w0 = rho * section.A * 9.80665
+        P = 100*9.80665
+        Fdx,Fdy,Fdz = 203,203,203
+        Mdx,Mdy,Mdz = 56,56,56
+
+    elif part == 'rotor':
+        w0 = rho * section.A * 9.80665
+        P = 0
+        Fdx,Fdy,Fdz = 0,2400*9.80665/4,0
+        Mdx,Mdy,Mdz = 0,750,0
+    return w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz
+
 rho_bridge = 2700
 w_bridge = 0.5
 h_bridge = 0.1
 thicc_w = 0.001
 thicc_h = 0.001
+L_bridge = 2.5
 
-
-section = pm.CrossSectionParameters('circle',[h_bridge],[thicc_h])
-#section = pm.CrossSectionParameters('ibeam',[h_bridge,w_bridge],[thicc_h,thicc_w])
-#section = pm.CrossSectionParameters('square',[h_bridge,w_bridge],[thicc_h,thicc_w])
-
-
-Ix = section.Ix
-Iy = section.Iy
-Jz = section.Jz
-
+section = pm.CrossSectionParameters('square', [h_bridge,w_bridge],[thicc_h,thicc_w])
 
 E = 69e9
 G = 25.5e9
-L_bridge = 2.5
-
-isBridge = True
-isRotor = False
-
-if isBridge:
-    w0 = rho_bridge * section.A * 9.80665
-    P = 100*9.80665
-    Fdx,Fdy,Fdz = 203,203,203
-    Mdx,Mdy,Mdz = 56,56,56
-elif isRotor:
-    w0 = rho_bridge * section.A * 9.80665
-    P = 0
-    Fdx,Fdy,Fdz = 0,2400*9.80665/4,0
-    Mdx,Mdy,Mdz = 0,750,0
-
-#Set up reactions
 dz = 0.01
-plotInternal = True
+
+plotInternal = False
+
+
+sigma_yield = 276e6
+component = 'rotor'
+r_lim = [1]
+t_lim = [0.005]
+hw_lim = [0.05,0.1]
+SF = 1.5
+n = 100
+
+
+w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(component, section,rho_bridge)
 reactions,z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plotInternal)
 sigmas, sigma_max, z_max = normalStress(section, Nz_int, Mx_int, My_int,z)
-section.plotNormalStress(sigmas)
+
+sigma_good,ms,sigma_maxs,sections = generateCrossSections(component,'circle',r_lim,t_lim,L_bridge,rho_bridge,sigma_yield,SF,n)
+idx = np.where(ms == np.amin(ms))[0][0]
+
+section_best = sections[idx]
+section_best.plotNormalStress(sigma_good[idx],ms[idx],sigma_yield)
+
+
+
+# np.savetxt('Data/Stress/sigmas_good.txt', sigma_good)
+# np.savetxt('Data/Stress/ms.txt', ms)
+# np.savetxt('Data/Stress/sigmas_maxs.txt', sigma_maxs)
+# np.savetxt('Data/Stress/props.txt', properties)
+
+
+
+
+
+
+
+
+
+
+
 
