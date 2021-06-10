@@ -88,7 +88,7 @@ M_tot = M_pipes + M_plate + M_water
 print(M_pipes)
 
 m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
-M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
+M_pump = 0.9                                            # Pump mass (Found on discord links P&P)
 M_final = M_tot + n_HV_bat * M_pump + m_rad * n_HV_bat
 print(M_final)
 print()
