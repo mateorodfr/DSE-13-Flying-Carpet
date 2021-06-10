@@ -5,10 +5,10 @@ elect = pm.ElectronicsParameters(0)
 concept = pm.ConceptParameters(0)
 
 V_cell = 3.7
-n_cell = 5
+n_cell = 4
 
-P_cons = elect.pump_amount * elect.pump_power + elect.camera_power * elect.camera_amount + elect.T_sens_power * elect.T_sens_amount + elect.motor_controller_power * elect.motor_controller_amount + elect.VCU_power + elect.FC_power + elect.AMS_power * elect.AMS_amount + elect.SN_power * elect.SN_amount
-M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.motor_controller_mass * elect.motor_controller_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
+P_cons = elect.pump_amount * elect.pump_power + elect.camera_power * elect.camera_amount + elect.T_sens_power * elect.T_sens_amount + elect.VCU_power + elect.FC_power + elect.AMS_power * elect.AMS_amount + elect.SN_power * elect.SN_amount  + elect.motor_controller_power * elect.motor_controller_amount
+M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
 
 n_cyc = 20
 t_asc_req = 80*n_cyc #time taken to ascend in s
@@ -120,9 +120,9 @@ print(eff_buck_12[-1])
 print(eff_buck_9[-1])
 print(eff_boost_24[-1])
 
-M_LV_bat = E_consumed / concept.battery.rhoE_battery / concept.battery.dod_battery / concept.battery.eff_battery  / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
+M_LV_bat = E_consumed / concept.battery.rhoE_battery / elect.LV_DoD / concept.battery.eff_battery  / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
 M_tot = M_LV_bat + M_comp
-print(P_cons/M_LV_bat)
+print((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons)
 print(M_LV_bat)
 print(P_out_12, P_out_9, P_out_boost_24)
 

@@ -196,7 +196,7 @@ class BatteryParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    battery0 = ['Panasonic NCA Si-C', 350, 683000,1086,0.7,0.9, 0.98, 0.15, 0.02, 6.5]
+    battery0 = ['Panasonic NCA Si-C', 350, 683000,1086,0.7,0.9, 0.98, 0.15, 0.02, 5.1]
 
 
     def __init__(self,key=0):
@@ -419,7 +419,7 @@ class PhysicalParameters(object):
         self.g = 9.80665
 
 class ElectronicsParameters(object):
-    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 75, 0.3, 8, 350, 0.4, 2, 200, 0.3, 2, 100, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4]
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 30, 0.3, 8, 350, 0.4, 2, 200, 0.3, 2, 150, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4, 0.85]
 
     # Initialization if no key is given takes the default object '0'
     def __init__(self, key=0):
@@ -450,6 +450,7 @@ class ElectronicsParameters(object):
             self.PF_electronics = self.Electronics0[23]
             self.pump_power = self.Electronics0[24]
             self.pump_amount = self.Electronics0[25]
+            self.LV_DoD = self.Electronics0[26]
 
 
 class CrossSectionParameters(object):
