@@ -419,7 +419,7 @@ class PhysicalParameters(object):
         self.g = 9.80665
 
 class ElectronicsParameters(object):
-    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 356, 0.3, 8, 300, 0.4, 2, 150, 0.3, 2, 200, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4]
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 75, 0.3, 8, 350, 0.4, 2, 200, 0.3, 2, 100, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4]
 
     # Initialization if no key is given takes the default object '0'
     def __init__(self, key=0):
