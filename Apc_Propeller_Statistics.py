@@ -125,11 +125,12 @@ class ApcPropellerData:
 
     def __init__(self):
         self.filedir = r"APC_Propellers\PERFILES_WEB"
+        self.propfiles = r"APC_Propellers\PERFILES_WEB\PERFILES2"
         self.thrustfile = "PER2_STATIC-2.DAT"
         self.rpmfile = "PER2_RPMRANGE.DAT"
         self.rpmranges = self.get_rpmranges()
         self.data = self.read_static_thrust()
-        self.pitch_data, self.final_data = self.get_data_per_propeller()
+        self.pitch_data, self.final_data, self.below_cpreq, self.above_ctcp = self.get_data_per_propeller()
 
     def get_rpmranges(self):
         """Read the rpm file and get the range in a dictionary"""
@@ -139,12 +140,21 @@ class ApcPropellerData:
             rpm_ranges = {}
             is_tenfold = lambda x: x % 10 == 0
             for tag, min, max in lines:
+                tag = self.tag2proper(tag)
                 min, max = int(min), int(max)
                 if not is_tenfold(int(max)):    # bodged fix for some rpms ending in 999
                     max += 1
                 rpm_ranges[tag] = (min, max)
             return rpm_ranges
 
+    def tag2proper(self, tag):
+        properfile = os.path.join(self.propfiles, f"PER3_{tag}.dat")
+        with open(properfile, "r") as pf:
+            lines = pf.readlines()
+            pline = " ".join([line.split() for line in lines][0])
+            proper = pline.split()[0]
+        return proper
+    
     def read_static_thrust(self):
         """Read thrust file and slap everything into one large array"""
         with open(os.path.join(self.filedir, self.thrustfile), "r") as f:
@@ -156,7 +166,10 @@ class ApcPropellerData:
     def get_data_per_propeller(self):
         """Propeller data for each propeller for 1000 RPM"""
         cp, ct = self.data[:, 4], self.data[:, 5]
+
         ctovercp = ct/cp
+
+        above_ctcp = []
         pitch_angles = []
         nested_data = []
         i = 0
@@ -174,21 +187,33 @@ class ApcPropellerData:
             if minrpm != 1000:
                 cpi, cti, ctovercpi = np.nan, np.nan, np.nan
             nested_data.append([cpi, cti, ctovercpi])
+            above_ctcp.append((cti/cpi > 3.202))
+            if cti/cpi > 3.202 and cti > 0.09789676:
+                print(tag)
+            
             i += nvals
+        nested_data = np.asarray(nested_data)
+        below_cpreq = [(ct_val < 0.09789676) for ct_val in nested_data[:, 1]]
 
-            # TODO Fix decimals in pitch reading (1225x48 = 12.25x4.8)
-
-            # TODO check minimal Ct of 0.098
-
-        return np.array(pitch_angles), np.array(nested_data)
+        return np.array(pitch_angles), nested_data, below_cpreq, above_ctcp
 
 
     def plot_propdata(self):
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.scatter(self.pitch_data, self.final_data[:, -1], color="red", marker=".")
-        ax.set_yticks(np.linspace(0, 5, 6))
+        ax.grid(ls="-.", zorder=1, alpha=.5)
+        for _ in range(len(self.pitch_data)):
+            if self.below_cpreq[_]:
+                ax.scatter(self.pitch_data[_], self.final_data[_, -1], color="purple", marker="x", zorder=10, alpha = .5)
+            else:
+                ax.scatter(self.pitch_data[_], self.final_data[_, -1], color="red", marker=".", zorder=10)
+        
+        ax.scatter([12.823], [3.202], color="blue", marker="$\circ$", zorder=10)
+        ax.set_yticks(np.linspace(0, 4.5, 10))
+        ax.set_xticks(np.arange(0, 37.5, 2.5))
         ax.set_xlabel("Blade angle [deg]")
         ax.set_ylabel("Ct/Cp [-]")
+        ax.set_ylim(0, 4.5)
+        ax.set_xlim(0, 35)
 
         plt.show()
 
@@ -197,6 +222,5 @@ class ApcPropellerData:
 if __name__ == "__main__":
     # print(pitch_to_angle(*decipher_tag("15x55MR")))
     # print(pitch_to_angle(*decipher_tag("20x15(WCAR-T6)")))
-
     data = ApcPropellerData()
     data.plot_propdata()
