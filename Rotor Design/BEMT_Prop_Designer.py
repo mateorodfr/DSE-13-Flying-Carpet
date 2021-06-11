@@ -76,9 +76,15 @@ def main() -> None:
         TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
         TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
 
+    init_M = 1667 # [kg]
+    T_W = 1.1
+    M_needed = init_M * (T_W * 4) / 8
 
-    print(f"\n{(T+T2)*4 / G} [kg]")
-    print(f"\n\n\t\t{(P+P2)/2}\n\n")
+    P_avg = (P+P2)/2
+
+    print(f"\n\n{M_needed = } [kg]")
+    print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
+    print(f"{P_avg = }\n")
     print(f"Rotor1: {CT = }, {CP = }, Ct/Cp = {CT / CP}\n")
     print(f"Rotor2: {CT2 = }, {CP2 = }, Ct/Cp = {CT2 / CP2}\n")
 
