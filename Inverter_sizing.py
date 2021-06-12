@@ -16,12 +16,12 @@ P_engine = np.arange(0, 102000, 2500)
 n_cell = 250
 Cap_dens = concept.battery.rhoE_battery / V_cell
 M_bat_it = 471     # Got from mass estimation repeated
-P_cont_tot = 434210
+P_cont_tot = 32000
 #P_surge = 1.5 * P_cont_tot
 m_row = M_bat_it/n_cell
 Cap_tot = m_row * Cap_dens
 #I_bat = Cap_tot / t_mission_req * 3600
-Inv_size = P_cont_tot * concept.battery.degradation * concept.battery.eff_battery / concept.motor.N_motor# VA
+Inv_size = P_cont_tot / concept.motor.eff_motor  # VA
 Bat_current = P_cont_tot / (V_cell * n_cell) / n_bat
 
 """     Both the delta and star configurations have to be applied to the motor in order to reduce the inrush/surge 
