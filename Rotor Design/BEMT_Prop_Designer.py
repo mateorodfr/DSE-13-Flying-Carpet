@@ -63,30 +63,126 @@ def setINI(n, *args) -> None:
 def main() -> None:
     def CT_CP(Thrust, Power, rho, D, f):
         return (Thrust/(rho * D*D*D*D * f * f), Power/(rho * D*D*D*D*D * f * f * f))
-    
+        
     
     solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\08062021rot_v2.ini")
 
-    
-    T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
-    try:
-        TSR, CT, CP = solver.turbine_coeffs(T, Q, P)
-        TSR2, CT2, CP2 = solver.turbine_coeffs(T2, Q2, P2)
-    except ZeroDivisionError:
-        TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
-        TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
+    Ts=[]
+    T2s=[]
+    Qs=[]
+    Q2s=[]
+    Ps=[]
+    P2s=[]
+    def run_sweep_coaxial(n, vinf):
+        rpms, rpms2 = np.linspace(300, 1400, n), np.linspace(300, 1400, n)
+        for rpm_now, rpm2_now in zip(rpms, rpms2):
+            solver.rpm = rpm_now
+            solver.rpm2 = rpm2_now
+            T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
 
-    init_M = 1667 # [kg]
-    T_W = 1.1
-    M_needed = init_M * (T_W * 4) / 8
+            Ts.append(T)
+            T2s.append(T2)
+            Qs.append(Q)
+            Q2s.append(Q2)
+            Ps.append(P)
+            P2s.append(P2)
 
-    P_avg = (P+P2)/2
+        fig, ax = plt.subplots(2, 2, figsize=(11, 11), dpi = 135, sharex=True)
 
-    print(f"\n\n{M_needed = } [kg]")
-    print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
-    print(f"{P_avg = }\n")
-    print(f"Rotor1: {CT = }, {CP = }, Ct/Cp = {CT / CP}\n")
-    print(f"Rotor2: {CT2 = }, {CP2 = }, Ct/Cp = {CT2 / CP2}\n")
+        ax[0][0].set_title(r"Thrust versus RPMs @ $V_{\infty} = -1~[ms^{-1}]$")
+        ax[0][0].set_xlim(0, 1500)
+        ax[0][0].set_xlabel("RPMs [-]")
+        ax[0][0].set_xticks(np.arange(0, 1500, 200))
+        ax[0][0].set_ylim(0, 7500)
+        ax[0][0].set_ylabel("Thrust [N]")
+        ax[0][0].grid(ls = "-.")
+        ax[0][0].spines["right"].set_visible(False)
+        ax[0][0].spines["top"].set_visible(False)
+        ax[0][0].plot(rpms, np.asarray(Ts), c="black", label="Top Propeller")
+        ax[0][0].plot(rpms, np.asarray(T2s), c="black", ls="--", label="Bottom Propeller")
+        ax[0][0].fill_between([1300, 1500], 0, 8000, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[0][0].legend(loc = "upper left", ncol=2, fancybox=True, framealpha=1, shadow=True, borderpad=1)
+
+        ax[0][1].set_title(r"Power versus RPMs @ $V_{\infty} = -1~[ms^{-1}]$")
+        ax[0][1].set_xlim(0, 1500)
+        ax[0][1].set_xlabel("RPMs [-]")
+        ax[0][1].set_xticks(np.arange(0, 1500, 200))
+        ax[0][1].set_ylim(0, 160)
+        ax[0][1].set_ylabel("Power [kW]")
+        ax[0][1].fill_between([0, 1500], 120, 160, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[0][1].fill_between([1300, 1500], 0, 120, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[0][1].grid(ls = "-.")
+        ax[0][1].spines["right"].set_visible(False)
+        ax[0][1].spines["top"].set_visible(False)
+        ax[0][1].plot(rpms, np.asarray(Ps)*1e-3, c="black", label="Top Propeller")
+        ax[0][1].plot(rpms, np.asarray(P2s)*1e-3, c="black", ls="--", label="Bottom Propeller")
+
+        ax[1][0].set_title(r"Torque versus RPMs @ $V_{\infty} = -1~[ms^{-1}]$")
+        ax[1][0].set_xlim(0, 1500)
+        ax[1][0].set_xlabel("RPMs [-]")
+        ax[1][0].set_xticks(np.arange(0, 1500, 200))
+        ax[1][0].set_ylim(0, 1100)
+        ax[1][0].set_ylabel("Torque [Nm]")
+        ax[1][0].fill_between([0, 1500], 930, 1100, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[1][0].fill_between([1300, 1500], 0, 930, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[1][0].grid(ls = "-.")
+        ax[1][0].spines["right"].set_visible(False)
+        ax[1][0].spines["top"].set_visible(False)
+        ax[1][0].plot(rpms, Qs, c="black", label="Top Propeller")
+        ax[1][0].plot(rpms, Q2s, c="black", ls="--", label="Bottom Propeller")
+
+        ax[1][1].set_title(r"T/W versus RPMs @ $V_{\infty} = -1~[ms^{-1}]$")
+        ax[1][1].set_xlim(0, 1500)
+        ax[1][1].set_xlabel("RPMs [-]")
+        ax[1][1].set_xticks(np.arange(0, 1500, 200))
+        ax[1][1].set_ylim(0, 3.25)
+        ax[1][1].set_ylabel("Thrust-to-Weight [-]")
+        ax[1][1].fill_between([1300, 1500], 0, 3.25, hatch = "//", fc="#FF000055", edgecolor="white", linewidth=0.0)
+        ax[1][1].grid(ls = "-.")
+        ax[1][1].spines["right"].set_visible(False)
+        ax[1][1].spines["top"].set_visible(False)
+        ax[1][1].plot(rpms, 4*(np.asarray(Ts)+np.asarray(T2s))/(1667*G), c="black", ls="-", label="All Propellers", zorder=10)
+        ax[1][1].axhline(y = 1.00, xmin = 0, xmax = 230/1500, c="#00A6D6", ls="-.")
+        ax[1][1].axhline(y = 1.00, xmin = 370/1500, xmax = 1300/1500, c="#00A6D6", ls="-.")
+        ax[1][1].text(300, 1.02, "Hover", fontsize = 7, horizontalalignment="center", verticalalignment="center", c="#00A6D6", weight="bold")
+        ax[1][1].axhline(y = 1.10, xmin = 0, xmax = 1300/1500, c="#0066A2", ls="--")
+        ax[1][1].text(300, 1.2, "Nominal Acceleration", fontsize = 7, horizontalalignment="center", verticalalignment="center", c="#0066A2", weight="bold")
+        ax[1][1].axhline(y = 0.90, xmin = 0, xmax = 1300/1500, c="#0066A2", ls="--")
+        ax[1][1].text(300, 0.80, "Nominal Deceleration", fontsize = 7, horizontalalignment="center", verticalalignment="center", c="#0066A2", weight="bold")
+        ax[1][1].axhline(y = 1.95, xmin = 0, xmax = 1300/1500, c="#C3312F", ls="-.")
+        ax[1][1].text(300, 1.85, "Critical Acceleration", fontsize = 7, horizontalalignment="center", verticalalignment="center", c="#C3312F", weight="bold")
+        ax[1][1].legend(loc = "upper left", fancybox=True, framealpha=1, shadow=True, borderpad=1)
+
+        fig.tight_layout()
+
+        try:
+            fig.savefig(rf"Rotor Design/T-RPM_P-RPM_at(Vinf {vinf}).png")
+        except Exception:
+            pass
+
+        plt.show()
+
+    run_sweep_coaxial(20, -1)
+            
+    # T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
+    # try:
+    #     TSR, CT, CP = solver.turbine_coeffs(T, Q, P)
+    #     TSR2, CT2, CP2 = solver.turbine_coeffs(T2, Q2, P2)
+    # except ZeroDivisionError:
+    #     TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
+    #     TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
+
+    # init_M = 1667 # [kg]
+    # T_W = 1.1
+    # M_needed = init_M * (T_W * 4) / 8
+
+    # P_avg = (P+P2)/2
+
+    # print(f"\n\n{M_needed = } [kg]")
+    # print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
+    # print(f"{P_avg = }\n")
+    # print(f"Rotor1: {CT = }, {CP = }, Ct/Cp = {CT / CP}\n")
+    # print(f"Rotor2: {CT2 = }, {CP2 = }, Ct/Cp = {CT2 / CP2}\n")
 
     
 
