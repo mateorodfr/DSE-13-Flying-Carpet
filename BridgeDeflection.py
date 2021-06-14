@@ -46,7 +46,7 @@ def internalLoading(dz,section,mc,L_beam,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=False
         raise NotImplementedError('Twist for open sections needs to be implemented')
         dtheta, thetaz = None, None
     if plot:
-        if component == 'bridge':
+        if component == 'rotor':
             fig, ax = plt.subplots(3,4)
             ax = ax.ravel()
             fig.suptitle('Bridge internal loadings and deflections')
@@ -113,7 +113,7 @@ def internalLoading(dz,section,mc,L_beam,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=False
 
             plt.show()
 
-        elif component == 'rotor':
+        elif component == 'dick':
             fig, ax = plt.subplots(2,2)
             ax = ax.ravel()
             fig.suptitle('Rotor arm internal loadings')
@@ -191,7 +191,7 @@ def normalStress(section, Nz, Mx, My,z):
             z_max = z[i]
     return sigma_dist_max, sigma_max, z_max
 
-def generateCrossSections(part,shape,prop_lim,t_lim,L,rho,syield,tauyield,sf,n=100,dz=0.01):
+def generateCrossSections(part,shape,prop_lim,t_lim,L,rho,syield,tauyield,deflectmax,sf,n=100,dz=0.01):
 
     SF = sf
     sigma_good = []
@@ -210,12 +210,12 @@ def generateCrossSections(part,shape,prop_lim,t_lim,L,rho,syield,tauyield,sf,n=1
                 section = pm.CrossSectionParameters(shape,[r[i]],[t[j]])
                 m = section.A*L*rho
                 w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(part,section,rho)
-                _,z, Vy_int, Mx_int, _, _, Vx_int, My_int, _, _, Nz_int, Tz_int, _, _ = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
+                reactions, z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
                 sigmas, sigma_max, _ = normalStress(section, Nz_int, Mx_int, My_int,z)
 
                 _, taumax, _, _ = internalShear(section,np.amax(np.abs(Vy_int)),np.amax(np.abs(Vx_int)),np.amax(np.abs(Tz_int)))
 
-                if np.abs(sigma_max*SF) <= syield and taumax*SF <= tauyield:
+                if np.abs(sigma_max*SF) <= syield and taumax*SF <= tauyield and np.max(np.abs(deflectx)) <= deflectmax and np.max(np.abs(deflecty)) <= deflectmax:
                     sigma_good.append(sigmas)
                     ms.append(m)
                     sigma_maxs.append(sigma_max)
@@ -237,10 +237,10 @@ def generateCrossSections(part,shape,prop_lim,t_lim,L,rho,syield,tauyield,sf,n=1
                     section = pm.CrossSectionParameters(shape,[i,j],[k,k])
                     m = section.A*rho*L
                     w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(part,section,rho)
-                    _,z, Vy_int, Mx_int, _, _, Vx_int, My_int, _, _, Nz_int, Tz_int, _, _ = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
+                    reactions, z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0)
                     sigmas, sigma_max, _ = normalStress(section, Nz_int, Mx_int, My_int,z)
                     _, taumax, _, _ = internalShear(section,np.amax(np.abs(Vy_int)),np.amax(np.abs(Vx_int)),np.amax(np.abs(Tz_int)))
-                    if np.abs(sigma_max*SF) <= syield and taumax*SF <= syield:
+                    if np.abs(sigma_max*SF) <= syield and taumax*SF <= tauyield and np.max(np.abs(deflectx)) <= deflectmax and np.max(np.abs(deflecty)) <= deflectmax:
                         sigma_good.append(sigmas)
                         ms.append(m)
                         sigma_maxs.append(sigma_max)
@@ -268,7 +268,7 @@ def getReactions(part,section,rho):
     elif part == 'rotor':
         w0 = rho * section.A * 9.80665
         P = 0
-        Fdx,Fdy,Fdz = 0,1.1*2400*9.80665/4,0
+        Fdx,Fdy,Fdz = 0,-1.1*2400*9.80665/4,0
         Mdx,Mdy,Mdz = 0,650,0
     return w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz
 
@@ -278,15 +278,15 @@ def internalShear(section,Vymax,Vxmax,Tmax,dxy=0.001,dtheta=0.0001,plot=False):
     if section.shape == "square":
         dxy = 0.001
         xyarr = np.arange(0,section.w * 0.5 +section.h * 0.5 + dxy, dxy)
-        tauy = (((Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
-        (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr >= section.w/2) * (section.w/2))/section.t_w + \
-        ((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  +section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h)
+        tauy = ( ( (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
+                   (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr >= section.w/2) * (section.w/2) )/section.t_w + \
+        ((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  + section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h)
 
         taux = np.flip(((Vxmax/section.Iy) * (section.w/2) * section.t_h * (xyarr < section.h/2) *xyarr + \
         ((Vxmax/section.Iy) * (section.w/2) * section.t_h) * (xyarr >= section.h/2)  * section.h/2)/section.t_h + \
         ((Vxmax/section.Ix) * (section.t_w / 2) * (-0.5*(xyarr - section.h/2) ** 2 + section.w*(xyarr - section.h/2)/2 ) * (xyarr > (section.h/2)))/section.t_w)
 
-        tauz = Tmax / (2*section.Am) * ( (xyarr < (section.w /2)) * (1/section.t_w)   +  (xyarr >= (section.w /2)) * (1/section.t_h)    )
+        tauz = Tmax / (2*section.Am) * ((xyarr < (section.w /2)) * (1/section.t_w)   +  (xyarr >= (section.w /2)) * (1/section.t_h))
 
         tau = taux + tauy + tauz
 
@@ -367,19 +367,20 @@ plotInternal = True
 
 sigma_yield = 500e6
 tau_yield = 331e6
+deflectmax = 0.02
 component = 'rotor'
 r_lim = [0.2]
-t_lim = [0.005]
-hw_lim = [0.05,0.05]
+t_lim = [0.01]
+hw_lim = [0.3,0.1]
 SF = 1.5
-n = 20
+n = 25
 
 
 # w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(component, section,rho_bridge)
 # reactions,z, Vy_int, Mx_int, thetay , deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plotInternal)
 # sigmas, sigma_max, z_max = normalStress(section, Nz_int, Mx_int, My_int,z)
 # tau, taumax, tauxyz,xyarr = internalShear(section, np.amax(np.abs(Vy_int)),np.amax(np.abs(Vx_int)),np.amax(np.abs(Tz_int)),plot=True)
-sigma_good,ms,sigma_maxs,sections, tau_maxs = generateCrossSections(component,'square',hw_lim,t_lim,L_bridge,rho_bridge,sigma_yield,tau_yield,SF,n)
+sigma_good,ms,sigma_maxs,sections, tau_maxs = generateCrossSections(component,'circle',r_lim,t_lim,L_bridge,rho_bridge,sigma_yield,tau_yield,deflectmax,SF,n)
 
 
 idx = np.where(ms == np.amin(ms))[0][0]
@@ -388,3 +389,5 @@ section_best = sections[idx]
 section_best.plotNormalStress(sigma_good[idx],tau_maxs[idx],ms[idx],sigma_yield)
 w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions("rotor",section_best,rho_bridge)
 reactions, z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz=internalLoading(dz,section_best,mc,L_bridge,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=True)
+
+print(len(sections))
