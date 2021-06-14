@@ -15,6 +15,7 @@ nOutput = 10
 
 State vector:
 x, y, z, x', y', z', phi, theta, chi, phi', theta', chi'
+0  1  2  3   4   5   6    7      8    9     10      11
 
 Input Vector:
 ft, fwx, fwy, fwz, Tx, Ty, Tz, Twx, Twy, Twz
@@ -62,14 +63,15 @@ C[8,9] = 1
 C[9,10] = 1
 
 D = np.zeros((nOutput,nInput))
+# D[10,5] = 1
 
 K = np.zeros((nInput,nOutput))
 K_z_z = -10000
 
 K_tx_y = 100
 K_tx_ydot = 300
-K_tx_phi = 6500
-K_tx_phidot = 2500
+K_tx_phi = 6000
+K_tx_phidot = 5000
 
 K_ty_x = -10
 K_ty_xdot = -100
@@ -80,24 +82,21 @@ K_tz_yaw  = 10000
 
 
 K[0,2] = K_z_z
-
 K[4,8] = K_tx_phidot
 K[4,3] = K_tx_phi
 K[4,7] = K_tx_ydot
 K[4,1] = K_tx_y
-
 K[5,9] = K_ty_thetadot
 K[5,4] = K_ty_theta
 K[5,6] = K_ty_xdot
 K[5,0] = K_ty_x
-
 K[6,5] = K_tz_yaw
 
 ss = ctr.StateSpace(A,B,C,D)
-ss = ss.feedback(K)
+# ss = ss.feedback(K)
 
 dt = 0.01
-T = np.arange(0,350+dt,dt)
+T = np.arange(0,50+dt,dt)
 U = np.zeros((len(T), nInput))
 
 
@@ -113,11 +112,14 @@ t_gust = np.loadtxt(r'Data/Gust/tgust.txt')
 U_gust = np.loadtxt(r'Data/Gust/Ugust.txt')
 
 
-# U[:len(az),0] = 0#az*concept.Mtot_concept
-# U[:,4] = 300
-
-U[len(t_gust):2*len(t_gust),1:4] = F_gust[:,:]
-U[len(t_gust):2*len(t_gust),7:] = M_gust[:,:]
+# U[len(t_gust):2*len(t_gust),1:4] = F_gust[:,:]
+# U[len(t_gust):2*len(t_gust),7:] = M_gust[:,:]
+# U[len(T)//2,1] = 1
+# U[len(T)//2,2] = 1
+# U[len(T)//2,3] = 1
+# U[len(T)//2,-3] = 1
+# U[len(T)//2,-2] = 1
+# U[len(T)//2,-1] = 1
 
 
 
@@ -126,7 +128,8 @@ U[len(t_gust):2*len(t_gust),7:] = M_gust[:,:]
 # U[:,5] = np.append([2*np.pi - t**2 /1e5 for t in range(3000)] , np.zeros(len(T)-3000))
 # U[len(T)//8:len(T)//7,8] = 100
 # U[:,4] = [10*np.cos(np.pi+ t) for t in T]
-y,t,x = sim.lsim(ss,U,T)
+# U[len(T)//4,:] = 1
+y,t,x = sim.lsim(ss,U,T,[0,0,0,0,0,0,0,0,0,0,0,0])
 
 
 
@@ -164,7 +167,7 @@ ax1[4].set_xlabel(r't [s]')
 
 ax1[5].plot(T, y[:,7])
 ax1[5].title.set_text(r"Y velocity over time")
-ax1[5].set_ylabel(r'u [m/s]')
+ax1[5].set_ylabel(r'v [m/s]')
 ax1[5].set_xlabel(r't [s]')
 
 ax1[6].plot(t, y[:, 3]*57.3)
@@ -187,15 +190,22 @@ ax1[9].title.set_text(r"Yaw angle $\chi$ over time")
 ax1[9].set_ylabel(r'$\chi$ [deg]')
 ax1[9].set_xlabel(r't [s]')
 
-ctr.pzmap(ss)
 
-plt.subplots_adjust(0.065,0.075,0.985,0.91,0.375,0.52)
+ctr.pzmap(ss)
+fig1.subplots_adjust(top=0.92,
+bottom=0.065,
+left=0.065,
+right=0.985,
+hspace=0.405,
+wspace=0.355)
 
 
 
 
 fig, ax = plt.subplots(1,1)
 rx = ax.plot(t,U)
+ax.set_xlabel('Time t [s]')
+ax.set_ylabel(r'Force [N], Torque [Nm]')
 ax.legend(iter(rx), ('Force in z','Wind Force in x','Wind Force in y','Wind Force in z','Torque around x','Torque around y','Torque around z','Wind Torque around x','Wind Torque around y','Wind Torque around z'))
 ax.title.set_text(r'Input function')
 
