@@ -296,13 +296,18 @@ def internalShear(section,Vymax,Vxmax,Tmax,dxy=0.001,dtheta=0.0001,plot=False):
         xyarr = np.arange(0, np.pi /2 + dtheta, dtheta)
 
         #tauy = ((Vymax/section.Ix) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
-        tauy = (Vymax/section.Ix) * section.t * section.r * np.sin(xyarr)
+        #tauy = (Vymax/section.Ix) * section.t * section.r * np.sin(xyarr)
+        tauy = Vymax * np.sin(xyarr) / (np.pi * section.r * section.t)
+        
 
         #taux = np.flip((Vxmax/section.Iy) * section.t * section.r * ( - np.sin(xyarr / (2*np.pi*section.r)) * 1/(2*np.pi*section.r)))/section.t
-        taux = np.flip((Vymax/section.Ix) * section.t * section.r * np.sin(xyarr))
+        #taux = np.flip((Vymax/section.Ix) * section.t * section.r * np.sin(xyarr))
+        taux = np.flip(Vxmax * np.sin(xyarr) / (np.pi * section.r * section.t))
+
         tauz = (Tmax / (2*section.Am * section.t)) * np.ones(len(xyarr))
 
         tau = taux + tauy + tauz
+        print(tau,taux,tauy,tauz)
 
     elif section.shape == "ibeam":
         raise NotImplementedError("Shear calculations for open sections not implemented")
@@ -390,4 +395,5 @@ section_best.plotNormalStress(sigma_good[idx],tau_maxs[idx],ms[idx],sigma_yield)
 w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions("rotor",section_best,rho_bridge)
 reactions, z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz=internalLoading(dz,section_best,mc,L_bridge,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=True)
 
+print(section_best.t)
 print(len(sections))
