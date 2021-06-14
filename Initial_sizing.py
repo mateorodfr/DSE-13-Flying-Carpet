@@ -175,8 +175,8 @@ print("The complete range of c.gs = ", np.round(cg_range,3))
 Moment_seat12 = - N_motor * T2[8] / 2 * cg_range[0]
 Moment_seat135 = - N_motor * T2[8] / 2 * cg_range[1]
 
-#print("Moment c.g longitudinal = ", Moment_seat12, "Nm")
-#print("Moment c.g lateral = ", Moment_seat135, "Nm")
+print("Moment c.g longitudinal = ", Moment_seat12, "Nm")
+print("Moment c.g lateral = ", Moment_seat135, "Nm")
 
 T_diff_seat12 = Moment_seat12 / (cg_tot_12[0]+D_blade/2*SF_dimensions)
 T_diff_seat135 = Moment_seat135 / (cg_tot_135[1]+D_blade/2*SF_dimensions)

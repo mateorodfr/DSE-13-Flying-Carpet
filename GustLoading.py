@@ -15,7 +15,7 @@ def gustDisturbance(S,Uds,t,drag,dt,Cd,rho):
 
 def gustEnvelope(Hmax,hmax,Umax,concept,plot=False):
 
-    H = np.arange(10,Hmax,Hmax/1000)
+    H = np.arange(10,Hmax,Hmax/100)
     Fgz = 1-hmax/76200
     R1 = concept.Mtot_concept/(concept.Mtot_concept-500)
     R2 = 1
@@ -36,8 +36,10 @@ def gustEnvelope(Hmax,hmax,Umax,concept,plot=False):
             plt.plot(Ss[i-1],Us[i-1])
     if plot:
         plt.title('Gust Envelope')
-        plt.xlabel('S gradient distance [m]')
-        plt.ylabel('Gust intensity [m/s]')
+        plt.xlabel('Time t [s]')
+        plt.ylabel(r'Gust intensity U [ms$^{-1}$]')
+        plt.grid()
+        plt.savefig('figures/gustenvelope.png')
         plt.show()
 
     maxUds = np.max(Udss)
@@ -76,7 +78,7 @@ def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.
     Hmt = Hmax
     Umax, z, Uf = gustMax(Ui,zi,hmax,z0,dz)
     Udsmax = gustEnvelope(Hmt,hmax,Umax,concept,plotGust)
-
+    print(Udsmax)
     """
     Compute characteristics
 
@@ -115,6 +117,8 @@ def getGustData(concept,tsim,Ui,zi,hmax,z0,Hmax,Cd=1.2,rho=1.225,dz=0.5,dtsim=0.
         plt.title('Gust speed at varying altitudes')
         plt.xlabel('Altitude: h [m]')
         plt.ylabel(r'Wind speed: U [ms$^{-1}$]')
+        plt.grid()
+        plt.savefig('figures/gustload.png')
         plt.show()
         # plt.savefig("figures/gustload")
 
@@ -178,10 +182,10 @@ concept = pm.ConceptParameters(0)
 
 
 #all these variable sneed to be manually changed to perform a case specific analysis
-Cd = 1.2 #CD of squre at reynolds: 6e5
+Cd = 1.05 #CD of squre at reynolds: 6e5
 rho = concept.physics.rho0 #[kg/m3] density at sea level
 tsim = 50
-dtsim = 0.001
+dtsim = 0.01
 
 
 """Define Module Specific parameters"""
@@ -197,9 +201,9 @@ Hmax = 1000
 
 """ Define Output Booleans"""
 
-plotGust = True #if this is true the program will plot the gust speed as a fucntion of height and the gust envelope
-plotDisturbance = True
-isPrint = True #if this is true the program will print all the characteristics
+plotGust = False #if this is true the program will plot the gust speed as a fucntion of height and the gust envelope
+plotDisturbance = False
+isPrint = False #if this is true the program will print all the characteristics
 saveText = True #Save arrays to text
 
 
@@ -207,5 +211,6 @@ r = r'Data/Gust/'
 names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alphagust.txt']
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
 store = [Dgust,M,Ugust,tgust,a,alpha]
+saveArrays(r,names,store)
 print(np.max(Dgust[:,0]))
 

@@ -486,8 +486,8 @@ class CrossSectionParameters(object):
             self.t_avg = np.average(ts)
             self.A = 2 * self.h * self.t_h + 2 * self.w * self.t_w
             self.Am = self.h * self.w
-            self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w**3 #(1/3) * props[0]**2 * props[1] * t_avg
-            self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h**3#(1/3) * props[1]**2 * props[0] * t_avg
+            self.Ix = (1/6)*self.t_h*self.h**3 + (1/2)*self.t_w*self.w*self.h**2 #(1/3) * props[0]**2 * props[1] * t_avg
+            self.Iy = (1/6)*self.t_w*self.w**3 + (1/2)*self.t_h*self.h*self.w**2#(1/3) * props[1]**2 * props[0] * t_avg
             self.Jz = ( ( self.h * self.w * self.t_avg ) / 3 ) * (self.h + self.w)
             ys = np.arange(-self.h/2,self.h/2+(self.h/2)/100,+(self.h/2)/100)
             xs = np.arange(-self.w/2,self.w/2++(self.w/2)/100,+(self.w/2)/100)
@@ -516,10 +516,11 @@ class CrossSectionParameters(object):
             self.Iy = (1/6)*self.t_w*self.w**3
             self.Jz = None
             self.contour = None
-    def plotContour(self):
+    def plotContour(self,isShow=True):
         plt.plot(self.contour[:,0],self.contour[:,1])
-        plt.show()
-    def plotNormalStress(self,sigma,mass=None,sigma_yield=None):
+        if isShow:
+            plt.show()
+    def plotNormalStress(self,sigma,taumax, mass=None,sigma_yield=None):
         plt.scatter(self.contour[:,0],self.contour[:,1],c=sigma/np.max(np.abs(sigma)))
         plt.xlim([-2*np.amax(self.contour[:,0]), 2*np.amax(self.contour[:,0])])
         plt.ylim([-2*np.amax(self.contour[:,1]), 2*np.amax(self.contour[:,1])])
@@ -527,9 +528,9 @@ class CrossSectionParameters(object):
         plt.ylabel('y position [m]')
         plt.title('Normal Stress distribution at max stress point')
         if self.shape == 'circle':
-            txt = f'Radius: ' + f'{np.round(self.r,3)} [m]' + f'\nThickness: ' + f'{np.round(self.t*1000,3)} [mm]' + f'\nMax Stress: ' + f'{np.round(1.5*np.max(np.abs(sigma))/1e6)} [MPa]'
+            txt = f'Radius: ' + f'{np.round(self.r,3)} [m]' + f'\nThickness: ' + f'{np.round(self.t*1000,3)} [mm]' + f'\nMax Normal Stress: ' + f'{np.round(1.5*np.max(np.abs(sigma))/1e6)} [MPa]' + f'\nMax Shear Stress: ' + f'{np.round(taumax/1e6,3)} [MPa]'
         elif self.shape == 'square':
-            txt = f'Height: ' + f'{np.round(self.h,3)} [m]' + f'\nWidth: ' + f'{np.round(self.w,3)} [m]' + f'\nThickness height: ' + f'{np.round(self.t_h*1000,3)} [mm]'+ f'\nThickness width: ' + f'{np.round(self.t_w*1000,3)} [mm]' + f'\nMax Stress: ' + f'{1.5*np.round(np.max(np.abs(sigma)))/1e6} [MPa]'
+            txt = f'Height: ' + f'{np.round(self.h,3)} [m]' + f'\nWidth: ' + f'{np.round(self.w,3)} [m]' + f'\nThickness height: ' + f'{np.round(self.t_h*1000,3)} [mm]'+ f'\nThickness width: ' + f'{np.round(self.t_w*1000,3)} [mm]' + f'\nMax Stress: ' + f'{1.5*np.round(np.max(np.abs(sigma)))/1e6} [MPa]' + f'\nMax Shear Stress: ' + f'{np.round(taumax/1e6,3)} [MPa]'
         if mass is not None:
             txt += (f'\nMass of Beam: ' + f'{np.round(mass,3)} [kg]')
         if sigma_yield is not None:
