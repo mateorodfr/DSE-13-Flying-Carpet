@@ -3,7 +3,7 @@ import Parameters as pm
 
 concept = pm.ConceptParameters(0)
 
-C_Li = 3582     # J/kg K of the anode
+C_Li = 3600     # J/kg K of the anode
 C_Epoxy = 1110  # J/kg K using solid polymer as electrolyte
 C_V_O = 490     # J/kg K Using Vanadium oxide as cathode
 n_Li = 1/6      # The estimated amount of the battery - 2/3 go to the electrolyte, rest is half-half
@@ -24,8 +24,8 @@ t_mission = (t_asc_req + t_hover_req + t_des_req)
 C_tot = n_V_0 * C_V_O + n_Li * C_Li + n_Epoxy * C_Epoxy     # The estimated specific heat of the battery
 P_loss = 1.05 * concept.Mbat_concept * concept.battery.rhoP_battery * concept.battery.eff_battery / n_HV_bat    # Power losses on the battery due the internal resistance
 Q_loss = P_loss * t_mission
-dT_per_HV = Q_loss / (C_tot * concept.Mbat_concept)
-#print(dT_per_HV)
+dT_per_HV = P_loss / (C_tot * concept.Mbat_concept)
+print(dT_per_HV)
 
 print(P_loss)
 
@@ -43,14 +43,14 @@ A_pipe = m_dot / rho_water / V_water * mat_perc # The area of the pipes needed t
 W_pipe = np.sqrt(4 * A_pipe)
 H_pipe = W_pipe / 4
 
-V_bat = concept.Mbat_concept / 1000 / n_HV_bat      # Volume of the battery
+V_bat = concept.Mbat_concept / 2000 / n_HV_bat      # Volume of the battery
 print(W_pipe, H_pipe)
 n_patch = 8         # Patches assumed per battery
 
-L_bat = 0.8         # Set dimensions for a single HV battery
-H_bat = 0.3
+L_bat = 0.5         # Set dimensions for a single HV battery
+H_bat = 0.2
 W_bat = V_bat / L_bat / H_bat
-print(m_dot)
+print(W_bat)
 L_patch = L_bat / n_patch
 
 h = 350
@@ -88,9 +88,9 @@ M_tot = M_pipes + M_plate + M_water
 print(M_pipes)
 
 m_rad = (V_rad * rho_plate + m_cool_pipes) * 1.1        # Radiator mass
-M_pump = 1.3                                            # Pump mass (Found on discord links P&P)
-M_final = m_rad + M_tot + n_HV_bat * M_pump
-print(M_final)
+M_pump = 0.9                                            # Pump mass (Found on discord links P&P)
+M_final = M_tot + n_HV_bat * M_pump + m_rad * n_HV_bat
+print(M_pipes + M_plate + M_water)
 print()
 print("Mass of the pipes: ", M_pipes)
 print("Length of the pipes: ", L_pipes)

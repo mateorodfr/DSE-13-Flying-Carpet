@@ -7,8 +7,8 @@ concept = pm.ConceptParameters(0)
 V_cell = 3.7
 n_cell = 4
 
-P_cons = elect.pump_amount * elect.pump_power + elect.camera_power + elect.T_sens_power + elect.motor_controller_power + elect.VCU_power + elect.FC_power + elect.AMS_power + elect.SN_power
-M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.motor_controller_mass * elect.motor_controller_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
+P_cons = elect.pump_amount * elect.pump_power + elect.camera_power * elect.camera_amount + elect.T_sens_power * elect.T_sens_amount + elect.VCU_power + elect.FC_power + elect.AMS_power * elect.AMS_amount + elect.SN_power * elect.SN_amount  + elect.motor_controller_power * elect.motor_controller_amount
+M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
 
 n_cyc = 20
 t_asc_req = 80*n_cyc #time taken to ascend in s
@@ -16,7 +16,7 @@ t_des_req = 80*n_cyc #time taken to descend in s
 t_hover_req = 445.5*n_cyc #time taken to hover in s
 t_mission_req = (t_asc_req + t_hover_req + t_des_req) #total mission time
 
-E_consumed = t_mission_req * P_cons / 3600
+E_consumed = t_mission_req * P_cons / 3600      # Wh
 
 
 V_LV = n_cell * V_cell
@@ -30,7 +30,7 @@ T_s = 1 / f_s
          the current ripple on the inductor has to be larger than twice the output power        """
 
 
-P_out_12 = 2/3*(elect.VCU_power + elect.FC_power) + 1/2*elect.AMS_power + elect.pump_power * elect.pump_amount
+P_out_12 = 2/3*(elect.VCU_power + elect.FC_power) + 1/2*elect.AMS_power * elect.AMS_amount + elect.pump_power * elect.pump_amount + elect.camera_power * elect.camera_power
 I_out_12 = P_out_12/V_buck_12
 L_buck_12_max = (np.sqrt((V_LV - V_buck_12) * T_s * 2 * P_out_12 / V_LV)/2/I_out_12)**2
 L_buck_12 = np.arange(5*10**-9, L_buck_12_max, 5 * 10 ** -9)
@@ -58,13 +58,13 @@ P_loss_12 = I_avg_d_12 * V_d_on_12 + I_rms_d_12**2 * R_d_12 + R_sw_12 * I_rms_sw
 eff_buck_12 = (P_out_12 - P_loss_12) / P_out_12
 
 
-print(eff_buck_12)
+
 
 """    Rest of the VCU and AMS systems work on 24V, thus Boost converter is applied     """
 
 d_V_out = 0.05
 
-P_out_boost_24 = 1/3*elect.VCU_power + 1/2*elect.AMS_power
+P_out_boost_24 = 1/3*elect.VCU_power + 1/2*elect.AMS_power * elect.AMS_amount + elect.motor_controller_power * elect.motor_controller_amount
 
 I_in_24 = P_out_boost_24 / V_LV
 I_out_24 = P_out_boost_24 / V_boost_24
@@ -88,10 +88,10 @@ R_C_24 = 0.025
 P_loss_24 = I_avg_d_24 * V_d_on_24 + I_rms_d_24**2 * R_d_24 + R_sw_24 * I_rms_sw_24**2 + R_L_24 * I_rms_L_24**2 + R_C_24 * I_rms_C_24**2
 eff_boost_24 = (P_out_boost_24 - P_loss_24) / P_out_boost_24
 
-print(eff_boost_24)
 
 
-P_out_9 = elect.SN_power * elect.SN_amount + 1/3 * elect.FC_power + elect.camera_power * elect.camera_power
+
+P_out_9 = elect.SN_power * elect.SN_amount + 1/3 * elect.FC_power
 I_out_9 = P_out_9/V_buck_9
 L_buck_9_max = (np.sqrt((V_LV - V_buck_9) * T_s * 2 * P_out_9 / V_LV)/2/I_out_9)**2
 L_buck_9 = np.arange(5*10**-9, L_buck_9_max, 5 * 10 ** -9)
@@ -116,11 +116,13 @@ R_C_9 = 0.025
 P_loss_9 = I_avg_d_9 * V_d_on_9 + I_rms_d_9**2 * R_d_9 + R_sw_9 * I_rms_sw_9**2 + R_L_9 * I_rms_L_9**2 + R_C_9 * I_rms_C_9**2
 eff_buck_9 = (P_out_9 - P_loss_9) / P_out_9
 
-print(eff_buck_9)
+print(eff_buck_12[-1])
+print(eff_buck_9[-1])
+print(eff_boost_24[-1])
 
-M_LV_bat = E_consumed / concept.battery.rhoE_battery / concept.battery.dod_battery / concept.battery.eff_battery / concept.battery.degradation / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
+M_LV_bat = E_consumed / concept.battery.rhoE_battery / elect.LV_DoD / concept.battery.eff_battery  / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
 M_tot = M_LV_bat + M_comp
-print(P_cons/M_LV_bat)
-
-print(M_tot)
+print((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons)
+print(M_LV_bat)
+print(P_out_12, P_out_9, P_out_boost_24)
 
