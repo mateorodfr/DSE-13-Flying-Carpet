@@ -199,7 +199,7 @@ class ApcPropellerData:
 
 
     def plot_propdata(self):
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(16, 12), dpi=135)
         ax.grid(ls="-.", zorder=1, alpha=.5)
         for _ in range(len(self.pitch_data)):
             if self.below_cpreq[_]:
@@ -207,15 +207,16 @@ class ApcPropellerData:
             else:
                 ax.scatter(self.pitch_data[_], self.final_data[_, -1], color="red", marker=".", zorder=10)
         
-        ax.scatter([12.823], [3.202], color="blue", marker="$\circ$", zorder=10)
-        ax.set_yticks(np.linspace(0, 4.5, 10))
-        ax.set_xticks(np.arange(0, 37.5, 2.5))
-        ax.set_xlabel("Blade angle [deg]")
-        ax.set_ylabel("Ct/Cp [-]")
-        ax.set_ylim(0, 4.5)
-        ax.set_xlim(0, 35)
+        ax.scatter([12.823], [3.202], s=60, color="blue", marker="$\circ$", zorder=10)
+        ax.set_yticks(np.arange(0, 5.0, 0.5))
+        ax.set_xticks(np.arange(0, 35, 2.5))
+        ax.set_xlabel(r"Blade angle ($\beta_{0.75}$) [deg]")
+        ax.set_ylabel(r"$C_{T}/C_{P}$ [-]")
+        ax.set_ylim(0, 4.25)
+        ax.set_xlim(0, 32.5)
 
         plt.show()
+        fig.savefig("CT-CPvsBeta075.pdf")
 
 
 
