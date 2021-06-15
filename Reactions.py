@@ -66,6 +66,11 @@ class Centerpiece:
             self.__l1 = None  # Width
             self.__l2 = None  # Length
 
+            self.__h = None
+            self.__b = None
+            self.__tf = None
+            self.__tw = None
+
             # Area Moments of Inertia of beams
             self.__Ixx_12 = None
             self.__Ixx_23 = None
@@ -150,27 +155,39 @@ class Centerpiece:
         self.__th3 = th3
         self.__th4 = th4
 
-    def set_beam_config(self, l1, l2, Ixx_12, Ixx_23, Ixx_34, Ixx_41, Iyy_12, Iyy_23, Iyy_34, Iyy_41, e_modulus):
+    def set_beam_config(self, l1, l2, Ixx, Iyy, e_modulus):
         """
         float l1 : y-distance between beams 12 and 34
         float l2 : x-distance between beams 23 and 41
-        float Iyy_12 : Moment of inertia of beam 12
-        float Iyy_23 : Moment of inertia of beam 23
-        float Iyy_34 : Moment of inertia of beam 34
-        float Iyy_41 : Moment of inertia of beam 41
+        float h : web height
+        float b : flange width
+        float tw : web thickness
+        float tf : flange thickness
         float e_modulus : E-modulus of material (same material for all beams)
         """
         if self.__cptype == "beams_square":
             self.__l1 = l1
             self.__l2 = l2
-            self.__Ixx_12 = Ixx_12
-            self.__Ixx_23 = Ixx_23
-            self.__Ixx_34 = Ixx_34
-            self.__Ixx_41 = Ixx_41
-            self.__Iyy_12 = Iyy_12
-            self.__Iyy_23 = Iyy_23
-            self.__Iyy_34 = Iyy_34
-            self.__Iyy_41 = Iyy_41
+
+            """
+            self.__h = h
+            self.__b = b
+            self.__tw = tw
+            self.__tf = tf
+
+            # Calculate MOIs
+            Ixx = h * h * h * tw / 12 + 2 * (tf * tf * tf * b / 12 + tf * b * (h + tf) * (h + tf) / 4)
+            Iyy = tw * tw * tw * h / 12 + 2 * (b * b * b * tf / 12)
+            """
+
+            self.__Ixx_12 = Ixx
+            self.__Ixx_23 = Ixx
+            self.__Ixx_34 = Ixx
+            self.__Ixx_41 = Ixx
+            self.__Iyy_12 = Iyy
+            self.__Iyy_23 = Iyy
+            self.__Iyy_34 = Iyy
+            self.__Iyy_41 = Iyy
             self.__e_modulus = e_modulus
         else:
             print("Error: set_beam_config called while cptype not a beam type")
@@ -388,12 +405,10 @@ class Centerpiece:
         return N, Vv, Vh, Mh, Mv
 
 
-"""
 cp = Centerpiece(2, 2, 2, 2, "beams_square")
-cp.set_beam_config(1.65, 1.65, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 69e9)
+cp.set_beam_config(1.65, 1.65, 8.1e-6, 8.1e-6, 69e9)
 
 cp.set_p(-11000, 0, 0, 0)
 cp.set_t(700, 0, 0, 0)
 cp.set_arm_angle(pi/4, pi, pi, 3*pi/2)
 cp.solve_c()
-"""
