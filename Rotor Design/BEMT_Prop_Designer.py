@@ -65,7 +65,7 @@ def main() -> None:
         return (Thrust/(rho * D*D*D*D * f * f), Power/(rho * D*D*D*D*D * f * f * f))
     
     
-    solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\08062021rot_v2.ini")
+    solver = Solver("08062021rot_v2.ini")
 
     
     T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     ini_file_path = os.path.join(os.getcwd(), "08062021rot_v2.ini")
     config = configparser.ConfigParser()
-    config.read(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\08062021rot_v2.ini")
+    config.read(ini_file_path)
     
     # setINI(15)
 

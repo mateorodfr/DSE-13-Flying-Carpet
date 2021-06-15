@@ -85,17 +85,20 @@ class CrashLanding:
 
 
 def main():
-    thrustratios = [0.8, 0.9, 0.95]
+    thrustratios = [0.9, 0.95, 0.8]
     t_arr = np.linspace(0, 50, 1000)
-    alt = 400
+    alt = 350
 
-    fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
+    # fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
     fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
 
-    for Tratio in thrustratios:
-        crash = CrashLanding(Tratio, t_arr, alt, kmperh=False, triangle=False)
+    styles = [("black", "solid"), ("dimgrey", "dashed"), ("darkgray", "dashdot")]
+
+    for Tratio, style in zip(thrustratios, styles):
+        color, line = style
+        crash = CrashLanding(Tratio, t_arr, alt, kmperh=False, triangle=True)
         crash.set_altitude_velocity_nonegative()
-        # print(crash.impact_duration, crash.peakacc)
+        print(crash.impact_duration, crash.peakacc / crash.g)
 
         tt = crash.time
         vv, zz = crash.velocity, crash.altitude
@@ -105,37 +108,93 @@ def main():
         jj_crash, aa_crash = crash.jerk_arr, crash.acceleration_arr
         vv_crash, ss_crash = crash.velocity_arr, crash.distance_arr
 
-        ax[0].plot(tt, vv, label=f"Terminal = {np.round(crash.vterm, 2)}")
-        ax[0].set_ylabel("velocity [m/s]")
-        ax[0].axvline(crash.ground_contact, color="black", linestyle='--')
-        ax[0].legend()
-
-        ax[1].plot(tt, zz)
-        ax[1].axhline(color="black")
-        ax[1].axvline(crash.ground_contact, color="black")
-        ax[1].set_ylabel("altituede [m]")
-        ax[1].set_xlabel("time [s]")
+        # ax[0].plot(tt, vv, color=color, linestyle=line, label=f"T/W = {Tratio}")
+        # ax[0].set_ylabel("velocity [m/s]")
+        # # ax[0].axvline(crash.ground_contact, color=color, linestyle=line)
+        # ax[0].legend()
+        #
+        # ax[1].plot(tt, zz, color=color, linestyle=line)
+        # # ax[1].axhline(color="black")
+        # # ax[1].axvline(crash.ground_contact, color="black")
+        # ax[1].set_ylabel("altituede [m]")
+        # ax[1].set_xlabel("time [s]")
+        #
+        # major_xticks = np.linspace(0, np.max(crash.time), 6)
+        # minor_xticks = np.linspace(0, np.max(crash.time), 51)
+        #
+        # major_vticks = np.linspace(0, 25, 6)
+        # minor_vticks = np.linspace(0, 25, 11)
+        #
+        # major_altticks = np.linspace(0, 350, 8)
+        # minor_altticks = np.linspace(0, 350, 15)
+        #
+        # ax[0].set_xticks(major_xticks)
+        # ax[0].set_xticks(minor_xticks, minor=True)
+        # ax[0].set_yticks(major_vticks)
+        # ax[0].set_yticks(minor_vticks, minor=True)
+        # ax[0].grid(which='minor', alpha=0.2)
+        # ax[0].grid(which='major', alpha=0.5)
+        #
+        # ax[1].set_xticks(major_xticks)
+        # ax[1].set_xticks(minor_xticks, minor=True)
+        # ax[1].set_yticks(major_altticks)
+        # ax[1].set_yticks(minor_altticks, minor=True)
+        # ax[1].grid(which='minor', alpha=0.2)
+        # ax[1].grid(which='major', alpha=0.5)
 
         # ax2[0].plot(tt_crash, ss_crash, label=f"T/W = {Tratio}")
-        # ax2[0].axhline(crash.compression, color="black", linestyle="--")
+        # # ax2[0].axhline(crash.compression, color="black", linestyle="--")
         # ax2[0].set_ylabel("distance [m]")
         # ax2[0].legend()
 
-        ax2[0].plot(tt_crash, vv_crash, label=f"T/W = {Tratio}")
+        ax2[0].plot(tt_crash, vv_crash, color=color, linestyle=line, label=f"T/W = {Tratio}")
         ax2[0].set_ylabel("velocity [m/s]")
         ax2[0].legend()
 
-        ax2[1].plot(tt_crash, aa_crash / crash.g)
+        ax2[1].plot(tt_crash, aa_crash / crash.g, color=color, linestyle=line)
         ax2[1].set_ylabel("Acceleration [G]")
-        # ax2[1].set_xlabel("time [s]")
 
-        ax2[2].plot(tt_crash, jj_crash / crash.g)
+        ax2[2].plot(tt_crash, jj_crash / crash.g, color=color, linestyle=line)
         ax2[2].set_ylabel("Jerk [G/s]")
         ax2[2].set_xlabel("time [s]")
 
-    fig.tight_layout()
+    major_tticks = np.linspace(-0.06, 0.06, 7)
+    minor_tticks = np.linspace(-0.06, 0.06, 31)
+
+    major_v_crash_ticks = np.linspace(0, 25, 6)
+    minor_v_crash_ticks = np.linspace(0, 25, 11)
+
+    major_accticks = np.linspace(-80, 0, 6)
+    minor_accticks = np.linspace(-80, 0, 11)
+
+    major_jerkticks = np.linspace(-3000, 3000, 6)
+    minor_jerkticks = np.linspace(-3000, 3000, 11)
+
+    ax2[0].set_xticks(major_tticks)
+    ax2[0].set_xticks(minor_tticks, minor=True)
+    ax2[0].set_yticks(major_v_crash_ticks)
+    ax2[0].set_yticks(minor_v_crash_ticks, minor=True)
+    ax2[0].grid(which='minor', alpha=0.2)
+    ax2[0].grid(which='major', alpha=0.5)
+
+    ax2[1].set_xticks(major_tticks)
+    ax2[1].set_xticks(minor_tticks, minor=True)
+    ax2[1].set_yticks(major_accticks)
+    ax2[1].set_yticks(minor_accticks, minor=True)
+    ax2[1].grid(which='minor', alpha=0.2)
+    ax2[1].grid(which='major', alpha=0.5)
+
+    ax2[2].set_xticks(major_tticks)
+    ax2[2].set_xticks(minor_tticks, minor=True)
+    ax2[2].set_yticks(major_jerkticks)
+    ax2[2].set_yticks(minor_jerkticks, minor=True)
+    ax2[2].grid(which='minor', alpha=0.2)
+    ax2[2].grid(which='major', alpha=0.5)
+
+    # fig.tight_layout()
     fig2.tight_layout()
-    plt.show()
+    # plt.show()
+    plt.savefig(r"figures/Crash_OEI.pdf")
 
 
 if __name__ == "__main__":
