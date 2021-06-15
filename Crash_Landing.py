@@ -9,7 +9,7 @@ class CrashLanding:
     def __init__(self, thrusttoweight, time, height, kmperh=False, triangle=True):
         self.cd = 0.8
         self.area = 12.04
-        self.rho = 1.225
+        self.rho = 0.92   # 1.225
         self.mass = 1667
         self.g = 9.80665
         self.compression = 0.65
@@ -85,14 +85,14 @@ class CrashLanding:
 
 
 def main():
-    thrustratios = [0.9, 0.95, 0.8]
+    thrustratios = [0.8, 0.9, 0.95]
     t_arr = np.linspace(0, 50, 1000)
     alt = 350
 
     # fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
     fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
 
-    styles = [("black", "solid"), ("dimgrey", "dashed"), ("darkgray", "dashdot")]
+    styles = [("darkgray", "dashdot"), ("black", "solid"), ("dimgrey", "dashed")]
 
     for Tratio, style in zip(thrustratios, styles):
         color, line = style
@@ -164,11 +164,11 @@ def main():
     major_v_crash_ticks = np.linspace(0, 25, 6)
     minor_v_crash_ticks = np.linspace(0, 25, 11)
 
-    major_accticks = np.linspace(-80, 0, 6)
-    minor_accticks = np.linspace(-80, 0, 11)
+    major_accticks = np.linspace(-100, 0, 6)
+    minor_accticks = np.linspace(-100, 0, 11)
 
-    major_jerkticks = np.linspace(-3000, 3000, 6)
-    minor_jerkticks = np.linspace(-3000, 3000, 11)
+    major_jerkticks = np.linspace(-4000, 4000, 6)
+    minor_jerkticks = np.linspace(-4000, 4000, 11)
 
     ax2[0].set_xticks(major_tticks)
     ax2[0].set_xticks(minor_tticks, minor=True)
@@ -193,8 +193,8 @@ def main():
 
     # fig.tight_layout()
     fig2.tight_layout()
-    # plt.show()
-    plt.savefig(r"figures/Crash_OEI.pdf")
+    plt.show()
+    # plt.savefig(r"figures/Crash_OEI.pdf")
 
 
 if __name__ == "__main__":
