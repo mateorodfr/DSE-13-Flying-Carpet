@@ -7,6 +7,6 @@
         "--ignore E501",
         "--ignore E303"
       ],
-      "python.pythonPath": "C:\\Users\\Silviop\\AppData\\Local\\Programs\\Python\\Python39\\python.exe"
+      "python.pythonPath": "C:\\Users\\Silviop\\anaconda3\\envs\\controlenv\\python.exe"
 
 }

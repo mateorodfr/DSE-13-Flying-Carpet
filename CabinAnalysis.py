@@ -50,10 +50,14 @@ M.Elements.add_elements([EA,EB,EC,ED,EE,EF,EG,EH,EI,EJ,EK,EL,EM,EN,EO,EP,EQ,ER])
 
 
 with M.Boundaries as MB:
-    MB.add_bound_U(2, (0,0,0))
-    MB.add_bound_U(7, (0,0,0))
-    MB.add_bound_U(8, (0,0,0))
-    MB.add_bound_U(3, (0,0,0))
+    MB.add_bound_U(5, (0,0,0))
+    MB.add_bound_U(6, (0,0,0))
+    MB.add_bound_U(9, (0,0,1))
+    MB.add_bound_U(4, (0,0,1))
+    MB.add_bound_U(2, (0,0,1))
+    MB.add_bound_U(7, (0,0,1))
+    MB.add_bound_U(8, (0,0,1))
+    MB.add_bound_U(3, (0,0,1))
 
 with M.ExtForces as ME:
     ME.add_force(9,(0,0,1))

@@ -222,7 +222,7 @@ I_tot = I_prop+I_mot
 T_init = T_req_eng[len(T_req_eng) // 2]
 T = T_init
 T_eng_op = T_init
-T_eng_carry = 1.8 * T_init
+T_eng_carry = 1.9 * T_init
 T_eng_rev = 0.5 * T_init        # 0.4 as initial
 T_eng_level = 0.25 * T_init
 T_eng_final = 0.1 * T_init
@@ -297,7 +297,7 @@ while t_I < t_response:
     M_y_lst.append(M_y_init)
 
     t_I += dt
-
+    print(Op)
 
 Op_1 = Op
 t_I = t_response
