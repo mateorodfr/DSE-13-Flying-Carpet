@@ -51,62 +51,62 @@ def internalLoading(dz,section,mc,L_beam,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=False
             ax = ax.ravel()
             fig.suptitle('Bridge internal loadings and deflections')
 
-            ax[0].plot(z, Vy_int)
+            ax[0].plot(z, np.flip(Vy_int))
             ax[0].title.set_text(r"Shear force in y along z")
             ax[0].set_ylabel(r'Vy - Shear force in y [N]')
             ax[0].set_xlabel(r'z [m]')
 
-            ax[1].plot(z, Mx_int)
+            ax[1].plot(z, np.flip(Mx_int))
             ax[1].title.set_text(r"Moment around x along z")
             ax[1].set_ylabel(r'Mx - Moment around x [Nm]')
             ax[1].set_xlabel(r'z [m]')
 
-            ax[2].plot(z, thetay)
+            ax[2].plot(z, np.flip(thetay))
             ax[2].title.set_text(r"Deflection angle in y along z")
             ax[2].set_ylabel(r'$\theta_y$ - Deflection angle in y [rad]')
             ax[2].set_xlabel(r'z [m]')
 
-            ax[3].plot(z, deflecty)
+            ax[3].plot(z, np.flip(deflecty))
             ax[3].title.set_text(r"Deflection in y along z")
             ax[3].set_ylabel(r'vy - Delfection [m]')
             ax[3].set_xlabel(r'z [m]')
 
-            ax[4].plot(z, Vx_int)
+            ax[4].plot(z, np.flip(Vx_int))
             ax[4].title.set_text(r"Shear force in x along z")
             ax[4].set_ylabel(r'Vx - Shear force in x [N]')
             ax[4].set_xlabel(r'z [m]')
 
-            ax[5].plot(z, My_int)
+            ax[5].plot(z, np.flip(My_int))
             ax[5].title.set_text(r"Moment around y along z")
             ax[5].set_ylabel(r'My - Moment around y [Nm]')
             ax[5].set_xlabel(r'z [m]')
 
-            ax[6].plot(z, thetax)
+            ax[6].plot(z, np.flip(thetax))
             ax[6].title.set_text(r"Deflection angle in x along z")
             ax[6].set_ylabel(r'$\theta_x$ - Deflection angle in x [rad]')
             ax[6].set_xlabel(r'z [m]')
 
-            ax[7].plot(z, deflectx)
+            ax[7].plot(z, np.flip(deflectx))
             ax[7].title.set_text(r"Deflection in x along z")
             ax[7].set_ylabel(r'vx - Delfection [m]')
             ax[7].set_xlabel(r'z [m]')
 
-            ax[8].plot(z, Nz_int)
+            ax[8].plot(z, np.flip(Nz_int))
             ax[8].title.set_text(r"Normal force in z along z")
             ax[8].set_ylabel(r'Nz - Normal force in z [N]')
             ax[8].set_xlabel(r'z [m]')
 
-            ax[9].plot(z, Tz_int)
+            ax[9].plot(z, np.flip(Tz_int))
             ax[9].title.set_text(r"Torque around z along z")
             ax[9].set_ylabel(r'Tz - Torque around z [Nm]')
             ax[9].set_xlabel(r'z [m]')
 
-            ax[10].plot(z, dtheta)
+            ax[10].plot(z, np.flip(dtheta))
             ax[10].title.set_text(r"Rate of twist along z")
             ax[10].set_ylabel(r'$d\theta/dz$ - Rate of twist[rad/m]')
             ax[10].set_xlabel(r'z [m]')
 
-            ax[11].plot(z, thetaz)
+            ax[11].plot(z, np.flip(thetaz))
             ax[11].title.set_text(r"Twist angle")
             ax[11].set_ylabel(r'$\theta_z$ - Twist [rad]')
             ax[11].set_xlabel(r'z [m]')
@@ -278,15 +278,30 @@ def internalShear(section,Vymax,Vxmax,Tmax,dxy=0.001,dtheta=0.0001,plot=False):
     if section.shape == "square":
         dxy = 0.001
         xyarr = np.arange(0,section.w * 0.5 +section.h * 0.5 + dxy, dxy)
-        tauy = ( ( (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
-                   (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr >= section.w/2) * (section.w/2) )/section.t_w + \
-        ((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  + section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h)
-
-        taux = np.flip(((Vxmax/section.Iy) * (section.w/2) * section.t_h * (xyarr < section.h/2) *xyarr + \
-        ((Vxmax/section.Iy) * (section.w/2) * section.t_h) * (xyarr >= section.h/2)  * section.h/2)/section.t_h + \
-        ((Vxmax/section.Ix) * (section.t_w / 2) * (-0.5*(xyarr - section.h/2) ** 2 + section.w*(xyarr - section.h/2)/2 ) * (xyarr > (section.h/2)))/section.t_w)
+        #tauy = ( ( (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr < section.w/2) * xyarr + \
+        #           (Vymax/section.Ix) * (section.h/2) * section.t_w * (xyarr >= section.w/2) * (section.w/2) )/section.t_w + \
+        #((Vymax/section.Ix) * (section.t_h / 2) *( -0.5*(xyarr - section.w/2) ** 2  + section.h*(xyarr - section.w/2)/2 ) * (xyarr > (section.w/2)))/section.t_h)
+        tauy = (Vymax/section.Ix)*section.t_w * (section.h/2) * xyarr *(xyarr <= section.w/2)/section.t_w + \
+            ((Vymax/section.Ix)* section.t_w * (section.h/2) * (section.w/2) *(xyarr > section.w/2) + \
+             ((Vymax/section.Ix) * section.t_h *   ((section.h/2) * (xyarr - section.w/2)*(xyarr > section.w/2)  - (1/2)*(xyarr-section.w/2)**2 *(xyarr > section.w/2)  )))/section.t_h 
+             
+             # (1/2) * (xyarr - section.w/2) ** 2 *(xyarr > section.w/2)))/section.t_h
+       
+        #taux = np.flip(((Vxmax/section.Iy) * (section.w/2) * section.t_h * (xyarr < section.h/2) *xyarr + \
+        #((Vxmax/section.Iy) * (section.w/2) * section.t_h) * (xyarr >= section.h/2)  * section.h/2)/section.t_h + \
+        #((Vxmax/section.Ix) * (section.t_w / 2) * (-0.5*(xyarr - section.h/2) ** 2 + section.w*(xyarr - section.h/2)/2 ) * (xyarr > (section.h/2)))/section.t_w)
+        taux = np.flip((Vxmax/section.Iy)*section.t_h * (section.w/2) * xyarr *(xyarr <= section.h/2)/section.t_h + \
+            ((Vxmax/section.Iy)* section.t_h * (section.w/2) * (section.h/2) *(xyarr > section.h/2) + \
+             ((Vxmax/section.Iy) * section.t_w *   ((section.w/2) * (xyarr - section.h/2)*(xyarr > section.h/2)  - (1/2)*(xyarr-section.h/2)**2 *(xyarr > section.h/2)  )))/section.t_w )
 
         tauz = Tmax / (2*section.Am) * ((xyarr < (section.w /2)) * (1/section.t_w)   +  (xyarr >= (section.w /2)) * (1/section.t_h))
+
+        #What I am doing here is sooooo sketch   
+        tauy = np.concatenate((tauy,np.flip(tauy)[1:],-tauy[1:],np.flip(-tauy)[1:]))
+        taux = np.concatenate((taux,np.flip(taux)[1:],-taux[1:],np.flip(-taux)[1:]))
+        tauz = np.concatenate((tauz,tauz[1:],tauz[1:],tauz[1:]))
+        xyarr = np.arange(0,section.w *2 +section.h * 2 +4* dxy, dxy)
+
 
         tau = taux + tauy + tauz
 
@@ -307,8 +322,7 @@ def internalShear(section,Vymax,Vxmax,Tmax,dxy=0.001,dtheta=0.0001,plot=False):
         tauz = (Tmax / (2*section.Am * section.t)) * np.ones(len(xyarr))
 
         tau = taux + tauy + tauz
-        print(tau,taux,tauy,tauz)
-
+        
     elif section.shape == "ibeam":
         raise NotImplementedError("Shear calculations for open sections not implemented")
 
@@ -343,6 +357,7 @@ def internalShear(section,Vymax,Vxmax,Tmax,dxy=0.001,dtheta=0.0001,plot=False):
 
 
 
+
 # ALU 7075-T651   E = 71.7 GPA G = 27.5 GPa ystress = 500MPA  shearstress  = 331 MPa rho = 2700 Cost = 1.8 $/kg
 
 # ALU 2024-T4     E = 73.1 GPa G = 28 GPa  ystress = 324 MPa shearstress = 283 MPa rho = 2770 Cost = 2 $/kg
@@ -367,6 +382,7 @@ G = 27.5e9
 Money = 1.8
 dz = 0.01
 
+
 plotInternal = True
 
 
@@ -378,22 +394,29 @@ r_lim = [0.2]
 t_lim = [0.01]
 hw_lim = [0.3,0.1]
 SF = 1.5
-n = 25
+n = 10
+
 
 
 # w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions(component, section,rho_bridge)
 # reactions,z, Vy_int, Mx_int, thetay , deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz = internalLoading(dz,section,mc,L_bridge, Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plotInternal)
 # sigmas, sigma_max, z_max = normalStress(section, Nz_int, Mx_int, My_int,z)
 # tau, taumax, tauxyz,xyarr = internalShear(section, np.amax(np.abs(Vy_int)),np.amax(np.abs(Vx_int)),np.amax(np.abs(Tz_int)),plot=True)
-sigma_good,ms,sigma_maxs,sections, tau_maxs = generateCrossSections(component,'circle',r_lim,t_lim,L_bridge,rho_bridge,sigma_yield,tau_yield,deflectmax,SF,n)
+sigma_good,ms,sigma_maxs,sections, tau_maxs = generateCrossSections(component,'square',hw_lim,t_lim,L_bridge,rho_bridge,sigma_yield,tau_yield,deflectmax,SF,n)
+
 
 
 idx = np.where(ms == np.amin(ms))[0][0]
 
 section_best = sections[idx]
 section_best.plotNormalStress(sigma_good[idx],tau_maxs[idx],ms[idx],sigma_yield)
-w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions("rotor",section_best,rho_bridge)
+
+w0,P,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz = getReactions('rotor',section_best,rho_bridge)
 reactions, z, Vy_int, Mx_int, thetay, deflecty, Vx_int, My_int, thetax, deflectx, Nz_int, Tz_int, dtheta, thetaz=internalLoading(dz,section_best,mc,L_bridge,Fdx,Fdy,Fdz,Mdx,Mdy,Mdz,P,w0,plot=True)
 
-print(section_best.t)
+tau, maxtau, [taux,tauy,tauz], xyarr  = internalShear(section_best,-1.1*2400*9.80665/4,0,0,dxy=0.001,dtheta=0.0001,plot=True)
+
+
+
+print(section_best.t_h, section_best.Ix)
 print(len(sections))
