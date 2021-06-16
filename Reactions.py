@@ -161,7 +161,7 @@ class Centerpiece:
         self.__th3 = th3
         self.__th4 = th4
 
-    def set_beam_config(self, l1, l2, h, b, tw, tf, e_modulus):
+    def set_beam_config(self, l1, l2, h, b, tw, tf, e_modulus, rho):
         """
         float l1 : y-distance between beams 12 and 34
         float l2 : x-distance between beams 23 and 41
@@ -180,9 +180,18 @@ class Centerpiece:
             self.__tw = tw
             self.__tf = tf
 
+            A = 2 * b * tf + h * tw
+            mass = (A * l1 * 2 + A * l2 * 2) * rho
+            print("material: Al 6061-T6")
+            print("centerpiece mass: " + str(mass) + " kg")
+
             # Calculate MOIs
             Ixx = h * h * h * tw / 12 + 2 * (tf * tf * tf * b / 12 + tf * b * (h + tf) * (h + tf) / 4)
             Iyy = tw * tw * tw * h / 12 + 2 * (b * b * b * tf / 12)
+
+            # Check for validity of no torsion assumption (bending stiffness >> torsional stiffness)
+            J = 1 / 3 * (2 * b * tf * tf * tf + h * tw * tw * tw)
+            print("J / Ixx: " + str(round(J / Ixx * 100, 5)) + " %")
 
             # Wrote the program to have variable MOIs for each beam but in the end they all use the same one
             self.__Ixx = Ixx
@@ -496,7 +505,7 @@ class Centerpiece:
 
         globalmax = np.max([max_vM_12, max_vM_23, max_vM_34, max_vM_41])
 
-        print("von Mises - Global: " + str(round(globalmax, 2)) + " MPa")
+        print("von Mises - global max: " + str(round(globalmax, 2)) + " MPa")
 
         if globalmax > 275:
             print("Result: Yield")
@@ -504,11 +513,32 @@ class Centerpiece:
             print("Result: No yield")
 
 
-cp = Centerpiece(2, 2, 2, 2, "beams_square")
-cp.set_beam_config(1.65, 1.65, 0.3, 0.1, 1.2e-3, 1.9e-3, 69e9)
+mass_MHM = 2200  # kg
+mass_motors = 110  # kg
+hover_thrust_perc = 40
+max_torque = 700  # Nm
 
-cp.set_p(-11600, 0, 0, 0)
-cp.set_t(700, 0, 0, 0)
+safety_factor = 1.5
+max_load = - mass_MHM * 9.81 * 100 / (4 * hover_thrust_perc) * safety_factor
+min_load = mass_motors * 9.81 * safety_factor
+hover_thrust = mass_motors * 9.81 / 4
+
+# Structure setup
+cp = Centerpiece(2, 2, 2, 2, "beams_square")
+cp.set_beam_config(1.65, 1.65, 0.3, 0.1, 2.8e-3, 3.65e-3, 69e9, 2700)
+
+# OEI at full thrust
+cp.set_p(max_load, max_load, max_load, max_load)
+cp.set_t(700*1.5, 0, 0, 0)
+
+# Landed, power off
+# cp.set_p(1080*1.5, 1080*1.5, 1080*1.5, 1080*1.5)
+# cp.set_t(0, 0, 0, 0)
+
+# One side full thrust, other side hover thrust (e.g. emergency manouver)
+# cp.set_p(hover_thrust, hover_thrust, max_load, max_load)
+# cp.set_t(0, 0, 0, 0)
+
 cp.set_arm_angle(pi / 4, pi, pi, 3 * pi / 2)
 cp.solve_c()
 cp.globalmax_vonMises()
