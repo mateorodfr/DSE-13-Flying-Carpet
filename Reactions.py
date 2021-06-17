@@ -1,5 +1,7 @@
-from math import sin, cos, pi
+from math import sin, cos, pi, sqrt
 from scipy.linalg import solve
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Centerpiece:
@@ -72,6 +74,10 @@ class Centerpiece:
             self.__tw = None
 
             # Area Moments of Inertia of beams
+            self.__Ixx = None
+            self.__Iyy = None
+
+            # Wrote the program to have variable MOIs for each beam but in the end they all use the same one
             self.__Ixx_12 = None
             self.__Ixx_23 = None
             self.__Ixx_34 = None
@@ -155,7 +161,7 @@ class Centerpiece:
         self.__th3 = th3
         self.__th4 = th4
 
-    def set_beam_config(self, l1, l2, Ixx, Iyy, e_modulus):
+    def set_beam_config(self, l1, l2, h, b, tw, tf, e_modulus, rho):
         """
         float l1 : y-distance between beams 12 and 34
         float l2 : x-distance between beams 23 and 41
@@ -169,17 +175,27 @@ class Centerpiece:
             self.__l1 = l1
             self.__l2 = l2
 
-            """
             self.__h = h
             self.__b = b
             self.__tw = tw
             self.__tf = tf
 
+            A = 2 * b * tf + h * tw
+            mass = (A * l1 * 2 + A * l2 * 2) * rho
+            print("material: Al 6061-T6")
+            print("centerpiece mass: " + str(mass) + " kg")
+
             # Calculate MOIs
             Ixx = h * h * h * tw / 12 + 2 * (tf * tf * tf * b / 12 + tf * b * (h + tf) * (h + tf) / 4)
             Iyy = tw * tw * tw * h / 12 + 2 * (b * b * b * tf / 12)
-            """
 
+            # Check for validity of no torsion assumption (bending stiffness >> torsional stiffness)
+            J = 1 / 3 * (2 * b * tf * tf * tf + h * tw * tw * tw)
+            print("J / Ixx: " + str(round(J / Ixx * 100, 5)) + " %")
+
+            # Wrote the program to have variable MOIs for each beam but in the end they all use the same one
+            self.__Ixx = Ixx
+            self.__Iyy = Iyy
             self.__Ixx_12 = Ixx
             self.__Ixx_23 = Ixx
             self.__Ixx_34 = Ixx
@@ -404,11 +420,125 @@ class Centerpiece:
         Mv = Mv_4 + Vh * d
         return N, Vv, Vh, Mh, Mv
 
+    def tau_f(self, x, Vh, Vv):
+        if not - self.__b * 0.5 <= x <= self.__b * 0.5:
+            print("Error: Invalid distance x-value in tau_f()")
+            exit()
 
+        if x < 0:
+            x = -x
+
+        return Vv * (self.__b * self.__h * self.__tf / 4 - self.__h * self.__tf / 2 * x) / (self.__Ixx * self.__tf) + \
+               Vh * (self.__b * self.__b * self.__tf / 8 - self.__tf / 2 * x * x) / (self.__Iyy * 2 * self.__tf)
+
+    def tau_w(self, y, Vh, Vv):
+        if not - self.__h * 0.5 <= y <= self.__h * 0.5:
+            print("Error: Invalid y-value in tau_w()")
+            exit()
+        return Vv * (self.__h * self.__b * self.__tf / 2 + self.__h * self.__h * self.__tw
+                     / 8 - self.__tw / 2 * y * y) / self.__Ixx * self.__tw
+
+    def sigma_f(self, x, Mh, Mv):
+        # Assuming constant sigma due to Mh
+        # Validity: small flange thickness
+        sigma = Mh * self.__h * 0.5 / self.__Ixx + Mv * x / self.__Iyy
+        return sigma
+
+    def sigma_w(self, y, Mh, Mv):
+        # Assuming no sigma due to Mv
+        # Validity: small distance from neutral axis
+        sigma = Mh * y / self.__Ixx
+        return sigma
+
+    def localmax_vonMises(self, d, f_nvm, plot=False):
+        x_f = np.linspace(-self.__b / 2, self.__b / 2, 25)
+        y_w = np.linspace(-self.__h / 2, self.__h / 2, 25)
+
+        vM_f = np.zeros_like(x_f)
+        vM_w = np.zeros_like(y_w)
+
+        N, Vv, Vh, Mh, Mv = f_nvm(d)
+
+        # von Mises stresses in top flange
+        for i in range(len(x_f)):
+            vM_f[i] = sqrt(self.tau_f(x_f[i], Vh, Vv) ** 2 + self.sigma_f(x_f[i], Mh, Mv) ** 2)
+            if vM_f[i] > 276e6:
+                print("yield in flange")
+
+        # von Mises stresses in web
+        for i in range(len(y_w)):
+            vM_w[i] = sqrt(self.tau_w(y_w[i], Vh, Vv) ** 2 + self.sigma_w(y_w[i], Mh, Mv) ** 2)
+            if vM_f[i] > 276e6:
+                print("yield in web")
+
+        max_vM = np.max([vM_f, vM_w]) / 1e6
+
+        if plot:
+            plt.figure(1)
+            plt.plot(x_f, vM_f / 1e6)
+            plt.xlabel("x_f")
+            plt.ylabel("vM_f")
+            plt.figure(2)
+            plt.plot(vM_w / 1e6, y_w)
+            plt.xlabel("vM_w")
+            plt.ylabel("y_w")
+            plt.show()
+
+        return max_vM
+
+    def globalmax_vonMises(self):
+        l1_arr = np.linspace(0, self.__l1, 100)
+        l2_arr = np.linspace(0, self.__l2, 100)
+
+        max_vM_12 = np.zeros_like(l2_arr)
+        max_vM_23 = np.zeros_like(l1_arr)
+        max_vM_34 = np.zeros_like(l2_arr)
+        max_vM_41 = np.zeros_like(l1_arr)
+
+        for i in range(len(l2_arr)):
+            max_vM_12[i] = self.localmax_vonMises(l2_arr[i], self.nvm12)
+            max_vM_34[i] = self.localmax_vonMises(l2_arr[i], self.nvm34)
+
+        for i in range(len(l1_arr)):
+            max_vM_23[i] = self.localmax_vonMises(l2_arr[i], self.nvm23)
+            max_vM_41[i] = self.localmax_vonMises(l2_arr[i], self.nvm41)
+
+        globalmax = np.max([max_vM_12, max_vM_23, max_vM_34, max_vM_41])
+
+        print("von Mises - global max: " + str(round(globalmax, 2)) + " MPa")
+
+        if globalmax > 275:
+            print("Result: Yield")
+        else:
+            print("Result: No yield")
+
+
+mass_MHM = 2200  # kg
+mass_motors = 110  # kg
+hover_thrust_perc = 40
+max_torque = 700  # Nm
+
+safety_factor = 1.5
+max_load = - mass_MHM * 9.81 * 100 / (4 * hover_thrust_perc) * safety_factor
+min_load = mass_motors * 9.81 * safety_factor
+hover_thrust = mass_motors * 9.81 / 4
+
+# Structure setup
 cp = Centerpiece(2, 2, 2, 2, "beams_square")
-cp.set_beam_config(1.65, 1.65, 8.1e-6, 8.1e-6, 69e9)
+cp.set_beam_config(1.65, 1.65, 0.3, 0.1, 2.8e-3, 3.65e-3, 69e9, 2700)
 
-cp.set_p(-11000, 0, 0, 0)
-cp.set_t(700, 0, 0, 0)
-cp.set_arm_angle(pi/4, pi, pi, 3*pi/2)
+# OEI at full thrust
+cp.set_p(max_load, max_load, max_load, max_load)
+cp.set_t(700*1.5, 0, 0, 0)
+
+# Landed, power off
+# cp.set_p(1080*1.5, 1080*1.5, 1080*1.5, 1080*1.5)
+# cp.set_t(0, 0, 0, 0)
+
+# One side full thrust, other side hover thrust (e.g. emergency manouver)
+# cp.set_p(hover_thrust, hover_thrust, max_load, max_load)
+# cp.set_t(0, 0, 0, 0)
+
+cp.set_arm_angle(pi / 4, pi, pi, 3 * pi / 2)
 cp.solve_c()
+cp.globalmax_vonMises()
