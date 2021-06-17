@@ -73,6 +73,9 @@ class Centerpiece:
             self.__tf = None
             self.__tw = None
 
+            self.__sigma_yield = None
+            self.__mass = None
+
             # Area Moments of Inertia of beams
             self.__Ixx = None
             self.__Iyy = None
@@ -161,7 +164,7 @@ class Centerpiece:
         self.__th3 = th3
         self.__th4 = th4
 
-    def set_beam_config(self, l1, l2, h, b, tw, tf, e_modulus, rho):
+    def set_beam_config(self, l1, l2, h, b, tw, tf, e_modulus, rho, sigma_yield):
         """
         float l1 : y-distance between beams 12 and 34
         float l2 : x-distance between beams 23 and 41
@@ -180,10 +183,13 @@ class Centerpiece:
             self.__tw = tw
             self.__tf = tf
 
+            self.__sigma_yield = sigma_yield
+
             A = 2 * b * tf + h * tw
-            mass = (A * l1 * 2 + A * l2 * 2) * rho
-            print("material: Al 6061-T6")
-            print("centerpiece mass: " + str(mass) + " kg")
+            self.__mass = (A * l1 * 2 + A * l2 * 2) * rho
+
+            # print("material: Al 6061-T6")
+            # print("centerpiece mass: " + str(self.__mass) + " kg")
 
             # Calculate MOIs
             Ixx = h * h * h * tw / 12 + 2 * (tf * tf * tf * b / 12 + tf * b * (h + tf) * (h + tf) / 4)
@@ -191,7 +197,9 @@ class Centerpiece:
 
             # Check for validity of no torsion assumption (bending stiffness >> torsional stiffness)
             J = 1 / 3 * (2 * b * tf * tf * tf + h * tw * tw * tw)
-            print("J / Ixx: " + str(round(J / Ixx * 100, 5)) + " %")
+            if round(J / Ixx * 100, 5) > 1:
+                print("WARNING: Torsional stiffness significant relative to bending stiffness. "
+                      "Results may be incorrect")
 
             # Wrote the program to have variable MOIs for each beam but in the end they all use the same one
             self.__Ixx = Ixx
@@ -450,7 +458,7 @@ class Centerpiece:
         sigma = Mh * y / self.__Ixx
         return sigma
 
-    def localmax_vonMises(self, d, f_nvm, plot=False):
+    def localcheck(self, d, f_nvm, plot=False, print_fail=False):
         x_f = np.linspace(-self.__b / 2, self.__b / 2, 25)
         y_w = np.linspace(-self.__h / 2, self.__h / 2, 25)
 
@@ -459,19 +467,40 @@ class Centerpiece:
 
         N, Vv, Vh, Mh, Mv = f_nvm(d)
 
-        # von Mises stresses in top flange
+        fail = False
+
+        # flange
         for i in range(len(x_f)):
-            vM_f[i] = sqrt(self.tau_f(x_f[i], Vh, Vv) ** 2 + self.sigma_f(x_f[i], Mh, Mv) ** 2)
-            if vM_f[i] > 276e6:
-                print("yield in flange")
+            # von Mises failure criterion
+            vM_f[i] = sqrt(self.sigma_f(x_f[i], Mh, Mv) ** 2 + 3 * self.tau_f(x_f[i], Vh, Vv) ** 2)
+            if vM_f[i] > self.__sigma_yield:
+                fail = True
+                if print_fail:
+                    print("yield in flange")
 
-        # von Mises stresses in web
+            # compression buckling
+            sigma_cr = 0.407 * pi * pi * self.__e_modulus / (12 * (1 - 0.33 * 0.33)) * (self.__tf * 2 / self.__b) ** 2
+            if self.sigma_f(x_f[i], Mh, Mv) > sigma_cr:
+                fail = True
+                if print_fail:
+                    print("flange column buckling")
+
+        # web
         for i in range(len(y_w)):
-            vM_w[i] = sqrt(self.tau_w(y_w[i], Vh, Vv) ** 2 + self.sigma_w(y_w[i], Mh, Mv) ** 2)
-            if vM_f[i] > 276e6:
-                print("yield in web")
+            # von Mises failure criterion
+            vM_w[i] = sqrt(self.sigma_w(y_w[i], Mh, Mv) ** 2 + 3 * self.tau_w(y_w[i], Vh, Vv) ** 2)
+            if vM_f[i] > self.__sigma_yield:
+                fail = True
+                if print_fail:
+                    print("yield in web")
 
-        max_vM = np.max([vM_f, vM_w]) / 1e6
+            # shear buckling
+            if print_fail and self.tau_w(y_w[i], Vh, Vv) > 8.2 * self.__e_modulus * (self.__tw / self.__b) ** 2:
+                fail = True
+                if print_fail:
+                    print("web shear buckling")
+
+        max_vM = np.max([vM_f, vM_w])
 
         if plot:
             plt.figure(1)
@@ -484,9 +513,9 @@ class Centerpiece:
             plt.ylabel("y_w")
             plt.show()
 
-        return max_vM
+        return max_vM, fail
 
-    def globalmax_vonMises(self):
+    def globalcheck(self, prnt=False):
         l1_arr = np.linspace(0, self.__l1, 100)
         l2_arr = np.linspace(0, self.__l2, 100)
 
@@ -495,50 +524,138 @@ class Centerpiece:
         max_vM_34 = np.zeros_like(l2_arr)
         max_vM_41 = np.zeros_like(l1_arr)
 
+        fail = False
         for i in range(len(l2_arr)):
-            max_vM_12[i] = self.localmax_vonMises(l2_arr[i], self.nvm12)
-            max_vM_34[i] = self.localmax_vonMises(l2_arr[i], self.nvm34)
+            max_vM_12[i], fail = self.localcheck(l2_arr[i], self.nvm12)
+            if fail:
+                break
+            max_vM_34[i], fail = self.localcheck(l2_arr[i], self.nvm34)
+            if fail:
+                break
 
         for i in range(len(l1_arr)):
-            max_vM_23[i] = self.localmax_vonMises(l2_arr[i], self.nvm23)
-            max_vM_41[i] = self.localmax_vonMises(l2_arr[i], self.nvm41)
+            max_vM_23[i], fail = self.localcheck(l2_arr[i], self.nvm23)
+            if fail:
+                break
+            max_vM_41[i], fail = self.localcheck(l2_arr[i], self.nvm41)
+            if fail:
+                break
 
         globalmax = np.max([max_vM_12, max_vM_23, max_vM_34, max_vM_41])
 
-        print("von Mises - global max: " + str(round(globalmax, 2)) + " MPa")
+        if prnt:
+            print("von Mises - global max: " + str(round(globalmax, 2)) + " MPa")
+            if globalmax > self.__sigma_yield / 1e6:
+                print("Result: Yield")
+            else:
+                print("Result: No yield")
 
-        if globalmax > 275:
-            print("Result: Yield")
-        else:
-            print("Result: No yield")
+        return globalmax, fail
+
+    def mass(self):
+        return self.__mass
 
 
+# Constants
 mass_MHM = 2200  # kg
 mass_motors = 110  # kg
 hover_thrust_perc = 40
-max_torque = 700  # Nm
+oei_torque = 700  # Nm
 
+# Limit cases
 safety_factor = 1.5
 max_load = - mass_MHM * 9.81 * 100 / (4 * hover_thrust_perc) * safety_factor
 min_load = mass_motors * 9.81 * safety_factor
+max_torque = oei_torque * safety_factor
 hover_thrust = mass_motors * 9.81 / 4
 
-# Structure setup
-cp = Centerpiece(2, 2, 2, 2, "beams_square")
-cp.set_beam_config(1.65, 1.65, 0.3, 0.1, 2.8e-3, 3.65e-3, 69e9, 2700)
+# Object generation
+cp = Centerpiece(1.72, 1.72, 1.72, 1.72, "beams_square")
 
-# OEI at full thrust
-cp.set_p(max_load, max_load, max_load, max_load)
-cp.set_t(700*1.5, 0, 0, 0)
+# Range of test values
+b_min = 0.045
+b_max = 0.055
+b_arr = np.linspace(b_min, b_max, 10)
 
-# Landed, power off
-# cp.set_p(1080*1.5, 1080*1.5, 1080*1.5, 1080*1.5)
-# cp.set_t(0, 0, 0, 0)
+tf_min = 5e-3
+tf_max = 7e-3
+tf_arr = np.linspace(tf_min, tf_max, 10)
 
-# One side full thrust, other side hover thrust (e.g. emergency manouver)
-# cp.set_p(hover_thrust, hover_thrust, max_load, max_load)
-# cp.set_t(0, 0, 0, 0)
+tw_min = 0.4e-3
+tw_max = 1e-3
+tw_arr = np.linspace(tw_min, tw_max, 1)
 
-cp.set_arm_angle(pi / 4, pi, pi, 3 * pi / 2)
-cp.solve_c()
-cp.globalmax_vonMises()
+t_min = 2e-3
+t_max = 6e-3
+t_arr = np.linspace(t_min, t_max, 10)
+
+# array to hold optimal values
+# b, tf, tw, mass
+opt = [0, 0, 0, 999]
+
+# Material stats
+# Al 6061-T6:
+#   E_mod       = 68.9e9
+#   rho         = 2700
+#   sigma_yield = 260e6
+
+# Al 2024-T4:
+#   E_mod       = 73.1e9
+#   rho         = 2780
+#   sigma_yield = 310e6
+
+# Al 7075-T6:
+#   E_mod       = 71.7e9
+#   rho         = 2810
+#   sigma_yield = 448e6
+
+# Optimal value generation
+i = 0
+for b in b_arr:
+    print(round(b, 3))
+    for t in t_arr:
+        print("   " + str(round(t, 5)), end=" ")
+        cp.set_beam_config(1.65, 1.65, 0.3, b, t, t, 71.7e9, 2810, 448e6)
+
+        # OEI at full thrust
+        cp.set_p(max_load, max_load, max_load, max_load)
+        cp.set_t(max_torque, 0, 0, 0)
+
+        f = False
+        for theta in np.linspace(0, pi, 90):
+            cp.set_arm_angle(theta, -theta, pi*0.5, pi*1.5)
+            cp.solve_c()
+
+            if cp.globalcheck()[1]:
+                f = True
+                print("FAIL")
+                break
+
+        if f:
+            continue
+        elif cp.mass() < opt[3]:
+            opt = [b, t, t, cp.mass()]
+            print("NEW OPT")
+        else:
+            print("")
+        break
+    i += 1
+    # print(round(i / len(b_arr) * 100, 1))
+
+print(opt)
+
+# Results
+# Al 6061-T6:
+# [0.088889, 0.00544444, 0.000400000, 19.38640]
+# [0.077778, 0.00444445, 0.004444445, 36.08000]
+
+# Al 2024-T4:
+# [0.083334, 0.00488889, 0.000400000, 17.15198]
+# [0.077778, 0.00377778, 0.003777778, 31.57669]
+
+# Al 7075-T6:
+# [0.065556, 0.00444445, 0.000400000, 13.03258]
+# [0.052222, 0.00377778, 0.003777778, 28.33646]
+
+
+
