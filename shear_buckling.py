@@ -19,9 +19,6 @@ class ShearBuckling:
     def find_required_stringers(self):
         return np.ceil(self.length / self.minimal_pitch)
 
-    def find_minimal_stringer_cross_section(self):
-        pass    # TODO
-
     def plot_findings(self):
         fig, ax = plt.subplots(figsize=(8, 6))
 
@@ -35,7 +32,9 @@ class ShearBuckling:
 def main():
     stresses = np.linspace(15e6, 25e6, 11)
     buckling_analysis = ShearBuckling(stresses, 2, 6.4, 70e9, 1e-3)
+    print(f"Current stress value: \t\t  {stresses/1e6}")
     print(f"Required number of stringers: {buckling_analysis.n_stringers}")
+    print(f"Minimum stringer spacing: \t {buckling_analysis.minimal_pitch}")
     buckling_analysis.plot_findings()
 
 
