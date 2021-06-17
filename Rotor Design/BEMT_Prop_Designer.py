@@ -65,7 +65,7 @@ def main() -> None:
         return (Thrust/(rho * D*D*D*D * f * f), Power/(rho * D*D*D*D*D * f * f * f))
         
     
-    solver = Solver("08062021rot_v2.ini")
+    solver = Solver(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\08062021rot_v2.ini")
 
     Ts=[]
     T2s=[]
@@ -162,27 +162,27 @@ def main() -> None:
 
         plt.show()
 
-    run_sweep_coaxial(20, -1)
+    # run_sweep_coaxial(20, -1)
             
-    # T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
-    # try:
-    #     TSR, CT, CP = solver.turbine_coeffs(T, Q, P)
-    #     TSR2, CT2, CP2 = solver.turbine_coeffs(T2, Q2, P2)
-    # except ZeroDivisionError:
-    #     TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
-    #     TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
+    T,Q,P,dfU,T2,Q2,P2,dfL = solver.run()
+    try:
+        TSR, CT, CP = solver.turbine_coeffs(T, Q, P)
+        TSR2, CT2, CP2 = solver.turbine_coeffs(T2, Q2, P2)
+    except ZeroDivisionError:
+        TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
+        TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
 
     # init_M = 1667 # [kg]
-    # T_W = 1.1
+    # T_W = 1.9
     # M_needed = init_M * (T_W * 4) / 8
 
     # P_avg = (P+P2)/2
 
     # print(f"\n\n{M_needed = } [kg]")
-    # print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
+    print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
     # print(f"{P_avg = }\n")
-    # print(f"Rotor1: {CT = }, {CP = }, Ct/Cp = {CT / CP}\n")
-    # print(f"Rotor2: {CT2 = }, {CP2 = }, Ct/Cp = {CT2 / CP2}\n")
+    print(f"Rotor1: {CT = }, CQ = {CP/(2*np.pi)}, {CP = }, Ct/Cp = {CT / CP}\n")
+    print(f"Rotor2: {CT2 = }, CQ2 = {CP2/(2*np.pi)}, {CP2 = }, Ct2/Cp2 = {CT2 / CP2}\n")
 
     
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
     ini_file_path = os.path.join(os.getcwd(), "08062021rot_v2.ini")
     config = configparser.ConfigParser()
-    config.read(ini_file_path)
+    config.read(r"C:\Users\marvd\Documents\GitHub\DSE-13-Flying-Carpet\Rotor Design\08062021rot_v2.ini")
     
     # setINI(15)
 
