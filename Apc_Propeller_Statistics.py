@@ -210,8 +210,9 @@ class ApcPropellerData:
         ax.scatter([12.823], [3.202], s=60, color="blue", marker="$\circ$", zorder=10)
         ax.set_yticks(np.arange(0, 5.0, 0.5))
         ax.set_xticks(np.arange(0, 35, 2.5))
-        ax.set_xlabel(r"Blade angle ($\beta_{0.75}$) [deg]")
-        ax.set_ylabel(r"$C_{T}/C_{P}$ [-]")
+        ax.set_xlabel(r"Blade angle ($\beta_{0.75}$) [deg]", fontsize=18)
+        ax.set_ylabel(r"$C_{T}/C_{P}$ [-]", fontsize=18)
+        ax.tick_params(labelsize=18)
         ax.set_ylim(0, 4.25)
         ax.set_xlim(0, 32.5)
 
