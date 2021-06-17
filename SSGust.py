@@ -4,6 +4,7 @@ import control as ctr
 import control.matlab as sim
 import matplotlib.pyplot as plt
 import scipy as sp
+from mpl_toolkits.mplot3d import Axes3D
 
 concept = pm.ConceptParameters(0)
 I = concept.MMOI()
@@ -19,7 +20,7 @@ x, y, z, x', y', z', phi, theta, chi, phi', theta', chi'
 
 Input Vector:
 ft, fwx, fwy, fwz, Tx, Ty, Tz, Twx, Twy, Twz
-
+0    1    2    3   4    5   6  7    8    9
 Output Vector:
 x, y, z, phi, theta, chi, x', y', phi', theta'
 
@@ -50,7 +51,7 @@ B[11,6] = 1/I[2]
 B[11,9] = 1/I[2]
 
 #Output matrix
-C = np.zeros((nOutput,nState))
+C = np.zeros((nOutput+4,nState))
 C[0,0] = 1
 C[1,1] = 1
 C[2,2] = 1
@@ -62,23 +63,42 @@ C[7,4] = 1
 C[8,9] = 1
 C[9,10] = 1
 
-D = np.zeros((nOutput,nInput))
-# D[10,5] = 1
+D = np.zeros((nOutput+4,nInput))
+D[10,4] = 1
+D[11,5] = 1
+D[12,6] = 1
+D[13,0] = 1
 
-K = np.zeros((nInput,nOutput))
+K = np.zeros((nInput,nOutput+4))
+
 K_z_z = -10000
 
-K_tx_y = 100
-K_tx_ydot = 300
-K_tx_phi = 6000
-K_tx_phidot = 5000
 
-K_ty_x = -10
-K_ty_xdot = -100
-K_ty_theta = 4000
-K_ty_thetadot = 5000
+# K_tx_y = 1500
+# K_tx_ydot = 3000
+# K_tx_phi = 15000
+# K_tx_phidot = 13000
 
-K_tz_yaw  = 10000
+
+# K_ty_x = -75
+# K_ty_xdot = -300
+# K_ty_theta = 4000
+# K_ty_thetadot = 4500
+
+K_tx_y = 250_000
+K_tx_ydot = 300_000
+K_tx_phi = 750_000
+K_tx_phidot = 70_000
+
+
+K_ty_x = -250_000
+K_ty_xdot = -300_000
+K_ty_theta = 750_000
+K_ty_thetadot = 70_000
+
+
+
+K_tz_yaw  = 5000
 
 
 K[0,2] = K_z_z
@@ -93,10 +113,10 @@ K[5,0] = K_ty_x
 K[6,5] = K_tz_yaw
 
 ss = ctr.StateSpace(A,B,C,D)
-# ss = ss.feedback(K)
+ss = ss.feedback(K)
 
 dt = 0.01
-T = np.arange(0,50+dt,dt)
+T = np.arange(0,250+dt,dt)
 U = np.zeros((len(T), nInput))
 
 
@@ -110,18 +130,34 @@ M_gust = np.loadtxt(r'Data/Gust/Mgust.txt')
 alpha_gust = np.loadtxt(r'Data/Gust/alphagust.txt')
 t_gust = np.loadtxt(r'Data/Gust/tgust.txt')
 U_gust = np.loadtxt(r'Data/Gust/Ugust.txt')
+T_cg = np.loadtxt(r'Data/Gust/cgtorque.txt')
+t_cg = np.loadtxt(r'Data/Gust/cgtime.txt')
 
+# M_gust[:,1] *= -1
+# U[len(t_gust)//2:len(t_gust)+len(t_gust)//2,1:4] = F_gust[:,:]
+# U[len(t_gust)//2:len(t_gust)+len(t_gust)//2,7:] = M_gust[:,:]
+# U[len(t_cg)//2:len(t_cg)+len(t_cg)//2,8] = T_cg*2
+# U[len(t_cg)//2:len(t_cg)+len(t_cg)//2,7] = T_cg*2
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,1] = 200
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,2] = 200
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,3] = 200
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,-3] = 60
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,-2] = -60
+# U[len(T)//4:int(np.round(len(t_gust)*0.08))+len(T)//4,-1] = 60
+U[len(T)//16:len(T)//16+len(T)//4,0] = np.sin(2*np.pi*T[:len(T)//4])*100
+# U[len(T)//4:int(len(T)//4 + 60//dt), 7] = 2353
+# U[len(T)//4:int(len(T)//4 + 60//dt), 8] = 1054
 
-# U[len(t_gust):2*len(t_gust),1:4] = F_gust[:,:]
-# U[len(t_gust):2*len(t_gust),7:] = M_gust[:,:]
-# U[len(T)//2,1] = 1
-# U[len(T)//2,2] = 1
-# U[len(T)//2,3] = 1
-# U[len(T)//2,-3] = 1
-# U[len(T)//2,-2] = 1
-# U[len(T)//2,-1] = 1
+# U[len(az_OEI)//8:len(az_OEI)+len(az_OEI)//8,3] = az_OEI
+# U[len(Mx_OEI)//8:len(Mx_OEI)+len(Mx_OEI)//8,-3] = Mx_OEI
+# U[len(My_OEI)//8:len(My_OEI)+len(My_OEI)//8,-2] = My_OEI
 
-
+# U[len(T)//4:,1] = 1
+# U[len(T)//4:,2] = 1
+# U[len(T)//4:,3] = 1
+# U[len(T)//4:,-3] = 1
+# U[len(T)//4:,-2] = -1
+# U[len(T)//4:,-1] = 1
 
 # U[:len(My),5] = -My
 # U[:,8] = np.append([100*(np.sin(2*np.pi - t/250)) for t in range(5000)] , np.zeros(len(T)-5000))
@@ -129,11 +165,9 @@ U_gust = np.loadtxt(r'Data/Gust/Ugust.txt')
 # U[len(T)//8:len(T)//7,8] = 100
 # U[:,4] = [10*np.cos(np.pi+ t) for t in T]
 # U[len(T)//4,:] = 1
+
 y,t,x = sim.lsim(ss,U,T,[0,0,0,0,0,0,0,0,0,0,0,0])
-
-
-
-
+#y,t,x = sim.lsim(ss,U,T,[1,1,1,1,1,1,1,1,1,1,1,1])
 
 
 fig1, ax1 = plt.subplots(3,4,figsize=(15,7.5))
@@ -145,10 +179,13 @@ ax1[0].title.set_text(r"X position over time")
 ax1[0].set_ylabel(r'X [m]')
 ax1[0].set_xlabel(r't [s]')
 
+
 ax1[1].plot(T, y[:,6])
 ax1[1].title.set_text(r"X velocity over time")
 ax1[1].set_ylabel(r'u [m/s]')
 ax1[1].set_xlabel(r't [s]')
+
+
 
 ax1[2].plot(t, y[:, 4]*57.3)
 ax1[2].title.set_text(r"Pitch angle $\theta$ over time")
@@ -190,6 +227,12 @@ ax1[9].title.set_text(r"Yaw angle $\chi$ over time")
 ax1[9].set_ylabel(r'$\chi$ [deg]')
 ax1[9].set_xlabel(r't [s]')
 
+# ax1[10].scatter(t,y[:,0],y[:,1])
+# # ax1[10].plot(t, y[:, -1])
+# ax1[10].title.set_text(r"Control torque")
+# ax1[10].set_ylabel(r'$\tau$ [deg]')
+# ax1[10].set_xlabel(r't [s]')
+
 
 ctr.pzmap(ss)
 fig1.subplots_adjust(top=0.92,
@@ -209,7 +252,18 @@ ax.set_ylabel(r'Force [N], Torque [Nm]')
 ax.legend(iter(rx), ('Force in z','Wind Force in x','Wind Force in y','Wind Force in z','Torque around x','Torque around y','Torque around z','Wind Torque around x','Wind Torque around y','Wind Torque around z'))
 ax.title.set_text(r'Input function')
 
+fig, ax = plt.subplots(1,1)
+control = y[:,-4:]
+print(np.amin(y[:,:]))
+rx = ax.plot(t,y)
+ax.set_xlabel('Time t [s]')
+ax.set_ylabel(r'Force [N], Torque [Nm]')
+ax.legend(iter(rx), ('Torque around x','Torque around y','Torque around z','Force in z'))
+ax.title.set_text(r'Control inputs due to disturbance')
 
+fig = plt.figure()
+ax3d = Axes3D(fig)
+ax3d.scatter(y[:,0],y[:,1],y[:,3])
 
 plt.show()
 
