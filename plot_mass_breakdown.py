@@ -3,26 +3,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# TODO refine data, right now it's just placeholders
-# m_total = 1667
-# # Payload, Batteries, structure, Propulsion, Controller
-# subsys_mass = np.array([600, 617, 333.4, 160, np.nan])
-# subsys_mass[-1] = m_total - np.sum(subsys_mass)
-#
-# subsys_perc = subsys_mass / m_total * 100
-# subsys_err = np.array([2, 20, 10, 15, 5]) / 100
-#
-# x_arr = np.arange(len(subsys_perc))
-#
-# fig, axes = plt.subplots(2, figsize=(6, 8))
-#
-# ax[0].bar(x_arr, subsys_mass, yerr=subsys_err * subsys_mass)
-#
-# for i, width in enumerate(subsys_perc):
-#     ax[1].barh([0], width, left=)
-#
-# fig.tight_layout()
-# plt.show()
+
+def weight_distribution(masses, massfractions, mass_err, colors, tick_names):
+    x_arr = np.arange(len(masses))
+    start_arr = np.cumsum(massfractions) - massfractions
+
+    fig, (ax1, ax2) = plt.subplots(2, figsize=(7, 5), gridspec_kw={'height_ratios': [3, 1]})
+
+    ax1.bar(x_arr, masses, yerr=mass_err, color=colors, tick_label=tick_names, alpha=0.5)
+    ax1.set_ylabel("Mass of subsystem [kg]")
+
+    for i, (width, color) in enumerate(zip(massfractions, colors)):
+        ax2.barh([0], width, left=start_arr[i], color=color, alpha=0.5, height=0.6)
+
+    ax2.set_xlabel("Mass fractions of subsystem [%]")
+    ax2.set_yticks([])
+
+    fig.tight_layout()
+    return fig, ax1, ax2
 
 
 def horizontal_barplot(results, category_names):
@@ -65,12 +63,24 @@ def horizontal_barplot(results, category_names):
     return fig, ax
 
 
-category_names = ['Payload', 'Batteries',
-                  'Structure', 'Propulsion', 'Controller']
-results = {
-    'Baseline': [600, 517, 333.4, 160, 56.6],
-    'Final': [600, 517, 333.4, 160, 56.6]
-}
+if __name__ == "__main__":
+    category_names = ['Payload', 'Batteries',
+                      'Structure', 'Propulsion', 'Controller']
+    results = {
+        'Baseline': [600, 517, 333.4, 160, 56.6],
+        'Final': [600, 517, 333.4, 160, 56.6]
+    }
 
-horizontal_barplot(results, category_names)
-plt.show()
+    # TODO: fix the masses to the correct subsystem values
+    # TODO: Pick nicer colors
+    # TODO: Add grid lines
+    mass_estimation = np.array([600, 517, 333.4, 160, 56.6])
+    mass_percentages = mass_estimation / np.sum(mass_estimation) * 100
+    mass_std = np.array([20.3, 50, 22, 43, 5.1])
+
+    category_colors = plt.get_cmap('Set2')(np.linspace(0, 1, len(mass_estimation)))
+
+    horizontal_barplot(results, category_names)
+    weight_distribution(mass_estimation, mass_percentages, mass_std, category_colors, category_names)
+
+    plt.show()
