@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import root_scalar
 
 rholst = [1.225, 0.923247]  # kg/m^3
-alst = [340.294, 329.174]  # m/s
+a = 329.174  # m/s
 MTOW = 1667  # kg
 DiskLoad = np.linspace(100, 1000, 91)  # N/m^2  !!!!
 g = 9.80665
@@ -25,8 +25,9 @@ Areq = TperEngine / DiskLoad
 Dreq = np.sqrt(4*Areq/np.pi)
 
 Design_diskload = DiskLoad[np.argmin(np.abs(Dreq - design_D))] / g
+print(Design_diskload)
 
-for rho, a, (col, linestyle) in zip(rholst, alst, colors):
+for rho, (col, linestyle) in zip(rholst, colors):
     Preq = TperEngine * np.sqrt(DiskLoad / (2 * rho))
     RPMreq = 60*np.cbrt(Preq / (rho * Cp * Dreq**5))  # rev/min
 
@@ -47,9 +48,7 @@ for rho, a, (col, linestyle) in zip(rholst, alst, colors):
 
     ax1[1].set_xlabel(r'Disk Loading $(kg/m^{2})$')
     ax1[1].set_ylabel('RPM required [rev/min]')
-    ax1[1].plot(DiskLoad / g, RPMreq, color=col, linestyle=linestyle)
-    ax1[1].plot(DiskLoad / g, (60 * 0.6 * a / np.pi) / Dreq,
-                label=fr"max RPM @ $\rho$ = {rho}", color=col, linestyle=linestyle)  # tip speed reaches mach 0.6
+    ax1[1].plot(DiskLoad / g, RPMreq, color=col, linestyle=linestyle, label=fr"RPM required @ $\rho$ = {rho}")
 
 ax2 = ax1[0].twinx()  # instantiate a second axes that shares the same x-axis
 
@@ -62,13 +61,20 @@ ax2.tick_params(axis='y', labelcolor=color)
 ax1[1].axvline(Design_diskload, color="red", linestyle="--")
 ax1[1].fill_between([0, np.max(DiskLoad / g)], maxrpm_motor, np.max(RPMreq), hatch="//", fc="#FF000055",
                     edgecolor="white", linewidth=4.0, label="engine limit")
+
+ax1[1].fill_between(DiskLoad / g, (60 * 0.6 * a / np.pi) / Dreq,
+                    np.max(RPMreq) * np.ones(DiskLoad.shape),
+                    hatch="X", fc="wheat", alpha=0.6,
+                    edgecolor="white", linewidth=3.0, label="Tip Mach number Limit")
+
+
 ax1[1].set_ylim(100, np.max(RPMreq))
 ax1[0].legend()
-ax1[1].legend()
+ax1[1].legend(loc="lower right")
 ax2.legend()
 ax1[0].grid(alpha=0.5)
 ax1[1].grid(alpha=0.5)
 
 fig.tight_layout()
-plt.savefig("figures/diskloading")
+# plt.savefig("figures/diskloading.pdf")
 plt.show()
