@@ -89,10 +89,10 @@ def main():
     t_arr = np.linspace(0, 50, 1000)
     alt = 350
 
-    # fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
-    fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+    fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
+    # fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
 
-    styles = [("darkgray", "dashdot"), ("black", "solid"), ("dimgrey", "dashed")]
+    styles = [("darkgray", "dashdot"), ("dimgrey", "dashed"), ("black", "solid")]
 
     for Tratio, style in zip(thrustratios, styles):
         color, line = style
@@ -108,39 +108,39 @@ def main():
         jj_crash, aa_crash = crash.jerk_arr, crash.acceleration_arr
         vv_crash, ss_crash = crash.velocity_arr, crash.distance_arr
 
-        # ax[0].plot(tt, vv, color=color, linestyle=line, label=f"T/W = {Tratio}")
-        # ax[0].set_ylabel("velocity [m/s]")
-        # # ax[0].axvline(crash.ground_contact, color=color, linestyle=line)
-        # ax[0].legend()
-        #
-        # ax[1].plot(tt, zz, color=color, linestyle=line)
-        # # ax[1].axhline(color="black")
-        # # ax[1].axvline(crash.ground_contact, color="black")
-        # ax[1].set_ylabel("altituede [m]")
-        # ax[1].set_xlabel("time [s]")
-        #
-        # major_xticks = np.linspace(0, np.max(crash.time), 6)
-        # minor_xticks = np.linspace(0, np.max(crash.time), 51)
-        #
-        # major_vticks = np.linspace(0, 25, 6)
-        # minor_vticks = np.linspace(0, 25, 11)
-        #
-        # major_altticks = np.linspace(0, 350, 8)
-        # minor_altticks = np.linspace(0, 350, 15)
-        #
-        # ax[0].set_xticks(major_xticks)
-        # ax[0].set_xticks(minor_xticks, minor=True)
-        # ax[0].set_yticks(major_vticks)
-        # ax[0].set_yticks(minor_vticks, minor=True)
-        # ax[0].grid(which='minor', alpha=0.2)
-        # ax[0].grid(which='major', alpha=0.5)
-        #
-        # ax[1].set_xticks(major_xticks)
-        # ax[1].set_xticks(minor_xticks, minor=True)
-        # ax[1].set_yticks(major_altticks)
-        # ax[1].set_yticks(minor_altticks, minor=True)
-        # ax[1].grid(which='minor', alpha=0.2)
-        # ax[1].grid(which='major', alpha=0.5)
+        ax[0].plot(tt, vv, color=color, linestyle=line, label=f"T/W = {Tratio}")
+        ax[0].set_ylabel("velocity [m/s]")
+        # ax[0].axvline(crash.ground_contact, color=color, linestyle=line)
+        ax[0].legend()
+
+        ax[1].plot(tt, zz, color=color, linestyle=line)
+        # ax[1].axhline(color="black")
+        # ax[1].axvline(crash.ground_contact, color="black")
+        ax[1].set_ylabel("altituede [m]")
+        ax[1].set_xlabel("time [s]")
+
+        major_xticks = np.linspace(0, np.max(crash.time), 6)
+        minor_xticks = np.linspace(0, np.max(crash.time), 51)
+
+        major_vticks = np.linspace(0, 25, 6)
+        minor_vticks = np.linspace(0, 25, 11)
+
+        major_altticks = np.linspace(0, 350, 8)
+        minor_altticks = np.linspace(0, 350, 15)
+
+        ax[0].set_xticks(major_xticks)
+        ax[0].set_xticks(minor_xticks, minor=True)
+        ax[0].set_yticks(major_vticks)
+        ax[0].set_yticks(minor_vticks, minor=True)
+        ax[0].grid(which='minor', alpha=0.2)
+        ax[0].grid(which='major', alpha=0.5)
+
+        ax[1].set_xticks(major_xticks)
+        ax[1].set_xticks(minor_xticks, minor=True)
+        ax[1].set_yticks(major_altticks)
+        ax[1].set_yticks(minor_altticks, minor=True)
+        ax[1].grid(which='minor', alpha=0.2)
+        ax[1].grid(which='major', alpha=0.5)
 
         # ax2[0].plot(tt_crash, ss_crash, label=f"T/W = {Tratio}")
         # # ax2[0].axhline(crash.compression, color="black", linestyle="--")
@@ -193,8 +193,8 @@ def main():
 
     # fig.tight_layout()
     fig2.tight_layout()
-    plt.show()
-    # plt.savefig(r"figures/Crash_OEI.pdf")
+    # plt.show()
+    plt.savefig(r"figures/Crash_OEI.pdf")
 
 
 if __name__ == "__main__":

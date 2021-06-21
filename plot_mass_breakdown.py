@@ -6,6 +6,7 @@ from matplotlib.lines import Line2D
 
 
 def weight_distribution(masses, massfractions, mass_err, colors, tick_names):
+    """Function to plot one budget breakdown"""
     x_arr = np.arange(len(masses))
     start_arr = np.cumsum(massfractions) - massfractions
 
@@ -36,7 +37,7 @@ def weight_distribution(masses, massfractions, mass_err, colors, tick_names):
 
 
 def weight_distribution_comparison(results, err_dict, colors, tick_names):
-    # TODO: Make this a comparison between midterm and final
+    """Function to plot the comparison of two budget breakdowns"""
     fig, (ax1, ax2) = plt.subplots(2, figsize=(7, 5), gridspec_kw={'height_ratios': [9, 1]})
     labels = list(results.keys())
     for label, masses in results.items():
@@ -135,18 +136,18 @@ if __name__ == "__main__":
     }
     key_i = "Baseline"
     std_dev[key_i] = [m*p/100 for m, p in zip(results[key_i], std_dev[key_i])]
-    print(std_dev[key_i])
-    # TODO: fix the masses to the correct subsystem values: structures and stddev
+    print("standard deviations for baseline review: ", sum(std_dev[key_i]))
     mass_estimation = np.array([600, 290 + 63, 270.5 + 80, 219.345, 18])
     total_mass = np.sum(mass_estimation)
-    print(total_mass)
+    print("Total mass at Final review: ", total_mass)
     mass_percentages = mass_estimation / total_mass * 100
     mass_std = np.array([20, 50, 22, 40, 5.1])
+    print("Total variance in mass Final review: ", np.sum(mass_std))
 
     category_colors = plt.get_cmap('jet')(np.linspace(0.15, 0.85, len(mass_estimation)))
 
     # horizontal_barplot(results, category_names)
     # weight_distribution(mass_estimation, mass_percentages, mass_std, category_colors, category_names)
     weight_distribution_comparison(results, std_dev, category_colors, category_names)
-    plt.savefig("figures/budget_breakdown_masses.pdf")
+    # plt.savefig("figures/budget_breakdown_masses.pdf")
     plt.show()
