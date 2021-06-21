@@ -90,7 +90,7 @@ def main():
     alt = 350
 
     fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
-    # fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+    fig2, ax2 = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
 
     styles = [("darkgray", "dashdot"), ("dimgrey", "dashed"), ("black", "solid")]
 
@@ -193,8 +193,8 @@ def main():
 
     # fig.tight_layout()
     fig2.tight_layout()
-    # plt.show()
-    plt.savefig(r"figures/Crash_OEI.pdf")
+    plt.show()
+    # plt.savefig(r"figures/Crash_OEI.pdf")
 
 
 if __name__ == "__main__":

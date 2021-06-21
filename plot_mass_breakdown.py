@@ -123,23 +123,55 @@ def horizontal_barplot(results, category_names):
     return fig, ax
 
 
-if __name__ == "__main__":
-    category_names = ['Payload', 'Batteries', 'Propulsion', 'Structure', 'Controller']
-    results = {
-        'Baseline': [600, 517, 160, 333.4, 56.6],
-        'Final': [600, 353, 350.5, 219.345, 18]
-    }
+def convert_masspercentages(result_dict, total_value):
+    """Convert result dictionary with percentages to absolute values"""
+    for key in result_dict.keys():
+        result_dict[key] = [total_value*p/100 for p in result_dict[key]]
 
-    std_dev = {
-        "Baseline": [15, 50, 25, 10, 5],        # This line is in percent !!!
-        "Final": [20, 50, 22, 40, 5.1]
-    }
+
+def convert_stddev(result_dict, std_dict, key):
+    """Convert std deviations from percentage to value"""
+    std_dict[key] = [m*p/100 for m, p in zip(result_dict[key], std_dict[key])]
+
+
+if __name__ == "__main__":
+    which_plot = "power"
+
+    if which_plot == "mass":
+        category_names = ['Payload', 'Batteries', 'Propulsion', 'Structure', 'Controller']
+        results = {
+            'Baseline': [600, 517, 160, 333.4, 56.6],
+            'Final': [600, 353, 350.5, 219.345, 18]
+        }
+
+        std_dev = {
+            "Baseline": [15, 50, 25, 10, 5],        # This line is in percent !!!
+            "Final": [20, 50, 22, 40, 5.1]
+        }
+
+    elif which_plot == "power":
+        category_names = ['Payload', 'Communication', 'Propulsion', 'Sensors', 'Controller']
+        # So far results in percent, Final values TBD
+        results = {
+            'Baseline': [1, 4, 85, 5, 5],
+            'Final': [1, 4, 85, 5, 5]
+        }
+
+        std_dev = {
+            "Baseline": [5, 15, 50, 40, 15],  # This line is in percent !!!
+            "Final": [5, 15, 50, 40, 15]
+        }
+
     key_i = "Baseline"
-    std_dev[key_i] = [m*p/100 for m, p in zip(results[key_i], std_dev[key_i])]
+
+    convert_masspercentages(results, 560)
+    convert_stddev(results, std_dev,key_i)
     print("standard deviations for baseline review: ", sum(std_dev[key_i]))
-    mass_estimation = np.array([600, 290 + 63, 270.5 + 80, 219.345, 18])
+
+    mass_estimation = np.array(results["Final"])
     total_mass = np.sum(mass_estimation)
     print("Total mass at Final review: ", total_mass)
+
     mass_percentages = mass_estimation / total_mass * 100
     mass_std = np.array([20, 50, 22, 40, 5.1])
     print("Total variance in mass Final review: ", np.sum(mass_std))
@@ -149,5 +181,6 @@ if __name__ == "__main__":
     # horizontal_barplot(results, category_names)
     # weight_distribution(mass_estimation, mass_percentages, mass_std, category_colors, category_names)
     weight_distribution_comparison(results, std_dev, category_colors, category_names)
+
     # plt.savefig("figures/budget_breakdown_masses.pdf")
     plt.show()
