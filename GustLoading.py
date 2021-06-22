@@ -1,6 +1,8 @@
-import numpy as np
-import Parameters as pm
 import matplotlib.pyplot as plt
+import numpy as np
+
+import Parameters as pm
+
 
 def dragForce(V,S,Cd,rho):
     return [0.5*rho*S[0]*Cd*V**2,0.5*rho*S[1]*Cd*V**2,0.5*rho*S[2]*Cd*V**2]
@@ -182,10 +184,10 @@ concept = pm.ConceptParameters(0)
 
 
 #all these variable sneed to be manually changed to perform a case specific analysis
-Cd = 1.05 #CD of squre at reynolds: 6e5
+Cd = 1.1 #CD of squre at reynolds: 6e5
 rho = concept.physics.rho0 #[kg/m3] density at sea level
 tsim = 50
-dtsim = 0.01
+dtsim = 0.001
 
 
 """Define Module Specific parameters"""
@@ -204,7 +206,7 @@ Hmax = 1000
 plotGust = False #if this is true the program will plot the gust speed as a fucntion of height and the gust envelope
 plotDisturbance = False
 isPrint = False #if this is true the program will print all the characteristics
-saveText = True #Save arrays to text
+saveText = False #Save arrays to text
 
 
 r = r'Data/Gust/'
@@ -212,5 +214,13 @@ names = [r'Dgust.txt',r'Mgust.txt',r'Ugust.txt',r'tgust.txt',r'agust.txt',r'alph
 Dgust,M,Ugust,tgust,a,alpha = getGustData(concept,tsim,Ui,zi,zf,z0,Hmax,Cd,rho,dz,dtsim,plotGust,plotDisturbance,isPrint)
 store = [Dgust,M,Ugust,tgust,a,alpha]
 saveArrays(r,names,store)
-print(np.max(Dgust[:,0]))
+
+
+S = np.array([concept.cabin.S_cabin[2],concept.cabin.S_cabin[1],concept.cabin.S_cabin[0]])
+taucg = 2353
+Dcg,Ucg,tcg = gustDisturbance(S,taucg,tsim,dragForce,dtsim,Cd,rho)
+np.savetxt(r'Data/Gust/cgtorque.txt',Ucg)
+np.savetxt(r'Data/Gust/cgtime.txt',tcg)
+plt.plot(tcg,Ucg)
+plt.show()
 
