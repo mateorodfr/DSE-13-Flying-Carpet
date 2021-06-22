@@ -172,8 +172,8 @@ def main() -> None:
         TSR, CT, CP = np.nan, *CT_CP(T, P, float(config["fluid"]["rho"]), float(config["rotor"]["diameter"]), float(config["case"]["rpm"])/60)
         TSR2, CT2, CP2 = np.nan, *CT_CP(T2, P2, float(config["fluid"]["rho"]), float(config["rotor2"]["diameter"]), float(config["case"]["rpm2"])/60)
 
-    # init_M = 1667 # [kg]
-    # T_W = 1.9
+    init_M = 1331 # [kg] -> 1497 -> 1488 -> 1385 -> 1344 -> 1334 -> 1331
+    # T_W = 0.9
     # M_needed = init_M * (T_W * 4) / 8
 
     omega = float(config["case"]["rpm"])*2*np.pi / 60
