@@ -219,19 +219,21 @@ I_prop = 1/3*(concept.propeller.D_prop/2)**2 * concept.propeller.M_blades
 I_mot = 1/2*concept.motor.M_motor * concept.motor.R_motor**2
 I_tot = I_prop+I_mot
 
-T_init = T_req_eng[len(T_req_eng) // 2]
+T_init = concept.Mtot_concept * concept.physics.g / concept.motor.N_motor
 T = T_init
 T_eng_op = T_init
-T_eng_carry = 1.9 * T_init
+T_eng_carry = 1.95 * T_init
 T_eng_rev = 0.5 * T_init        # 0.4 as initial
 T_eng_level = 0.25 * T_init
 T_eng_final = 0.1 * T_init
 
-P_init = P_req_eng[len(P_req_eng)//2]
-P_eng_rev = np.sqrt((2*T_eng_rev**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
-P_eng_level = np.sqrt((2*T_eng_level**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
-P_eng_final = np.sqrt((2*T_eng_final**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
-P_eng_carry = np.sqrt((2*T_eng_carry**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor)
+
+
+P_init = 30000
+P_eng_rev = 10500
+P_eng_level = 3700
+P_eng_final = 970
+P_eng_carry = 82000
 
 t_response = 0.2    #s
 t_reverse = P_init / concept.motor.Torque **2 * I_tot + P_eng_rev / concept.motor.Torque **2 * I_tot
@@ -239,9 +241,9 @@ t_stop_engine = (P_eng_rev) / concept.motor.Torque **2 * I_tot #s
 t_level = (P_eng_level) / concept.motor.Torque **2 * I_tot #s
 t_stop_engine_end = (P_eng_level) / concept.motor.Torque **2 * I_tot #s
 t_carry = (P_eng_carry) / concept.motor.Torque **2 * I_tot - P_init / concept.motor.Torque **2 * I_tot #s
-t_const_motion = 0.95    # s
-t_level_const = 1.615  # s
-t_final = 1.425
+t_const_motion = 0.58    # s
+t_level_const = 1.21  # s
+t_final = 0.85
 
 Op_init = 0.8
 Op = Op_init
@@ -601,7 +603,7 @@ print(P_max/concept.Mbat_concept)
 print("Initial power", P_init)
 print(((t_hover_req + t_asc_req + t_des_req) * P_init*concept.motor.N_motor)/concept.Mbat_concept/3600)
 
-t_theta = np.arange(0, (len(theta_x_lst)) *dt, dt)
+t_theta = np.arange(0, (len(theta_x_lst)) *dt - 0* dt, dt)
 
 np.savetxt(r'Data/az.txt',a_z_lst)
 np.savetxt(r'Data/Mx.txt',M_x_lst)

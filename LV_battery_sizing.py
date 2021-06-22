@@ -7,8 +7,8 @@ concept = pm.ConceptParameters(0)
 V_cell = 3.7
 n_cell = 4
 
-P_cons = elect.pump_amount * elect.pump_power + elect.camera_power * elect.camera_amount + elect.T_sens_power * elect.T_sens_amount + elect.VCU_power + elect.FC_power + elect.AMS_power * elect.AMS_amount + elect.SN_power * elect.SN_amount  + elect.motor_controller_power * elect.motor_controller_amount
-M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount
+P_cons = elect.pump_amount * elect.pump_power + elect.camera_power * elect.camera_amount + elect.T_sens_power * elect.T_sens_amount + elect.VCU_power + elect.FC_power + elect.AMS_power * elect.AMS_amount + elect.SN_power * elect.SN_amount  + elect.motor_controller_power * elect.motor_controller_amount  + elect.power_antenna * elect.amount_antenna + elect.power_lights
+M_comp = elect.camera_mass * elect.camera_amount + elect.T_sens_mass * elect.T_sens_amount + elect.VCU_mass * (elect.VCU_amount - 1) + elect.FC_mass * (elect.FC_amount - 1) + elect.AMS_mass * (elect.AMS_amount - 1) + elect.SN_mass * elect.SN_amount + elect.sensor_mass
 
 n_cyc = 20
 t_asc_req = 80*n_cyc #time taken to ascend in s
@@ -50,7 +50,7 @@ I_rms_d_12 = np.sqrt(d12 * dI_L_12**2 / 3)
 I_avg_d_12 = d12 * dI_L_12 / 2
 I_rms_C_12 = np.sqrt((D_12 + d12) * (dI_L_12**2/3 - dI_L_12 * I_out_12) + I_out_12**2)
 R_L_12 = 0.005
-R_sw_12 = 0.0047
+R_sw_12 = 0.005
 R_d_12 = 0.003
 V_d_on_12 = 0.7
 R_C_12 = 0.025
@@ -64,12 +64,12 @@ eff_buck_12 = (P_out_12 - P_loss_12) / P_out_12
 
 d_V_out = 0.05
 
-P_out_boost_24 = 1/3*elect.VCU_power + 1/2*elect.AMS_power * elect.AMS_amount + elect.motor_controller_power * elect.motor_controller_amount
+P_out_boost_24 = 1/3*elect.VCU_power + 1/2*elect.AMS_power * elect.AMS_amount + elect.motor_controller_power * elect.motor_controller_amount + elect.power_antenna * elect.amount_antenna + elect.power_lights
 
 I_in_24 = P_out_boost_24 / V_LV
 I_out_24 = P_out_boost_24 / V_boost_24
 L_boost_24_max = (2 * P_out_boost_24 * T_s * (V_boost_24 - V_LV) / V_boost_24) / (4 * I_in_24**2)
-L_boost_24 = np.arange(20 * 10 ** -9, L_boost_24_max, 40 * 10 ** -9)
+L_boost_24 = np.arange(10 * 10 ** -9, L_boost_24_max, 5 * 10 ** -9)
 dI_L_24 = np.sqrt(2 * P_out_boost_24 * T_s * (V_boost_24 - V_LV) / (V_boost_24 * L_boost_24))
 D_24 = dI_L_24 * L_boost_24 / V_LV / T_s
 d24 = 2 * I_out_24 / dI_L_24
@@ -117,12 +117,13 @@ P_loss_9 = I_avg_d_9 * V_d_on_9 + I_rms_d_9**2 * R_d_9 + R_sw_9 * I_rms_sw_9**2 
 eff_buck_9 = (P_out_9 - P_loss_9) / P_out_9
 
 print(eff_buck_12[-1])
-print(eff_buck_9[-1])
-print(eff_boost_24[-1])
+print(eff_buck_9[-3])
+print(eff_boost_24[-3])
 
-M_LV_bat = E_consumed / concept.battery.rhoE_battery / elect.LV_DoD / concept.battery.eff_battery  / ((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons) / elect.PF_electronics
+M_LV_bat = E_consumed / concept.battery.rhoE_battery / elect.LV_DoD / concept.battery.eff_battery  / ((eff_buck_9[-3] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-3] * P_out_boost_24)/P_cons) / elect.PF_electronics
 M_tot = M_LV_bat + M_comp
-print((eff_buck_9[-1] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons)
-print(M_LV_bat)
+print((eff_buck_9[-3] * P_out_9 + eff_buck_12[-1] * P_out_12 + eff_boost_24[-1] * P_out_boost_24)/P_cons)
+print(M_tot)
 print(P_out_12, P_out_9, P_out_boost_24)
+print(L_buck_12_max, L_boost_24[-3])
 

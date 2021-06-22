@@ -302,7 +302,7 @@ class ConceptParameters(object):
     #Battery list
     #The object with index 0 is the currently selected one. All other indices are for comparison
     #The battery cost is a constant currently set at 100$/kWh
-    concept0 = ['Pickup & Release', 1680, 600, 241, 12.3, 0.325, 44, 69]
+    concept0 = ['Pickup & Release', 1685, 600, 237.3, 12.3, 0.325, 65, 62.2, 18, 27, 17, 10.4, 27.2, 200, 100.4, 10]
     concept1 = ['Pickup & Release', 1454, 600, 221.82, 12.3, 0.325]
 
     def __init__(self,key=0):
@@ -316,6 +316,11 @@ class ConceptParameters(object):
             self.Vbat_concept = self.concept0[5]
             self.M_LV_bat = self.concept0[6]
             self.M_cooling = self.concept0[7]
+            self.M_comms = self.concept0[8]
+            self.M_struct = self.concept0[9] + self.concept0[10] + self.concept0[11] + self.concept0[12] + self.concept0[13]
+            self.M_prop_final = self.concept0[14]
+            self.M_wires = self.concept0[15]
+
 
 
         if key == 1:
@@ -419,7 +424,7 @@ class PhysicalParameters(object):
         self.g = 9.80665
 
 class ElectronicsParameters(object):
-    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 30, 0.3, 8, 350, 0.4, 2, 200, 0.3, 2, 150, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4, 0.85]
+    Electronics0 = [12, 1.3, 4, 30*10**-6, 0.005, 10, 30, 0.3, 8, 350, 0.4, 2, 200, 0.3, 2, 150, 0.4, 5, 25, 0.1, 6, 0.95, 0.95, 0.9, 130, 4, 0.85, 250, 1, 258, 10]
 
     # Initialization if no key is given takes the default object '0'
     def __init__(self, key=0):
@@ -451,7 +456,10 @@ class ElectronicsParameters(object):
             self.pump_power = self.Electronics0[24]
             self.pump_amount = self.Electronics0[25]
             self.LV_DoD = self.Electronics0[26]
-
+            self.power_antenna = self.Electronics0[27]
+            self.amount_antenna = self.Electronics0[28]
+            self.power_lights = self.Electronics0[29]
+            self.sensor_mass = self.Electronics0[30]
 
 class CrossSectionParameters(object):
 

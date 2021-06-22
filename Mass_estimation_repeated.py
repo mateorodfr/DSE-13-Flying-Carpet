@@ -178,7 +178,7 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     #T_req_eng = M_tot0*(state[:,0]+concept.physics.g)/concept.motor.N_motor /concept.propeller.eff_prop
     T_req_eng= np.array(T_req_eng)
     #P_req_eng= np.sqrt(T_req_eng/concept.physics.rho0/CL/Sb -0.25* state[:,1]**2) *3* torque/ np.pi**2/Dblade /concept.motor.eff_motor
-    P_req_eng = 31100 / concept.motor.eff_motor
+    P_req_eng = 30600 / concept.motor.eff_motor
     #P_req_eng = np.sqrt((2*T_req_eng**3)/(concept.physics.rho0*np.pi*(concept.propeller.D_prop/concept.propeller.eff_prop)**2))/(concept.motor.eff_motor) * (1+ concept.battery.loss_factor) / concept.battery.eff_inverter / concept.battery.degradation
     P_req_eng_OEI = sqrt((2 * (M_tot1*a_OEI/2 + M_tot1*a_roll/4) ** 3) / (concept.physics.rho0 * np.pi * (concept.propeller.D_prop / concept.propeller.eff_prop) ** 2)) / (concept.motor.eff_motor) / concept.battery.loss_factor / concept.battery.eff_inverter
 
@@ -199,9 +199,9 @@ while abs(1-M_tot1/M_tot0) > 0.005:
     M_motor= concept.motor.M_motor * concept.motor.N_motor
     M_propeller= concept.propeller.M_blades* concept.motor.N_motor
     M_payload= concept.Mpay_concept
-    M_struct_coeff= 1.2
+    M_struct_coeff= 0
 
-    M_tot1= (Mbat + M_motor + M_propeller +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat + concept.M_cooling)*M_struct_coeff
+    M_tot1= (concept.M_wires+ Mbat + M_motor + concept.M_prop_final +M_payload + concept.motor.N_motor * concept.battery.inverter_mass + concept.M_LV_bat + concept.M_cooling + concept.M_comms + concept.M_struct)
     iterations +=1
 
 print("Power loss of the battery = ", Mbat*concept.battery.rhoP_battery * (1 - concept.battery.eff_battery))
@@ -216,5 +216,5 @@ print("---------------")
 print("Required energy", E_req)
 print("Required energy density", E_req/Mbat)
 print("Energy density battery", concept.battery.rhoE_battery*3600)
-print(concept.motor.N_motor * concept.motor.M_motor + concept.propeller.M_blades * concept.motor.N_motor)
+print(concept.motor.N_motor * concept.motor.M_motor + concept.M_prop_final)
 print(concept.propeller.M_blades * concept.motor.N_motor)

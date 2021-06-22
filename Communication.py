@@ -6,9 +6,9 @@ r= 400/np.cos(1/3*np.pi)
 k=1.38*10**(-23)
 L_cable1= 1
 L_cable2=4
-Bitrate= 7.5*10**6/250
+Bitrate= 12*10**6
 Bandwith= (54-30)*10**6
-D = 1.
+D = 1.5
 
 
 
@@ -40,7 +40,7 @@ F_amp= 10**(5.7/10)
 F_receiver= 10**(1.6/10) # NOT dB
 T0= 290
 T_amp= T0 * (F_amp-1)
-T_antenna= 400
+T_antenna= 750
 T_cable1= T0 *(L1-1)
 T_cable2= T0 *(L2-1)
 T_receiver= T0 * (F_receiver-1)
@@ -77,7 +77,7 @@ Capacity= Bandwith * np.log2(1+SNR_1)
 
 #print(Lfs)
 #print(La)
-print("Noise",Noise0)
+print("Noise",10*np.log10(Noise0))
 print("Power Received", P_receiver_max)
 
 #print("PNR=", PNR)
