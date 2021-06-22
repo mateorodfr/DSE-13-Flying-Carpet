@@ -176,13 +176,16 @@ def main() -> None:
     # T_W = 1.9
     # M_needed = init_M * (T_W * 4) / 8
 
-    # P_avg = (P+P2)/2
+    omega = float(config["case"]["rpm"])*2*np.pi / 60
+    omega2 = float(config["case"]["rpm2"])*2*np.pi / 60
+
+    P_avg = (P+P2)/2
 
     # print(f"\n\n{M_needed = } [kg]")
     print(f"\nMass carry-able = {(T+T2)*4 / G} [kg]\n")
-    # print(f"{P_avg = }\n")
-    print(f"Rotor1: {CT = }, CQ = {CP/(2*np.pi)}, {CP = }, Ct/Cp = {CT / CP}\n")
-    print(f"Rotor2: {CT2 = }, CQ2 = {CP2/(2*np.pi)}, {CP2 = }, Ct2/Cp2 = {CT2 / CP2}\n")
+    print(f"{P_avg = }\n")
+    print(f"Rotor1: {CT = }, CQ = {CP/omega}, {CP = }, Ct/Cp = {CT / CP}\n") 
+    print(f"Rotor2: {CT2 = }, CQ2 = {CP2/omega2}, {CP2 = }, Ct2/Cp2 = {CT2 / CP2}\n")
 
     
 
@@ -194,6 +197,8 @@ if __name__ == '__main__':
     1.1g -> rpm = 1003
     1.8g -> rpm = 1282
     '''
+
+    #1685
 
     G = 9.80665
 
