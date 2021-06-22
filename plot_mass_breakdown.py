@@ -44,21 +44,22 @@ def weight_distribution_comparison(results, err_dict, colors, tick_names):
         x_arr = np.arange(len(masses))
         masses = np.array(masses)
         massfractions = masses / total_mass * 100
-        start_arr = np.cumsum(massfractions) - massfractions
+        start_arr = np.nancumsum(massfractions) - massfractions
 
         if label == "Final":
             ax1.bar(x_arr, masses, yerr=err_dict[label], color=colors, edgecolor="red",
-                    capsize=5.0, tick_label=tick_names, alpha=0.7, align="edge", width=0.4, lw=2.5, ls="solid")
+                    capsize=5.0, tick_label=tick_names, alpha=0.7, align="edge", width=0.4, lw=1.5, ls="solid")
         else:
             ax1.bar(x_arr, masses, yerr=err_dict[label], color=colors, edgecolor="black",
-                    capsize=5.0, tick_label=tick_names, alpha=0.7, align="edge", width=-0.4, ls="solid", lw=2.5)
+                    capsize=5.0, tick_label=tick_names, alpha=0.7, align="edge", width=-0.4, ls="solid", lw=1.5)
 
-    ax1.set_ylabel("Mass of subsystem [kg]")
+    ax1.set_ylabel("Power of subsystem [kW]")
 
     for i, (width, color) in enumerate(zip(massfractions, colors)):
-        ax2.barh([0], width, left=start_arr[i], color=color, alpha=0.8, height=0.1, edgecolor="white", lw=2)
+        if not np.isnan(start_arr[i]):
+            ax2.barh([0], width, left=start_arr[i], color=color, alpha=0.8, height=0.1, edgecolor="white", lw=0.5)
 
-    ax2.set_xlabel("Mass fractions of subsystems (final version) [%]")
+    ax2.set_xlabel("Power fractions of subsystems (final version) [%]")
     ax2.set_yticks([])
 
     major_ticks = np.linspace(0, 800, 9)
@@ -123,10 +124,9 @@ def horizontal_barplot(results, category_names):
     return fig, ax
 
 
-def convert_masspercentages(result_dict, total_value):
+def convert_masspercentages(result_dict, key, total_value):
     """Convert result dictionary with percentages to absolute values"""
-    for key in result_dict.keys():
-        result_dict[key] = [total_value*p/100 for p in result_dict[key]]
+    result_dict[key] = [total_value*p/100 for p in result_dict[key]]
 
 
 def convert_stddev(result_dict, std_dict, key):
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         category_names = ['Payload', 'Batteries', 'Propulsion', 'Structure', 'Controller']
         results = {
             'Baseline': [600, 517, 160, 333.4, 56.6],
-            'Final': [600, 353, 350.5, 219.345, 18]
+            'Final': [600, 237.3 + 65 + 10 + 62.2 + 8*5.1, 370.9, 27 + 17 + 10.4 + 27.2 + 200, 18]
         }
 
         std_dev = {
@@ -154,22 +154,26 @@ if __name__ == "__main__":
         # So far results in percent, Final values TBD
         results = {
             'Baseline': [1, 4, 85, 5, 5],
-            'Final': [1, 4, 85, 5, 5]
+            'Final': [np.nan, 0.1, 94, 1.15, np.nan]
         }
 
         std_dev = {
             "Baseline": [5, 15, 50, 40, 15],  # This line is in percent !!!
-            "Final": [5, 15, 50, 40, 15]
+            "Final": [np.nan, 5, 15, 3, np.nan]
         }
 
     key_i = "Baseline"
 
-    convert_masspercentages(results, 560)
-    convert_stddev(results, std_dev,key_i)
+    # note that baseline and final have different total powers
+    if which_plot == "power":
+        convert_masspercentages(results, key_i, 560)
+        convert_masspercentages(results, "Final", 260.7)
+
+    convert_stddev(results, std_dev, key_i)
     print("standard deviations for baseline review: ", sum(std_dev[key_i]))
 
     mass_estimation = np.array(results["Final"])
-    total_mass = np.sum(mass_estimation)
+    total_mass = np.nansum(mass_estimation)
     print("Total mass at Final review: ", total_mass)
 
     mass_percentages = mass_estimation / total_mass * 100
@@ -182,5 +186,5 @@ if __name__ == "__main__":
     # weight_distribution(mass_estimation, mass_percentages, mass_std, category_colors, category_names)
     weight_distribution_comparison(results, std_dev, category_colors, category_names)
 
-    # plt.savefig("figures/budget_breakdown_masses.pdf")
+    plt.savefig("figures/budget_breakdown_power.pdf")
     plt.show()
