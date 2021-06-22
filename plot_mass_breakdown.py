@@ -62,8 +62,8 @@ def weight_distribution_comparison(results, err_dict, colors, tick_names):
     ax2.set_xlabel("Power fractions of subsystems (final version) [%]")
     ax2.set_yticks([])
 
-    major_ticks = np.linspace(0, 800, 9)
-    minor_ticks = np.linspace(0, 800, 41)
+    major_ticks = np.linspace(0, 900, 10)
+    minor_ticks = np.linspace(0, 900, 46)
 
     ax1.set_yticks(major_ticks)
     ax1.set_yticks(minor_ticks, minor=True)
@@ -135,13 +135,13 @@ def convert_stddev(result_dict, std_dict, key):
 
 
 if __name__ == "__main__":
-    which_plot = "power"
+    which_plot = "mass"
 
     if which_plot == "mass":
         category_names = ['Payload', 'Batteries', 'Propulsion', 'Structure', 'Controller']
         results = {
-            'Baseline': [600, 517, 160, 333.4, 56.6],
-            'Final': [600, 237.3 + 65 + 10 + 62.2 + 8*5.1, 370.9, 27 + 17 + 10.4 + 27.2 + 200, 18]
+            'Baseline': [40, 37, 10, 10, 3],
+            'Final': [600, 167.5 + 65 + 10 + 43.4 + 8*3.1, 269.45, 27 + 17 + 20 + 27.2 + 35.07*1.2, 18]
         }
 
         std_dev = {
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         # So far results in percent, Final values TBD
         results = {
             'Baseline': [1, 4, 85, 5, 5],
-            'Final': [np.nan, 0.1, 94, 1.15, np.nan]
+            'Final': [np.nan, 0.14, 95, 1.6, np.nan]
         }
 
         std_dev = {
@@ -167,7 +167,9 @@ if __name__ == "__main__":
     # note that baseline and final have different total powers
     if which_plot == "power":
         convert_masspercentages(results, key_i, 560)
-        convert_masspercentages(results, "Final", 260.7)
+        convert_masspercentages(results, "Final", 182)
+    else:
+        convert_masspercentages(results, key_i, 1512)
 
     convert_stddev(results, std_dev, key_i)
     print("standard deviations for baseline review: ", sum(std_dev[key_i]))
@@ -186,5 +188,5 @@ if __name__ == "__main__":
     # weight_distribution(mass_estimation, mass_percentages, mass_std, category_colors, category_names)
     weight_distribution_comparison(results, std_dev, category_colors, category_names)
 
-    plt.savefig("figures/budget_breakdown_power.pdf")
+    plt.savefig("figures/budget_breakdown_masses.pdf")
     plt.show()
