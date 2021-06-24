@@ -1,6 +1,7 @@
 """File to analyse crash landing Drop"""
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy.integrate import cumtrapz
 
 
@@ -109,15 +110,15 @@ def main():
         vv_crash, ss_crash = crash.velocity_arr, crash.distance_arr
 
         ax[0].plot(tt, vv, color=color, linestyle=line, label=f"T/W = {Tratio}")
-        ax[0].set_ylabel("velocity [m/s]")
+        ax[0].set_ylabel("velocity [m/s]", fontsize=14)
         # ax[0].axvline(crash.ground_contact, color=color, linestyle=line)
-        ax[0].legend()
+        ax[0].legend(fontsize=13)
 
         ax[1].plot(tt, zz, color=color, linestyle=line)
         # ax[1].axhline(color="black")
         # ax[1].axvline(crash.ground_contact, color="black")
-        ax[1].set_ylabel("altituede [m]")
-        ax[1].set_xlabel("time [s]")
+        ax[1].set_ylabel("altituede [m]", fontsize=14)
+        ax[1].set_xlabel("time [s]", fontsize=14)
 
         major_xticks = np.linspace(0, np.max(crash.time), 6)
         minor_xticks = np.linspace(0, np.max(crash.time), 51)
@@ -148,15 +149,15 @@ def main():
         # ax2[0].legend()
 
         ax2[0].plot(tt_crash, vv_crash, color=color, linestyle=line, label=f"T/W = {Tratio}")
-        ax2[0].set_ylabel("velocity [m/s]")
-        ax2[0].legend()
+        ax2[0].set_ylabel("velocity [m/s]", fontsize=14)
+        ax2[0].legend(fontsize=13)
 
         ax2[1].plot(tt_crash, aa_crash / crash.g, color=color, linestyle=line)
-        ax2[1].set_ylabel("Acceleration [G]")
+        ax2[1].set_ylabel("Acceleration [G]", fontsize=14)
 
         ax2[2].plot(tt_crash, jj_crash / crash.g, color=color, linestyle=line)
-        ax2[2].set_ylabel("Jerk [G/s]")
-        ax2[2].set_xlabel("time [s]")
+        ax2[2].set_ylabel("Jerk [G/s]", fontsize=14)
+        ax2[2].set_xlabel("time [s]", fontsize=14)
 
     major_tticks = np.linspace(-0.06, 0.06, 7)
     minor_tticks = np.linspace(-0.06, 0.06, 31)
@@ -191,10 +192,14 @@ def main():
     ax2[2].grid(which='minor', alpha=0.2)
     ax2[2].grid(which='major', alpha=0.5)
 
-    # fig.tight_layout()
+    fig.tight_layout()
     fig2.tight_layout()
+    for a in ax:
+        a.tick_params(labelsize=12)
+    for b in ax2:
+        b.tick_params(labelsize=12)
     plt.show()
-    # plt.savefig(r"figures/Crash_OEI.pdf")
+    # plt.savefig(fr"figures/freefall_OEI.pdf")
 
 
 if __name__ == "__main__":
