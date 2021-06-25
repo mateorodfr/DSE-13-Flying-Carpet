@@ -30,7 +30,7 @@ class ShearBuckling:
         plt.show()
 
 def main():
-    stresses = np.linspace(15e6, 25e6, 11)
+    stresses = np.linspace(7e6, 25e6, 19)
     buckling_analysis = ShearBuckling(stresses, 2, 6.4, 70e9, 1e-3)
     print(f"Current stress value: \t\t  {stresses/1e6}")
     print(f"Required number of stringers: {buckling_analysis.n_stringers}")
