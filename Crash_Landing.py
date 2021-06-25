@@ -11,7 +11,7 @@ class CrashLanding:
         self.cd = 0.8
         self.area = 12.04
         self.rho = 0.92   # 1.225
-        self.mass = 1667
+        self.mass = 1331
         self.g = 9.80665
         self.compression = 0.65
         self.height = height
@@ -199,7 +199,7 @@ def main():
     for b in ax2:
         b.tick_params(labelsize=12)
     plt.show()
-    # plt.savefig(fr"figures/freefall_OEI.pdf")
+    # plt.savefig(fr"figures/crash_OEI.pdf")
 
 
 if __name__ == "__main__":
